@@ -33,12 +33,12 @@ public class TunerConstants {
         .withKP(0.1).withKI(0).withKD(0)
         .withKS(0).withKV(0.124);
 
-    // The closed-loop output type to use for the steer motors;
-    // This affects the PID/FF gains for the steer motors
-    private static final ClosedLoopOutputType kSteerClosedLoopOutput = ClosedLoopOutputType.Voltage;
     // The closed-loop output type to use for the drive motors;
     // This affects the PID/FF gains for the drive motors
     private static final ClosedLoopOutputType kDriveClosedLoopOutput = ClosedLoopOutputType.Voltage;
+    // The closed-loop output type to use for the steer motors;
+    // This affects the PID/FF gains for the steer motors
+    private static final ClosedLoopOutputType kSteerClosedLoopOutput = ClosedLoopOutputType.Voltage;
 
     // The type of motor used for the drive motor
     private static final DriveMotorArrangement kDriveMotorType = DriveMotorArrangement.TalonFX_Integrated;
@@ -51,26 +51,63 @@ public class TunerConstants {
 
     // The stator current at which the wheels start to slip;
     // This needs to be tuned to your individual robot
-    private static final Current kSlipCurrent = Amps.of(60);
+    private static final Current kSlipCurrent = Amps.of(70);
 
     // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
     private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration()
         .withCurrentLimits(
             new CurrentLimitsConfigs()
-                // Swerve azimuth does not require much torque output, so we can set a relatively low
-                // stator current limit to help avoid brownouts without impacting performance.
-                .withStatorCurrentLimit(Amps.of(40))
                 .withStatorCurrentLimitEnable(true)
-        );
+                .withStatorCurrentLimit(Amps.of(60))
+                .withSupplyCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(40))
+        .withClosedLoopRamps(
+            new ClosedLoopRampsConfigs()
+                .withDutyCycleClosedLoopRampPeriod(0.25)
+                .withTorqueClosedLoopRampPeriod(0.25)
+                .withVoltageClosedLoopRampPeriod(0.25))
+        .withVoltage(
+            new VoltageConfigs()
+                .withPeakForwardVoltage(10.0)
+                .withPeakReverseVoltage(-10.0))
+        .withOpenLoopRamps(
+            new OpenLoopRampsConfigs()
+                .withDutyCycleOpenLoopRampPeriod(0.25)
+                .withTorqueOpenLoopRampPeriod(0.25)
+                .withVoltageOpenLoopRampPeriod(0.25))
+        .withMotorOutput(
+            new MotorOutputConfigs()
+                .withNeutralMode(NeutralModeValue.Brake));
+
     private static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()
         .withCurrentLimits(
             new CurrentLimitsConfigs()
                 // Swerve azimuth does not require much torque output, so we can set a relatively low
                 // stator current limit to help avoid brownouts without impacting performance.
-                .withStatorCurrentLimit(Amps.of(20))
                 .withStatorCurrentLimitEnable(true)
-        );
+                .withStatorCurrentLimit(Amps.of(30))
+                .withSupplyCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(20)
+        )
+        .withClosedLoopRamps(
+            new ClosedLoopRampsConfigs()
+                .withDutyCycleClosedLoopRampPeriod(0.25)
+                .withTorqueClosedLoopRampPeriod(0.25)
+                .withVoltageClosedLoopRampPeriod(0.25))
+        .withVoltage(
+            new VoltageConfigs()
+                .withPeakForwardVoltage(10)
+                .withPeakReverseVoltage(-10))
+        .withOpenLoopRamps(
+            new OpenLoopRampsConfigs()
+                .withDutyCycleOpenLoopRampPeriod(0.25)
+                .withTorqueOpenLoopRampPeriod(0.25)
+                .withVoltageOpenLoopRampPeriod(0.25))
+        .withMotorOutput(
+            new MotorOutputConfigs()
+                .withNeutralMode(NeutralModeValue.Brake));                ;
+
     private static final CANcoderConfiguration encoderInitialConfigs = new CANcoderConfiguration();
     // Configs for the Pigeon 2; leave this null to skip applying Pigeon 2 configs
     private static final Pigeon2Configuration pigeonConfigs = null;

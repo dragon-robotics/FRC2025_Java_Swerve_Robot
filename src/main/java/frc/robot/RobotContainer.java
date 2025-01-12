@@ -22,7 +22,9 @@ import frc.robot.swerve_constant.TunerConstants;
 import frc.robot.subsystems.Limelight3Subsystem;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -47,20 +49,23 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public final CommandSwerveDrivetrain m_swerveDriveSubsystem = TunerConstants.createDrivetrain();
-  public final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
-  public final UptakeSubsystem m_uptakeSubsystem = new UptakeSubsystem();
-  public final ArmSubsystem m_armSubsystem = new ArmSubsystem();
-  public final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
-  public final LEDSubsystem m_ledSubsystem = new LEDSubsystem();
-  public final Limelight3Subsystem m_limelight3Subsystem = new Limelight3Subsystem();
+  // public final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
+  // public final UptakeSubsystem m_uptakeSubsystem = new UptakeSubsystem();
+  // public final ArmSubsystem m_armSubsystem = new ArmSubsystem();
+  // public final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
+  // public final LEDSubsystem m_ledSubsystem = new LEDSubsystem();
+  // public final Limelight3Subsystem m_limelight3Subsystem = new Limelight3Subsystem();
 
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-          .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-          .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+          .withDeadband(MaxSpeed * 0.1)
+          .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+          .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+          // .withSteerRequestType(SteerRequestType.MotionMagicExpo)
+          .withDesaturateWheelSpeeds(true); // Use open-loop control for drive motors
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
@@ -157,16 +162,16 @@ public class RobotContainer {
       m_driverController.start().and(m_driverController.y()).whileTrue(m_swerveDriveSubsystem.sysIdQuasistatic(Direction.kForward));
       m_driverController.start().and(m_driverController.x()).whileTrue(m_swerveDriveSubsystem.sysIdQuasistatic(Direction.kReverse));
 
-      m_intakeSubsystem.setDefaultCommand(new TestIntake(m_intakeSubsystem, () -> -m_operatorController.getRightY()));
-      m_uptakeSubsystem.setDefaultCommand(new TestUptake(m_uptakeSubsystem, () -> -m_operatorController.getLeftY()));
-      m_armSubsystem.setDefaultCommand(Commands.run(() -> m_armSubsystem.setArmSpeed(0.0), m_armSubsystem));
-      m_shooterSubsystem.setDefaultCommand(new TestShooter(m_shooterSubsystem, () -> -m_operatorController.getRightTriggerAxis(), () -> -m_operatorController.getLeftTriggerAxis()));
+      // m_intakeSubsystem.setDefaultCommand(new TestIntake(m_intakeSubsystem, () -> -m_operatorController.getRightY()));
+      // m_uptakeSubsystem.setDefaultCommand(new TestUptake(m_uptakeSubsystem, () -> -m_operatorController.getLeftY()));
+      // m_armSubsystem.setDefaultCommand(Commands.run(() -> m_armSubsystem.setArmSpeed(0.0), m_armSubsystem));
+      // m_shooterSubsystem.setDefaultCommand(new TestShooter(m_shooterSubsystem, () -> -m_operatorController.getRightTriggerAxis(), () -> -m_operatorController.getLeftTriggerAxis()));
 
-      m_operatorController.a()
-          .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(0.1), m_armSubsystem));
+      // m_operatorController.a()
+      //     .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(0.1), m_armSubsystem));
 
-      m_operatorController.b()
-          .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(-0.1), m_armSubsystem));
+      // m_operatorController.b()
+      //     .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(-0.1), m_armSubsystem));
 
       m_swerveDriveSubsystem.registerTelemetry(logger::telemeterize);
 
