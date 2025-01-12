@@ -4,53 +4,39 @@
 
 package frc.robot;
 
-import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.CustomButtonBoxConstants;
+import static edu.wpi.first.units.Units.*;
+
 import frc.robot.Constants.GeneralConstants;
-import frc.robot.Constants.JoystickConstants;
-import frc.robot.Constants.LEDConstants;
 import frc.robot.Constants.GeneralConstants.RobotMode;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Teleop.MoveArmToPos;
-import frc.robot.commands.Teleop.HoldArmToPosition;
-import frc.robot.commands.Teleop.MoveIntake;
-import frc.robot.commands.Teleop.MoveIntakeUntilNoteDetected;
-import frc.robot.commands.Teleop.MoveIntakeUptake;
-import frc.robot.commands.Teleop.MoveIntakeUptakeVoltage;
-import frc.robot.commands.Teleop.MoveShooter;
-import frc.robot.commands.Teleop.MoveUptake;
-import frc.robot.commands.Teleop.MoveIntakeUptakeUntilNoteDetected;
 import frc.robot.commands.Test.TestIntake;
 import frc.robot.commands.Test.TestShooter;
 import frc.robot.commands.Test.TestUptake;
 import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.UptakeSubsystem;
+import frc.robot.swerve_constant.TunerConstants;
 import frc.robot.subsystems.Limelight3Subsystem;
 
-import java.util.Map;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -60,13 +46,31 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem();
+  public final CommandSwerveDrivetrain m_swerveDriveSubsystem = TunerConstants.createDrivetrain();
   public final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
   public final UptakeSubsystem m_uptakeSubsystem = new UptakeSubsystem();
   public final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   public final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
   public final LEDSubsystem m_ledSubsystem = new LEDSubsystem();
   public final Limelight3Subsystem m_limelight3Subsystem = new Limelight3Subsystem();
+
+  private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+  private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+
+  /* Setting up bindings for necessary control of the swerve drive platform */
+  private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+          .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+          .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+
+  // Setup Telemetry //
+  private final Telemetry logger = new Telemetry(MaxSpeed);
+
+  // Setup Slew Rate Limiters for driving //
+  private final SlewRateLimiter translationLimiter = new SlewRateLimiter(MaxSpeed);
+  private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(MaxSpeed);
+  private final SlewRateLimiter rotationLimiter = new SlewRateLimiter(MaxAngularRate);
 
   // Define Driver and Operator controllers //
   private final CommandXboxController m_driverController =
@@ -80,19 +84,19 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser;
 
-  // Create all the shuffleboard tab for testing //
-  public ShuffleboardTab m_testShuffleboardTab = null;
-  public ShuffleboardTab m_intakeShuffleboardTab = null;
-  public ShuffleboardTab m_uptakeShuffleboardTab = null;
-  public ShuffleboardTab m_shooterShuffleboardTab = null;
-  public ShuffleboardTab m_ampShuffleboardTab = null;
-  public ShuffleboardTab m_climberShuffleboardTab = null;
+  // // Create all the shuffleboard tab for testing //
+  // public ShuffleboardTab m_testShuffleboardTab = null;
+  // public ShuffleboardTab m_intakeShuffleboardTab = null;
+  // public ShuffleboardTab m_uptakeShuffleboardTab = null;
+  // public ShuffleboardTab m_shooterShuffleboardTab = null;
+  // public ShuffleboardTab m_ampShuffleboardTab = null;
+  // public ShuffleboardTab m_climberShuffleboardTab = null;
 
-  GenericEntry noteIsInIntakeEntry = Shuffleboard.getTab("SmartDashboard")
-      .add("NoteIsInIntake", false)
-      .withWidget("Boolean Box")
-      .withProperties(Map.of("colorWhenTrue", "green", "colorWhenFalse", "maroon"))
-      .getEntry();
+  // GenericEntry noteIsInIntakeEntry = Shuffleboard.getTab("SmartDashboard")
+  //     .add("NoteIsInIntake", false)
+  //     .withWidget("Boolean Box")
+  //     .withProperties(Map.of("colorWhenTrue", "green", "colorWhenFalse", "maroon"))
+  //     .getEntry();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -108,7 +112,7 @@ public class RobotContainer {
     // Move to L4 //
 
     // Init Auto Chooser //
-    autoChooser = AutoBuilder.buildAutoChooser("UptakeShoot");
+    autoChooser = AutoBuilder.buildAutoChooser("LeaveAuto");
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     // Configure the trigger bindings
@@ -128,17 +132,31 @@ public class RobotContainer {
 
     // #region Xbox Controller Bindings
 
-    // Set default teleop command to drive //
     m_swerveDriveSubsystem.setDefaultCommand(
-      m_swerveDriveSubsystem.drive(
-        () -> -m_driverController.getLeftY(),   // Translation
-        () -> -m_driverController.getLeftX(),   // Strafe
-        () -> -m_driverController.getRightX(),
-        () -> m_driverController.getHID().getRightBumper()  // Half-Speed
+      // Drivetrain will execute this command periodically
+      m_swerveDriveSubsystem.applyRequest(() ->
+          drive
+              .withVelocityX(
+                  translationLimiter.calculate(-m_driverController.getLeftY()) * MaxSpeed
+              ) // Drive forward with negative Y (forward)
+              .withVelocityY(
+                  strafeLimiter.calculate(-m_driverController.getLeftX()) * MaxSpeed
+              ) // Drive left with negative X (left)
+              .withRotationalRate(
+                  rotationLimiter.calculate(-m_driverController.getRightX()) * MaxAngularRate
+              ) // Drive counterclockwise with negative X (left)
       )
     );
 
     if (GeneralConstants.CURRENT_MODE == RobotMode.TEST){
+
+      // Run SysId routines when holding back/start and X/Y.
+      // Note that each routine should be run exactly once in a single log.
+      m_driverController.back().and(m_driverController.y()).whileTrue(m_swerveDriveSubsystem.sysIdDynamic(Direction.kForward));
+      m_driverController.back().and(m_driverController.x()).whileTrue(m_swerveDriveSubsystem.sysIdDynamic(Direction.kReverse));
+      m_driverController.start().and(m_driverController.y()).whileTrue(m_swerveDriveSubsystem.sysIdQuasistatic(Direction.kForward));
+      m_driverController.start().and(m_driverController.x()).whileTrue(m_swerveDriveSubsystem.sysIdQuasistatic(Direction.kReverse));
+
       m_intakeSubsystem.setDefaultCommand(new TestIntake(m_intakeSubsystem, () -> -m_operatorController.getRightY()));
       m_uptakeSubsystem.setDefaultCommand(new TestUptake(m_uptakeSubsystem, () -> -m_operatorController.getLeftY()));
       m_armSubsystem.setDefaultCommand(Commands.run(() -> m_armSubsystem.setArmSpeed(0.0), m_armSubsystem));
@@ -150,13 +168,20 @@ public class RobotContainer {
       m_operatorController.b()
           .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(-0.1), m_armSubsystem));
 
+      m_swerveDriveSubsystem.registerTelemetry(logger::telemeterize);
+
     }
 
     // Use the "A" button to reset the Gyro orientation //
-    m_driverController.a().onTrue(Commands.runOnce(() -> m_swerveDriveSubsystem.zeroGyro()));
+    m_driverController.a().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldCentric()));
 
     // Use the "B" button to x-lock the wheels //
-    m_driverController.b().onTrue(Commands.runOnce(() -> m_swerveDriveSubsystem.lock()));
+    m_driverController.b().whileTrue(m_swerveDriveSubsystem.applyRequest(() -> brake));
+    
+    // Use the "X" button to point the wheels at the current direction //
+    m_driverController.x().whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
+        point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
+    ));
   }
 
   /**
