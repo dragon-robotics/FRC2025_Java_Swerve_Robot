@@ -68,6 +68,8 @@ public class RobotContainer {
           .withDesaturateWheelSpeeds(true); // Use open-loop control for drive motors
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+  private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
+  .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
   // Setup Telemetry //
   private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -187,6 +189,13 @@ public class RobotContainer {
     m_driverController.x().whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
         point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
     ));
+
+    m_driverController.pov(0).whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
+      forwardStraight.withVelocityX(0.5).withVelocityY(0))
+    );
+    m_driverController.pov(180).whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
+      forwardStraight.withVelocityX(-0.5).withVelocityY(0))
+    );
   }
 
   /**
