@@ -119,7 +119,7 @@ public class RobotContainer {
     // Move to L4 //
 
     // Init Auto Chooser //
-    autoChooser = AutoBuilder.buildAutoChooser("LeaveAuto");
+    autoChooser = AutoBuilder.buildAutoChooser("TestAuto");
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     // Configure the trigger bindings
