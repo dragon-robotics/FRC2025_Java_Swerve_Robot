@@ -7,19 +7,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "S2-R11-Path"
+            "pathName": "S3-R10-Path"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "R11-LC1-Path"
+            "pathName": "R10-LC2-Path"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LC1-R11-Path"
+            "pathName": "LC2-R09-Path"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R09-LC2-Path"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LC2-R08-Path"
           }
         }
       ]

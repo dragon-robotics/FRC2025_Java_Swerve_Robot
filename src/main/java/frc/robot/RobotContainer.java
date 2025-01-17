@@ -61,15 +61,20 @@ public class RobotContainer {
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-          .withDeadband(MaxSpeed * 0.1)
-          .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-          .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-          // .withSteerRequestType(SteerRequestType.MotionMagicExpo)
-          .withDesaturateWheelSpeeds(true); // Use open-loop control for drive motors
+      .withDeadband(MaxSpeed * 0.1)
+      .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage) // Use open-loop control for drive motors
+      // .withSteerRequestType(SteerRequestType.MotionMagicExpo)
+      .withDesaturateWheelSpeeds(true); // Desaturate wheel speeds to prevent clipping
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
   private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
-  .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+  private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
+      .withDeadband(MaxSpeed * 0.1)
+      .withRotationalDeadband(MaxAngularRate * 0.1)
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage) // Use open-loop control for drive motors
+      .withDesaturateWheelSpeeds(true);
 
   // Setup Telemetry //
   private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -154,6 +159,23 @@ public class RobotContainer {
               ) // Drive counterclockwise with negative X (left)
       )
     );
+
+    // m_swerveDriveSubsystem.setDefaultCommand(
+    //   // Drivetrain will execute this command periodically
+    //   m_swerveDriveSubsystem.applyRequest(() ->
+    //     driveFacingAngle
+    //           .withVelocityX(
+    //               translationLimiter.calculate(-m_driverController.getLeftY()) * MaxSpeed
+    //           ) // Drive forward with negative Y (forward)
+    //           .withVelocityY(
+    //               strafeLimiter.calculate(-m_driverController.getLeftX()) * MaxSpeed
+    //           ) // Drive left with negative X (left)
+    //           .withTargetDirection(
+    //               new Rotation2d(m_driverController.getRightX(), m_driverController.getRightY())
+    //               // rotationLimiter.calculate(-m_driverController.getRightX()) * MaxAngularRate
+    //           ) // Drive counterclockwise with negative X (left)
+    //   )
+    // );
 
     if (GeneralConstants.CURRENT_MODE == RobotMode.TEST){
 
