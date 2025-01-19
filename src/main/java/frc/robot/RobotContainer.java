@@ -34,6 +34,8 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -175,56 +177,29 @@ public class RobotContainer {
                 if (currentHeading.isEmpty()) {
                     currentHeading = Optional.of(m_swerveDriveSubsystem.getState().Pose.getRotation());
                 }
+
+                // Based on alliance color, add 180 degrees to the current heading
+                Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+                if(alliance == Alliance.Red) {
+                  Rotation2d adjHeading = currentHeading.get().plus(Rotation2d.fromDegrees(180));
+                  System.out.println(
+                      "Current Alliance: " + alliance.toString() +
+                      " Current Heading: " + currentHeading.get().getDegrees() +
+                      " Adjusted Heading: " + adjHeading.getDegrees());
+                  m_swerveDriveSubsystem.setControl(driveHeading.withVelocityX(leftY).withVelocityY(leftX)
+                          .withTargetDirection(adjHeading));
+                } else {
+                  m_swerveDriveSubsystem.setControl(driveHeading.withVelocityX(leftY).withVelocityY(leftX)
+                          .withTargetDirection(currentHeading.get()));
+                }
+
                 m_swerveDriveSubsystem.setControl(driveHeading.withVelocityX(leftY).withVelocityY(leftX)
-                        .withTargetDirection(currentHeading.get()));
-                // System.out.println(
-                //     "Heading Locked: " + currentHeading.get().toString() +
-                //     " Position Error: " + driveHeading.HeadingController.getPositionError() +
-                //     " Position Setpoint: " + driveHeading.HeadingController.getSetpoint());
+                .withTargetDirection(currentHeading.get()));
+
+
             }  
         }, m_swerveDriveSubsystem)
-        // // Drivetrain will execute this command periodically
-        // drivetrain.applyRequest(() ->
-        //     drive.withVelocityX(MathUtil.applyDeadband(joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
-        //         .withVelocityY(MathUtil.applyDeadband(joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
-        //         .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate) // Drive counterclockwise with negative X (left)
-        // )
       );
-
-    //   // Drivetrain will execute this command periodically
-    //   m_swerveDriveSubsystem.applyRequest(() ->
-    //       drive
-    //           .withVelocityX(
-    //               translationLimiter.calculate(
-    //                 MathUtil.applyDeadband(-m_driverController.getLeftY(), 0.1)) * MaxSpeed
-    //           ) // Drive forward with negative Y (forward)
-    //           .withVelocityY(
-    //               strafeLimiter.calculate(
-    //                 MathUtil.applyDeadband(-m_driverController.getLeftX(), 0.1)) * MaxSpeed
-    //           ) // Drive left with negative X (left)
-    //           .withRotationalRate(
-    //               rotationLimiter.calculate(
-    //                 MathUtil.applyDeadband(-m_driverController.getRightX(), 0.1) * MaxAngularRate
-    //           ) // Drive counterclockwise with negative X (left)
-    //   ))
-    // );
-
-    // m_swerveDriveSubsystem.setDefaultCommand(
-    //   // Drivetrain will execute this command periodically
-    //   m_swerveDriveSubsystem.applyRequest(() ->
-    //     driveFacingAngle
-    //           .withVelocityX(
-    //               translationLimiter.calculate(-m_driverController.getLeftY()) * MaxSpeed
-    //           ) // Drive forward with negative Y (forward)
-    //           .withVelocityY(
-    //               strafeLimiter.calculate(-m_driverController.getLeftX()) * MaxSpeed
-    //           ) // Drive left with negative X (left)
-    //           .withTargetDirection(
-    //               new Rotation2d(m_driverController.getRightX(), m_driverController.getRightY())
-    //               // rotationLimiter.calculate(-m_driverController.getRightX()) * MaxAngularRate
-    //           ) // Drive counterclockwise with negative X (left)
-    //   )
-    // );
 
     if (GeneralConstants.CURRENT_MODE == RobotMode.TEST){
 
