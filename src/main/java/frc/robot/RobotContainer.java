@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.Optional;
+
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.GeneralConstants.RobotMode;
 import frc.robot.Constants.OperatorConstants;
@@ -29,12 +31,15 @@ import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -61,18 +66,17 @@ public class RobotContainer {
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(MaxSpeed * 0.1)
-      .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+      .withDeadband(MaxSpeed * 0.05)
+      .withRotationalDeadband(MaxAngularRate * 0.05) // Add a 5% deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage) // Use open-loop control for drive motors
-      // .withSteerRequestType(SteerRequestType.MotionMagicExpo)
       .withDesaturateWheelSpeeds(true); // Desaturate wheel speeds to prevent clipping
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
   private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-  private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
-      .withDeadband(MaxSpeed * 0.1)
-      .withRotationalDeadband(MaxAngularRate * 0.1)
+  private final SwerveRequest.FieldCentricFacingAngle driveHeading = new SwerveRequest.FieldCentricFacingAngle()
+      .withDeadband(MaxSpeed * 0.05)
+      .withRotationalDeadband(MaxAngularRate * 0.05)
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage) // Use open-loop control for drive motors
       .withDesaturateWheelSpeeds(true);
 
@@ -83,6 +87,9 @@ public class RobotContainer {
   private final SlewRateLimiter translationLimiter = new SlewRateLimiter(MaxSpeed);
   private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(MaxSpeed);
   private final SlewRateLimiter rotationLimiter = new SlewRateLimiter(MaxAngularRate);
+
+  private double joystickLastTouched = 0.0; // When the joystick was last touched
+  private Optional<Rotation2d> currentHeading = Optional.empty();
 
   // Define Driver and Operator controllers //
   private final CommandXboxController m_driverController =
@@ -123,6 +130,10 @@ public class RobotContainer {
     // Move to L3 //
     // Move to L4 //
 
+    driveHeading.HeadingController.setPID(3, 0.0, 0.5);
+    // driveHeading.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+    driveHeading.HeadingController.setTolerance(0.01);
+
     // Init Auto Chooser //
     autoChooser = AutoBuilder.buildAutoChooser("TestAuto");
     SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -145,20 +156,58 @@ public class RobotContainer {
     // #region Xbox Controller Bindings
 
     m_swerveDriveSubsystem.setDefaultCommand(
-      // Drivetrain will execute this command periodically
-      m_swerveDriveSubsystem.applyRequest(() ->
-          drive
-              .withVelocityX(
-                  translationLimiter.calculate(-m_driverController.getLeftY()) * MaxSpeed
-              ) // Drive forward with negative Y (forward)
-              .withVelocityY(
-                  strafeLimiter.calculate(-m_driverController.getLeftX()) * MaxSpeed
-              ) // Drive left with negative X (left)
-              .withRotationalRate(
-                  rotationLimiter.calculate(-m_driverController.getRightX()) * MaxAngularRate
-              ) // Drive counterclockwise with negative X (left)
-      )
-    );
+        new RunCommand(() -> {
+
+            // Apply deadband to joystick inputs
+            double leftY = MathUtil.applyDeadband(-m_driverController.getLeftY(), 0.1) * MaxSpeed; // Forward/Backward
+            double leftX = MathUtil.applyDeadband(-m_driverController.getLeftX(), 0.1) * MaxSpeed; // Left/Right
+            double rightX = MathUtil.applyDeadband(-m_driverController.getRightX(), 0.1) * MaxAngularRate; // Rotation
+
+            if (Math.abs(rightX) > 0.1) {
+                joystickLastTouched = Timer.getFPGATimestamp();
+            }
+            if (Math.abs(rightX) > 0.1
+                    || (MathUtil.isNear(joystickLastTouched, Timer.getFPGATimestamp(), 0.1)
+                        && Math.abs(m_swerveDriveSubsystem.getState().Speeds.omegaRadiansPerSecond) > Math.toRadians(10))) {
+                m_swerveDriveSubsystem.setControl(drive.withVelocityX(leftY).withVelocityY(leftX).withRotationalRate(rightX));
+                currentHeading = Optional.empty();
+            } else {
+                if (currentHeading.isEmpty()) {
+                    currentHeading = Optional.of(m_swerveDriveSubsystem.getState().Pose.getRotation());
+                }
+                m_swerveDriveSubsystem.setControl(driveHeading.withVelocityX(leftY).withVelocityY(leftX)
+                        .withTargetDirection(currentHeading.get()));
+                // System.out.println(
+                //     "Heading Locked: " + currentHeading.get().toString() +
+                //     " Position Error: " + driveHeading.HeadingController.getPositionError() +
+                //     " Position Setpoint: " + driveHeading.HeadingController.getSetpoint());
+            }  
+        }, m_swerveDriveSubsystem)
+        // // Drivetrain will execute this command periodically
+        // drivetrain.applyRequest(() ->
+        //     drive.withVelocityX(MathUtil.applyDeadband(joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
+        //         .withVelocityY(MathUtil.applyDeadband(joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
+        //         .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate) // Drive counterclockwise with negative X (left)
+        // )
+      );
+
+    //   // Drivetrain will execute this command periodically
+    //   m_swerveDriveSubsystem.applyRequest(() ->
+    //       drive
+    //           .withVelocityX(
+    //               translationLimiter.calculate(
+    //                 MathUtil.applyDeadband(-m_driverController.getLeftY(), 0.1)) * MaxSpeed
+    //           ) // Drive forward with negative Y (forward)
+    //           .withVelocityY(
+    //               strafeLimiter.calculate(
+    //                 MathUtil.applyDeadband(-m_driverController.getLeftX(), 0.1)) * MaxSpeed
+    //           ) // Drive left with negative X (left)
+    //           .withRotationalRate(
+    //               rotationLimiter.calculate(
+    //                 MathUtil.applyDeadband(-m_driverController.getRightX(), 0.1) * MaxAngularRate
+    //           ) // Drive counterclockwise with negative X (left)
+    //   ))
+    // );
 
     // m_swerveDriveSubsystem.setDefaultCommand(
     //   // Drivetrain will execute this command periodically
@@ -197,8 +246,6 @@ public class RobotContainer {
       // m_operatorController.b()
       //     .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(-0.1), m_armSubsystem));
 
-      m_swerveDriveSubsystem.registerTelemetry(logger::telemeterize);
-
     }
 
     // Use the "A" button to reset the Gyro orientation //
@@ -207,9 +254,18 @@ public class RobotContainer {
     // Use the "B" button to x-lock the wheels //
     m_driverController.b().whileTrue(m_swerveDriveSubsystem.applyRequest(() -> brake));
     
-    // Use the "X" button to point the wheels at the current direction //
+    // Bind the X button to snap to 90 degrees
     m_driverController.x().whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
-        point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
+        driveHeading.withTargetDirection(Rotation2d.fromDegrees(90))
+            .withVelocityX(MathUtil.applyDeadband(m_driverController.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
+            .withVelocityY(MathUtil.applyDeadband(m_driverController.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
+    ));
+
+    // Bind the Y button to snap to 180 degrees
+    m_driverController.y().whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
+        driveHeading.withTargetDirection(Rotation2d.fromDegrees(180))
+            .withVelocityX(MathUtil.applyDeadband(m_driverController.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
+            .withVelocityY(MathUtil.applyDeadband(m_driverController.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
     ));
 
     m_driverController.pov(0).whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
@@ -218,6 +274,9 @@ public class RobotContainer {
     m_driverController.pov(180).whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
       forwardStraight.withVelocityX(-0.5).withVelocityY(0))
     );
+
+    m_swerveDriveSubsystem.registerTelemetry(logger::telemeterize);
+
   }
 
   /**
