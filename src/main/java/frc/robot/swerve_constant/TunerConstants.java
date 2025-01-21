@@ -241,7 +241,11 @@ public class TunerConstants {
      */
     public static CommandSwerveDrivetrain createDrivetrain() {
         return new CommandSwerveDrivetrain(
-            DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight
+            DrivetrainConstants,
+            FrontLeft,
+            FrontRight,
+            BackLeft,
+            BackRight
         );
     }
 
@@ -249,9 +253,37 @@ public class TunerConstants {
      * Creates a CommandSwerveDrivetrain instance.
      * This should only be called once in your robot program,.
      */
-    public static CommandSwerveDrivetrain createDrivetrain(double odometryUpdateFrequency) {
+    public static CommandSwerveDrivetrain createDrivetrain(
+        double odometryUpdateFrequency
+    ) {
         return new CommandSwerveDrivetrain(
-            DrivetrainConstants, odometryUpdateFrequency, FrontLeft, FrontRight, BackLeft, BackRight
+            DrivetrainConstants,
+            odometryUpdateFrequency,
+            FrontLeft,
+            FrontRight,
+            BackLeft,
+            BackRight
+        );
+    }
+
+        /**
+     * Creates a CommandSwerveDrivetrain instance.
+     * This should only be called once in your robot program,.
+     */
+    public static CommandSwerveDrivetrain createDrivetrain(
+        double odometryUpdateFrequency,
+        Matrix<N3, N1> odometryStandardDeviation,
+        Matrix<N3, N1> visionStandardDeviation
+    ) {
+        return new CommandSwerveDrivetrain(
+            DrivetrainConstants,
+            odometryUpdateFrequency,
+            odometryStandardDeviation,
+            visionStandardDeviation,
+            FrontLeft,
+            FrontRight,
+            BackLeft,
+            BackRight
         );
     }
 
