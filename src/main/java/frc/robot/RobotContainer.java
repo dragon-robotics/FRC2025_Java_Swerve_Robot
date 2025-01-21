@@ -11,6 +11,8 @@ import java.util.Optional;
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.GeneralConstants.RobotMode;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.Test.TestIntake;
 import frc.robot.commands.Test.TestShooter;
 import frc.robot.commands.Test.TestUptake;
@@ -20,6 +22,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.UptakeSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 import frc.robot.subsystems.Limelight3Subsystem;
 
@@ -54,8 +57,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+
   // The robot's subsystems and commands are defined here...
-  public final CommandSwerveDrivetrain m_swerveDriveSubsystem = TunerConstants.createDrivetrain();
+  public final CommandSwerveDrivetrain m_swerveDriveSubsystem = TunerConstants.createDrivetrain(
+    250,
+    SwerveConstants.ODOMETRY_STD,
+    VisionConstants.kDefaultTagStdDevs);
+
+  public final VisionSubsystem m_visionSubsystem = new VisionSubsystem(m_swerveDriveSubsystem.getState());
   // public final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
   // public final UptakeSubsystem m_uptakeSubsystem = new UptakeSubsystem();
   // public final ArmSubsystem m_armSubsystem = new ArmSubsystem();
@@ -186,8 +195,10 @@ public class RobotContainer {
                       "Current Alliance: " + alliance.toString() +
                       " Current Heading: " + currentHeading.get().getDegrees() +
                       " Adjusted Heading: " + adjHeading.getDegrees());
-                  m_swerveDriveSubsystem.setControl(driveHeading.withVelocityX(leftY).withVelocityY(leftX)
-                          .withTargetDirection(adjHeading));
+                  m_swerveDriveSubsystem.setControl(
+                      driveHeading.withVelocityX(leftY)
+                      .withVelocityY(leftX)
+                      .withTargetDirection(adjHeading));
                 } else {
                   m_swerveDriveSubsystem.setControl(driveHeading.withVelocityX(leftY).withVelocityY(leftX)
                           .withTargetDirection(currentHeading.get()));

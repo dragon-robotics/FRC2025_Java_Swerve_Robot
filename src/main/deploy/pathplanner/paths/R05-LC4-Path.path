@@ -20,7 +20,7 @@
         "y": 1.28
       },
       "prevControl": {
-        "x": 1.925890079567096,
+        "x": 1.9258900795670963,
         "y": 1.023570457078607
       },
       "nextControl": null,
@@ -45,7 +45,7 @@
     "rotation": 54.011
   },
   "reversed": false,
-  "folder": null,
+  "folder": "LC4",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

@@ -45,7 +45,7 @@
     "rotation": -52.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "LC1",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -120.165

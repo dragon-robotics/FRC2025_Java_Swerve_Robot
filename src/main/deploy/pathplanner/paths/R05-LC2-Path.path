@@ -8,7 +8,7 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.494071522108765,
+        "x": 2.4940715221087646,
         "y": 5.1147342663314905
       },
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": -53.326
   },
   "reversed": false,
-  "folder": null,
+  "folder": "LC2",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
