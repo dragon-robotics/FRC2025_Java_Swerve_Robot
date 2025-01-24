@@ -54,20 +54,62 @@ public final class Constants {
   }
 
   public static class VisionConstants {
-        public static final String kCameraName = "AprilTagCamera";
-        // Cam mounted facing forward, half a meter forward of center, half a meter up from center.
-        public static final Transform3d kRobotToCam =
-                new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0, 0, 0));
+        public static final String[] APTAG_CAMERA_NAMES = {
+          "AprilTagAlignCamera",
+          "AprilTagPoseEstCameraFL",
+          "AprilTagPoseEstCameraFR",
+          "AprilTagPoseEstCameraBL",
+          "AprilTagPoseEstCameraBR"
+        };
+        
+        // Main Apriltag alignment cam mounted facing forward, half a meter forward of center, half a meter up from center.
+        public static final Transform3d APTAG_ALIGN_CAM_POS =
+            new Transform3d(new Translation3d(0.5, 0.0, 0.5),
+            new Rotation3d(0, 0, 0));
+
+        // Front-Left Camera: Mounted at front-left corner, pointing outward at 45 degrees
+        public static final Transform3d APTAG_POSE_EST_CAM_FL_POS =
+        new Transform3d(
+            new Translation3d(0.5, 0.5, 1), // Example position (x, y, z)
+            new Rotation3d(0, 0, Units.degreesToRadians(45))
+        );
+
+        // Front-Right Camera: Mounted at front-right corner, pointing outward at -45 degrees
+        public static final Transform3d APTAG_POSE_EST_CAM_FR_POS =
+            new Transform3d(
+                new Translation3d(0.5, -0.5, 1), // Example position (x, y, z)
+                new Rotation3d(0, 0, Units.degreesToRadians(-45))
+            );
+
+        // Back-Left Camera: Mounted at back-left corner, pointing outward at 135 degrees
+        public static final Transform3d APTAG_POSE_EST_CAM_BL_POS =
+            new Transform3d(
+                new Translation3d(-0.5, 0.5, 1), // Example position (x, y, z)
+                new Rotation3d(0, 0, Units.degreesToRadians(135))
+            );
+
+        // Back-Right Camera: Mounted at back-right corner, pointing outward at -135 degrees
+        public static final Transform3d APTAG_POSE_EST_CAM_BR_POS =
+            new Transform3d(
+                new Translation3d(-0.5, -0.5, 1), // Example position (x, y, z)
+                new Rotation3d(0, 0, Units.degreesToRadians(-135))
+            );
+        public static final Transform3d[] APTAG_POSE_EST_CAM_POSITIONS = {
+          APTAG_POSE_EST_CAM_FL_POS,
+          APTAG_POSE_EST_CAM_FR_POS,
+          APTAG_POSE_EST_CAM_BL_POS,
+          APTAG_POSE_EST_CAM_BR_POS
+        };
 
         // The layout of the AprilTags on the field
-        public static final AprilTagFieldLayout kTagLayout =
+        public static final AprilTagFieldLayout APTAG_FIELD_LAYOUT =
                 AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
         // The standard deviations of our vision estimated poses, which affect correction rate
         // (Fake values. Experiment and determine estimation noise on an actual robot.)
-        public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
-        public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
-        public static final Matrix<N3, N1> kDefaultTagStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
+        public static final Matrix<N3, N1> SINGLE_TAG_STDDEV = VecBuilder.fill(4, 4, 8);
+        public static final Matrix<N3, N1> MULTI_TAG_STDDEV = VecBuilder.fill(0.5, 0.5, 1);
+        public static final Matrix<N3, N1> DEFAULT_TAG_STDDEV = VecBuilder.fill(0.9, 0.9, 0.9);
     }
 
   /** Intake Subsystem Constants */
