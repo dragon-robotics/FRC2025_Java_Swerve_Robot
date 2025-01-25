@@ -210,12 +210,20 @@ public final class Constants {
     public static final int STALL_CURRENT_LIMIT = 40;
     public static final double SECONDARY_CURRENT_LIMIT = 60.0;
 
-    public static final float STARTING_LIMIT = 0.0f;
-    public static final float ENDING_LIMIT = 100.0f;
+    public static final double STARTING_LIMIT = 0.0;
+    public static final double ENDING_LIMIT = 100.0;
 
-    /* Desired absolute encoder setpoint for moving elevator (to be tuned later using absolute encoder) */
-    public static final double LVL_1 = 0.32;
-    public static final double LVL_2 = 0.4;
+    // Elevator Feedforward Constants
+    public static final double ELEVATOR_KS = 0.0;
+    public static final double ELEVATOR_KV = 0.762;
+    public static final double ELEVATOR_KA = 0.762;
+    public static final double ELEVATOR_KG = 0.0;
+
+    /* Desired absolute encoder setpoint for moving elevator (to be tuned later using relative encoder) */
+    public static final double LVL_1 = 30;
+    public static final double LVL_2 = 40;
+    public static final double LVL_3 = 50;
+    public static final double LVL_4 = 70;
   }
 
   public static class LEDConstants {
@@ -329,6 +337,20 @@ public final class Constants {
   
   public static class SwerveConstants {
     // General constants for swerve drive //
+    public static final double STEER_KP = 100;
+    public static final double STEER_KI = 0;
+    public static final double STEER_KD = 0.5;
+    public static final double STEER_KS = 0.1;
+    public static final double STEER_KV = 1.59;
+    public static final double STEER_KA = 0;
+
+    public static final double DRIVE_KP = 0.1;
+    public static final double DRIVE_KI = 0;
+    public static final double DRIVE_KD = 0;
+    public static final double DRIVE_KS = 0;
+    public static final double DRIVE_KV = 0.124;
+    public static final double DRIVE_KA = 0;
+
     public static final double ANGLE_GEAR_RATIO = 12.8;
     public static final double DRIVE_GEAR_RATIO = 6.12;
     public static final double PULSE_PER_ROTATION = 1;

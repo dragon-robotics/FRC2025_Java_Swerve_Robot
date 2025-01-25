@@ -26,7 +26,6 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.UptakeSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
-import frc.robot.subsystems.Limelight3Subsystem;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule;
