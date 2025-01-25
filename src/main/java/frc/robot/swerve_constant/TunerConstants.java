@@ -62,11 +62,6 @@ public class TunerConstants {
                 .withStatorCurrentLimit(Amps.of(60))
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(40))
-        // .withClosedLoopRamps(
-        //     new ClosedLoopRampsConfigs()
-        //         .withDutyCycleClosedLoopRampPeriod(0.25)
-        //         .withTorqueClosedLoopRampPeriod(0.25)
-        //         .withVoltageClosedLoopRampPeriod(0.25))
         .withVoltage(
             new VoltageConfigs()
                 .withPeakForwardVoltage(10.0)
@@ -90,11 +85,6 @@ public class TunerConstants {
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(20)
         )
-        // .withClosedLoopRamps(
-        //     new ClosedLoopRampsConfigs()
-        //         .withDutyCycleClosedLoopRampPeriod(0.25)
-        //         .withTorqueClosedLoopRampPeriod(0.25)
-        //         .withVoltageClosedLoopRampPeriod(0.25))
         .withVoltage(
             new VoltageConfigs()
                 .withPeakForwardVoltage(10)
