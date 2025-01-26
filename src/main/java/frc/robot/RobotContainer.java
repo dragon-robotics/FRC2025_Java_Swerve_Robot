@@ -10,20 +10,21 @@ import java.util.Optional;
 
 import org.photonvision.PhotonUtils;
 
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.GeneralConstants.RobotMode;
+import frc.robot.commands.Teleop.IntakeAlgaeUntilAlgaeDetected;
+import frc.robot.commands.Teleop.IntakeCoralUntilCoralDetected;
+import frc.robot.commands.Teleop.MoveElevator;
+import frc.robot.commands.Teleop.ScoreAlgae;
+import frc.robot.commands.Teleop.ScoreCoral;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.Test.TestIntake;
-import frc.robot.commands.Test.TestShooter;
-import frc.robot.commands.Test.TestUptake;
-import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.AlgaeSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.LEDSubsystem;
-import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.UptakeSubsystem;
+import frc.robot.subsystems.CoralSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 
@@ -68,12 +69,9 @@ public class RobotContainer {
     VisionConstants.DEFAULT_TAG_STDDEV);
 
   public final VisionSubsystem m_visionSubsystem = new VisionSubsystem(m_swerveDriveSubsystem.getState());
-  // public final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
-  // public final UptakeSubsystem m_uptakeSubsystem = new UptakeSubsystem();
-  // public final ArmSubsystem m_armSubsystem = new ArmSubsystem();
-  // public final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
-  // public final LEDSubsystem m_ledSubsystem = new LEDSubsystem();
-  // public final Limelight3Subsystem m_limelight3Subsystem = new Limelight3Subsystem();
+  public final AlgaeSubsystem m_algaeSubsystem = new AlgaeSubsystem();
+  public final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
+  public final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
 
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -134,15 +132,15 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Register Named Commands //
-    // Example: NamedCommands.registerCommand("MoveUptake0", new MoveUptake(m_uptakeSubsystem, () -> UPTAKE_STOP));
-    // Intake Algae (Until Algae Detected) Command //
-    // Score Algae Command //
-    // Intake Coral (Until Coral Detected) Command //
-    // Score Coral Command //
-    // Move to L1 //
-    // Move to L2 //
-    // Move to L3 //
-    // Move to L4 //
+    NamedCommands.registerCommand("IntakeAlgaeUntilAlgaeDetected", new IntakeAlgaeUntilAlgaeDetected(m_algaeSubsystem));
+    NamedCommands.registerCommand("ScoreAlgae", new ScoreAlgae(m_algaeSubsystem));
+    NamedCommands.registerCommand("IntakeCoralUntilCoralDetected", new IntakeCoralUntilCoralDetected(m_coralSubsystem));
+    NamedCommands.registerCommand("ScoreCoral", new ScoreCoral(m_coralSubsystem));
+
+    NamedCommands.registerCommand("MoveToL1", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_1));
+    NamedCommands.registerCommand("MoveToL2", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_2));
+    NamedCommands.registerCommand("MoveToL3", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_3));
+    NamedCommands.registerCommand("MoveToL4", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_4));
 
     driveHeading.HeadingController.setPID(3, 0.0, 0.5);
     // driveHeading.HeadingController.enableContinuousInput(-Math.PI, Math.PI);

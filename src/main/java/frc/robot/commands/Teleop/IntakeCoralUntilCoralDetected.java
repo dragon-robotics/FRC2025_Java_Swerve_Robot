@@ -4,24 +4,21 @@
 
 package frc.robot.commands.Teleop;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.CoralSubsystem;
 
-public class MoveIntake extends Command {
-  
-  private IntakeSubsystem m_intake;
-  private DoubleSupplier m_speed;
+/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+public class IntakeCoralUntilCoralDetected extends Command {
 
-  /** Creates a new MoveIntake. */
-  public MoveIntake(IntakeSubsystem intake, DoubleSupplier speed) {
+  private CoralSubsystem m_coral;
 
-    m_intake = intake;
-    m_speed = speed;
+  /** Creates a new IntakeCoralUntilCoralDetected. */
+  public IntakeCoralUntilCoralDetected(CoralSubsystem coral) {
+
+    m_coral = coral;
 
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(intake);
+    addRequirements(coral);
   }
 
   // Called when the command is initially scheduled.
@@ -30,9 +27,7 @@ public class MoveIntake extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    m_intake.set(m_speed.getAsDouble());
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override

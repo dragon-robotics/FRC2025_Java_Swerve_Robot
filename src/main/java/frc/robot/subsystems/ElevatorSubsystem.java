@@ -28,7 +28,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.GeneralConstants.RobotMode;
@@ -119,11 +118,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     m_elevatorLeftConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
         .apply(m_elevatorLeftMaxMotionConfig)
-        .p(ArmConstants.P, ClosedLoopSlot.kSlot0)
-        .i(ArmConstants.I, ClosedLoopSlot.kSlot0)
-        .d(ArmConstants.D, ClosedLoopSlot.kSlot0)
-        .velocityFF(ArmConstants.F, ClosedLoopSlot.kSlot0)
-        .iZone(ArmConstants.IZ, ClosedLoopSlot.kSlot0)
+        .p(ElevatorConstants.P, ClosedLoopSlot.kSlot0)
+        .i(ElevatorConstants.I, ClosedLoopSlot.kSlot0)
+        .d(ElevatorConstants.D, ClosedLoopSlot.kSlot0)
+        .velocityFF(ElevatorConstants.F, ClosedLoopSlot.kSlot0)
+        .iZone(ElevatorConstants.IZ, ClosedLoopSlot.kSlot0)
         .minOutput(-0.5, ClosedLoopSlot.kSlot0)
         .maxOutput(0.5, ClosedLoopSlot.kSlot0)
         .iMaxAccum(0.0, ClosedLoopSlot.kSlot0)
