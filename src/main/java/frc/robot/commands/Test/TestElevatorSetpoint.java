@@ -4,22 +4,13 @@
 
 package frc.robot.commands.Test;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.UptakeSubsystem;
 
-public class TestUptake extends Command {
-  private final UptakeSubsystem m_uptake;
-  private final DoubleSupplier m_speedSupplier;
-
-  /** Creates a new TestUptake. */
-  public TestUptake(UptakeSubsystem uptake, DoubleSupplier speedSupplier) {
+/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+public class TestElevatorSetpoint extends Command {
+  /** Creates a new TestElevatorSetpoint. */
+  public TestElevatorSetpoint() {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(uptake);
-
-    m_uptake = uptake;
-    m_speedSupplier = speedSupplier;
   }
 
   // Called when the command is initially scheduled.
@@ -28,14 +19,7 @@ public class TestUptake extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    double speed = m_speedSupplier.getAsDouble();
-    // if (speed < -0.9)
-    //   speed = -0.9;
-    // else if (speed > 0.9)
-    //   speed = 0.9;
-    m_uptake.set(speed);
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override

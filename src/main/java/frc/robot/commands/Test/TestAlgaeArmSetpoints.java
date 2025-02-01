@@ -2,24 +2,24 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.Teleop;
+package frc.robot.commands.Test;
+
+import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.UptakeSubsystem;
+import frc.robot.subsystems.AlgaeSubsystem;
 
-public class MoveUptake40 extends Command {
-  /** Creates a new MoveUptake40. */
+public class TestAlgaeArmSetpoints extends Command {
+  private final AlgaeSubsystem m_arm;
+  private final DoubleSupplier m_power;
 
-  private final UptakeSubsystem m_uptake;
-
-  public MoveUptake40(
-    UptakeSubsystem uptake
-  ) {
-
-    m_uptake = uptake;
-
+  /** Creates a new TestArmSetpoints. */
+  public TestAlgaeArmSetpoints(AlgaeSubsystem arm, DoubleSupplier power) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(uptake);
+    addRequirements(arm);
+
+    m_arm = arm;
+    m_power = power;
   }
 
   // Called when the command is initially scheduled.
@@ -29,7 +29,12 @@ public class MoveUptake40 extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_uptake.set(-0.4);
+    double speed = m_power.getAsDouble();
+    if (m_power.getAsDouble() < -0.2)
+      speed = -0.2;
+    else if (m_power.getAsDouble() > 0.2)
+      speed = 0.2;
+    m_arm.setArmSpeed(speed);
   }
 
   // Called once the command ends or is interrupted.

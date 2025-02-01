@@ -13,15 +13,15 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.Constants.GeneralConstants.RobotMode;
 import frc.robot.Constants.GeneralConstants;
-import frc.robot.Constants.IntakeConstants;
+import static frc.robot.Constants.CoralSubsystemConstants.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class IntakeSubsystem extends SubsystemBase {
+public class CoralSubsystem extends SubsystemBase {
 
   // @TODO: Create Elastic Tabs for the Intake Subsystem //
 
   // Intake Motor Controller //
-  private final SparkMax m_intake = new SparkMax(IntakeConstants.MOTOR_ID, MotorType.kBrushless);
+  private final SparkMax m_intake = new SparkMax(MOTOR_ID, MotorType.kBrushless);
 
   // Intake Motor Controller Configurations //
   private final SparkBaseConfig m_intakeConfig = new SparkMaxConfig();
@@ -29,15 +29,15 @@ public class IntakeSubsystem extends SubsystemBase {
   /**
    * Creates a new IntakeSubsystem.
    */
-  public IntakeSubsystem() {
+  public CoralSubsystem() {
 
     // Intake Motor Configuration //
     m_intakeConfig
-        .voltageCompensation(IntakeConstants.NOMINAL_VOLTAGE)
-        .smartCurrentLimit(IntakeConstants.STALL_CURRENT_LIMIT, IntakeConstants.FREE_CURRENT_LIMIT)
-        .secondaryCurrentLimit(IntakeConstants.STALL_CURRENT_LIMIT)
+        .voltageCompensation(NOMINAL_VOLTAGE)
+        .smartCurrentLimit(STALL_CURRENT_LIMIT, FREE_CURRENT_LIMIT)
+        .secondaryCurrentLimit(STALL_CURRENT_LIMIT)
         .idleMode(IdleMode.kBrake)
-        .openLoopRampRate(IntakeConstants.RAMP_RATE_IN_SEC);
+        .openLoopRampRate(RAMP_RATE_IN_SEC);
 
     // Create Shuffleboard entries for the IntakeSubsystem if the robot is in test mode //
     if (GeneralConstants.CURRENT_MODE == RobotMode.TEST) {

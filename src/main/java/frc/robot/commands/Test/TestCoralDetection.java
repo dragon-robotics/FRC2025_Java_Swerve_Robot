@@ -4,22 +4,13 @@
 
 package frc.robot.commands.Test;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.ArmSubsystem;
 
-public class TestArmSetpoints extends Command {
-  private final ArmSubsystem m_arm;
-  private final DoubleSupplier m_power;
-
-  /** Creates a new TestArmSetpoints. */
-  public TestArmSetpoints(ArmSubsystem arm, DoubleSupplier power) {
+/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+public class TestCoralDetection extends Command {
+  /** Creates a new TestCoralDetection. */
+  public TestCoralDetection() {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(arm);
-
-    m_arm = arm;
-    m_power = power;
   }
 
   // Called when the command is initially scheduled.
@@ -28,14 +19,7 @@ public class TestArmSetpoints extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    double speed = m_power.getAsDouble();
-    if (m_power.getAsDouble() < -0.2)
-      speed = -0.2;
-    else if (m_power.getAsDouble() > 0.2)
-      speed = 0.2;
-    m_arm.setArmSpeed(speed);
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override

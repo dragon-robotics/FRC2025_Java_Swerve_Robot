@@ -8,23 +8,25 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.Optional;
 
+import org.photonvision.PhotonUtils;
+
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.GeneralConstants.RobotMode;
+import frc.robot.commands.Teleop.IntakeAlgaeUntilAlgaeDetected;
+import frc.robot.commands.Teleop.IntakeCoralUntilCoralDetected;
+import frc.robot.commands.Teleop.MoveElevator;
+import frc.robot.commands.Teleop.ScoreAlgae;
+import frc.robot.commands.Teleop.ScoreCoral;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.Test.TestIntake;
-import frc.robot.commands.Test.TestShooter;
-import frc.robot.commands.Test.TestUptake;
-import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.AlgaeSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.LEDSubsystem;
-import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.UptakeSubsystem;
+import frc.robot.subsystems.CoralSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
-import frc.robot.subsystems.Limelight3Subsystem;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule;
@@ -37,6 +39,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -44,6 +47,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -62,15 +66,12 @@ public class RobotContainer {
   public final CommandSwerveDrivetrain m_swerveDriveSubsystem = TunerConstants.createDrivetrain(
     250,
     SwerveConstants.ODOMETRY_STD,
-    VisionConstants.kDefaultTagStdDevs);
+    VisionConstants.DEFAULT_TAG_STDDEV);
 
   public final VisionSubsystem m_visionSubsystem = new VisionSubsystem(m_swerveDriveSubsystem.getState());
-  // public final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
-  // public final UptakeSubsystem m_uptakeSubsystem = new UptakeSubsystem();
-  // public final ArmSubsystem m_armSubsystem = new ArmSubsystem();
-  // public final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
-  // public final LEDSubsystem m_ledSubsystem = new LEDSubsystem();
-  // public final Limelight3Subsystem m_limelight3Subsystem = new Limelight3Subsystem();
+  public final AlgaeSubsystem m_algaeSubsystem = new AlgaeSubsystem();
+  public final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
+  public final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
 
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -131,15 +132,15 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Register Named Commands //
-    // Example: NamedCommands.registerCommand("MoveUptake0", new MoveUptake(m_uptakeSubsystem, () -> UPTAKE_STOP));
-    // Intake Algae (Until Algae Detected) Command //
-    // Score Algae Command //
-    // Intake Coral (Until Coral Detected) Command //
-    // Score Coral Command //
-    // Move to L1 //
-    // Move to L2 //
-    // Move to L3 //
-    // Move to L4 //
+    NamedCommands.registerCommand("IntakeAlgaeUntilAlgaeDetected", new IntakeAlgaeUntilAlgaeDetected(m_algaeSubsystem));
+    NamedCommands.registerCommand("ScoreAlgae", new ScoreAlgae(m_algaeSubsystem));
+    NamedCommands.registerCommand("IntakeCoralUntilCoralDetected", new IntakeCoralUntilCoralDetected(m_coralSubsystem));
+    NamedCommands.registerCommand("ScoreCoral", new ScoreCoral(m_coralSubsystem));
+
+    NamedCommands.registerCommand("MoveToL1", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_1));
+    NamedCommands.registerCommand("MoveToL2", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_2));
+    NamedCommands.registerCommand("MoveToL3", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_3));
+    NamedCommands.registerCommand("MoveToL4", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_4));
 
     driveHeading.HeadingController.setPID(3, 0.0, 0.5);
     // driveHeading.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
@@ -191,10 +192,10 @@ public class RobotContainer {
                 Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
                 if(alliance == Alliance.Red) {
                   Rotation2d adjHeading = currentHeading.get().plus(Rotation2d.fromDegrees(180));
-                  System.out.println(
-                      "Current Alliance: " + alliance.toString() +
-                      " Current Heading: " + currentHeading.get().getDegrees() +
-                      " Adjusted Heading: " + adjHeading.getDegrees());
+                  // System.out.println(
+                  //     "Current Alliance: " + alliance.toString() +
+                  //     " Current Heading: " + currentHeading.get().getDegrees() +
+                  //     " Adjusted Heading: " + adjHeading.getDegrees());
                   m_swerveDriveSubsystem.setControl(
                       driveHeading.withVelocityX(leftY)
                       .withVelocityY(leftX)
@@ -260,6 +261,63 @@ public class RobotContainer {
     m_driverController.pov(180).whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
       forwardStraight.withVelocityX(-0.5).withVelocityY(0))
     );
+
+    // Aim and Range to a target Apriltag //
+    m_driverController.rightBumper().whileTrue(new RunCommand(() -> {
+      // Read in relevant data from the Camera
+      boolean targetVisible = false;
+      double targetYaw = 0.0;
+      double targetRange = 0.0;
+      var results = m_visionSubsystem.getCamera().getAllUnreadResults();
+      if (!results.isEmpty()) {
+          // Camera processed a new frame since last
+          // Get the last one in the list.
+          var result = results.get(results.size() - 1);
+          if (result.hasTargets()) {
+              // At least one AprilTag was seen by the camera
+              for (var target : result.getTargets()) {
+                  if (target.getFiducialId() == 22) {
+                      // Found Tag 17, record its information
+                      targetYaw = target.getYaw();
+                      target.getSkew();
+                      targetRange =
+                              PhotonUtils.calculateDistanceToTargetMeters(
+                                      Units.inchesToMeters(13.75), // Measured with a tape measure, or in CAD.
+                                      0.308, // From 2024 game manual for ID 7
+                                      Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
+                                      Units.degreesToRadians(target.getPitch()));
+
+                      targetVisible = true;
+                  }
+              }
+          }
+      }
+
+      // If the target is visible, aim and range to it
+      if (targetVisible) {
+        // Driver wants auto-alignment to tag 17
+        // And, tag 17 is in sight, so we can turn toward it.
+        // Override the driver's turn and fwd/rev command with an automatic one
+        // That turns toward the tag, and gets the range right.
+        double strafe = (0.0 - targetYaw) * 0.01 * 1.0;
+        double forward = (0.2 - targetRange) * 0.2 * 1.0;
+        // double turn = (0.0 - targetYaw) * 0.01 * MaxAngularRate;
+
+        System.out.println(
+            "Strafe: " + Double.toString(strafe) +
+            " Forward: " + Double.toString(forward) +
+            " TargetYaw: " + Double.toString(targetYaw) +
+            " TargetRange: " + Double.toString(targetRange));
+
+        m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.fromDegrees(120));
+        m_swerveDriveSubsystem.setControl(
+            driveHeading
+                .withVelocityX(forward)
+                .withVelocityY(strafe)
+                .withTargetDirection(Rotation2d.kZero));
+      }
+    }, m_visionSubsystem, m_swerveDriveSubsystem))
+    .whileFalse(new InstantCommand(() -> {m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.kZero);}));
 
     m_swerveDriveSubsystem.registerTelemetry(logger::telemeterize);
 
