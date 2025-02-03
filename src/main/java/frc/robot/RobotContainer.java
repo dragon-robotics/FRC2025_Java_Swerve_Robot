@@ -21,11 +21,14 @@ import frc.robot.commands.Teleop.ScoreCoral;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.subsystems.AlgaeSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.CoralSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.algae.AlgaeIO;
+import frc.robot.subsystems.algae.AlgaeIOSparkMax;
+import frc.robot.subsystems.algae.AlgaeSubsystem;
+import frc.robot.subsystems.coral.CoralIOSparkMax;
+import frc.robot.subsystems.coral.CoralSubsystem;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -69,8 +72,8 @@ public class RobotContainer {
     VisionConstants.DEFAULT_TAG_STDDEV);
 
   public final VisionSubsystem m_visionSubsystem = new VisionSubsystem(m_swerveDriveSubsystem.getState());
-  public final AlgaeSubsystem m_algaeSubsystem = new AlgaeSubsystem();
-  public final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
+  public final AlgaeSubsystem m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
+  public final CoralSubsystem m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
   public final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
 
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed

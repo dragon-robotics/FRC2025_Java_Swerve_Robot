@@ -127,6 +127,10 @@ public final class Constants {
     public static final int BEAM_BREAK_1_DIGITAL_CHANNEL = 0;
     public static final int BEAM_BREAK_2_DIGITAL_CHANNEL = 1;
     public static final double CORAL_DETECT_CURRENT_THRESHOLD = 30.0;
+
+    /* Desired intake speed for intake and outtake */
+    public static final double INTAKE_SPEED = 0.5;
+    public static final double OUTTAKE_SPEED = 0.5;
   }
 
   public static class AlgaeSubsystemConstants {
@@ -158,10 +162,19 @@ public final class Constants {
     public static final double MIN_OUTPUT = -1;
     public static final double MAX_OUTPUT = 1;
 
+    public static final double MAX_MAXMOTION_VELOCITY = 4000;
+    public static final double MAX_MAXMOTION_ACCELERATION = 4000;
+    public static final double MAXMOTION_ALLOWED_ERROR = 0.01;
+
     /* Desired absolute encoder setpoint for moving shooter and amp mechanism (to be tuned later using absolute encoder) */
-    public static final double INITIAL_GOAL = 0.03;
+    public static final double HOME_GOAL = 0.03;
     public static final double INTAKE_GOAL = 0.13;
-    public static final double PROCESSOR_OUTTAKE_GOAL = 0.32;
+    public static final double HOLD_GOAL = 0.2;
+    public static final double PROCESSOR_OUTTAKE_GOAL = 0.13;
+
+    /* Desired intake speed for intake and outtake */
+    public static final double INTAKE_SPEED = 0.5;
+    public static final double OUTTAKE_SPEED = -0.5;
   }
 
   /** Elevator Subsystem Constants */
