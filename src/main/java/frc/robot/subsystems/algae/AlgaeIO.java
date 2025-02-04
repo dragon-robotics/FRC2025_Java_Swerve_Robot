@@ -13,6 +13,10 @@ public interface AlgaeIO {
     default void setArmSetpoint(double setpoint) {
         throw new UnsupportedOperationException("setArmSetpoint is not implemented");
     }
+
+    default void setArmSetpointFF(double setpoint) {
+        throw new UnsupportedOperationException("setArmSetpointFF is not implemented");
+    }
     
     default void setIntakeMotorVoltage(double voltage) {
         throw new UnsupportedOperationException("setIntakeMotorVoltage is not implemented");
@@ -29,15 +33,23 @@ public interface AlgaeIO {
         public boolean armRightMotorConnected;
         public boolean intakeMotorConnected;
 
-        // Motor data //
+        // Left Arm Motor data //
         public double armLeftMotorVoltage;
+        public double armLeftMotorDutyCycle;
         public double armLeftMotorCurrent;
         public double armLeftMotorTemperature;
-        public double armLeftMotorSetpoint;
+        public double armLeftMotorPosition;
+        public double armLeftMotorVelocity;
+
+        // Right Arm Motor data //
         public double armRightMotorVoltage;
+        public double armRightMotorDutyCycle;
         public double armRightMotorCurrent;
         public double armRightMotorTemperature;
+
+        // Intake motor data //
         public double intakeMotorVoltage;
+        public double intakeMotorDutyCycle;
         public double intakeMotorCurrent;
         public double intakeMotorTemperature;
 

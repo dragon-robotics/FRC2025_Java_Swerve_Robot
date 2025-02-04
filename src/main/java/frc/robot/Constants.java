@@ -154,23 +154,36 @@ public final class Constants {
     
     public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot0;
 
-    public static final double P = 3.0;
-    public static final double I = 0.0;
-    public static final double D = 0.0;
-    public static final double F = 0.0;
-    public static final double IZ = 0.0;
-    public static final double MIN_OUTPUT = -1;
-    public static final double MAX_OUTPUT = 1;
+    // Arm PID Constants //
+    public static final double ARM_P = 3.0;
+    public static final double ARM_I = 0.0;
+    public static final double ARM_D = 0.0;
+    public static final double ARM_F = 0.0;
+    public static final double ARM_IZ = 0.0;
+    public static final double ARM_MIN_OUTPUT = -1;
+    public static final double ARM_MAX_OUTPUT = 1;
 
-    public static final double MAX_MAXMOTION_VELOCITY = 4000;
-    public static final double MAX_MAXMOTION_ACCELERATION = 4000;
-    public static final double MAXMOTION_ALLOWED_ERROR = 0.01;
+    // MaxMotion Constants //
+    public static final double ARM_MAX_MAXMOTION_VELOCITY = 4000;
+    public static final double ARM_MAX_MAXMOTION_ACCELERATION = 4000;
+    public static final double ARM_MAXMOTION_ALLOWED_ERROR = 0.01;
+
+    // Arm Physical Constants //
+    public static final double ARM_REDUCTION = 20;  // Mounted on 20:1 gear reduction
+    public static final double ARM_MASS_KG = Units.lbsToKilograms(10.165);
+    public static final double ARM_LENGTH_M = Units.inchesToMeters(17);
+
+    // Algae Arm Feedforward Constants
+    public static final double ARM_KS = 0.0;   // TODO: To be tuned later
+    public static final double ARM_KV = 0.762; // TODO: To be tuned later
+    public static final double ARM_KA = 0.762; // TODO: To be tuned later
+    public static final double ARM_KG = 0.0;   // TODO: To be tuned later
 
     /* Desired absolute encoder setpoint for moving shooter and amp mechanism (to be tuned later using absolute encoder) */
-    public static final double HOME_GOAL = 0.03;
-    public static final double INTAKE_GOAL = 0.13;
-    public static final double HOLD_GOAL = 0.2;
-    public static final double PROCESSOR_OUTTAKE_GOAL = 0.13;
+    public static final double ARM_HOME_GOAL = 0.03;
+    public static final double ARM_INTAKE_GOAL = 0.13;
+    public static final double ARM_HOLD_GOAL = 0.2;
+    public static final double ARM_PROCESSOR_OUTTAKE_GOAL = 0.13;
 
     /* Desired intake speed for intake and outtake */
     public static final double INTAKE_SPEED = 0.5;

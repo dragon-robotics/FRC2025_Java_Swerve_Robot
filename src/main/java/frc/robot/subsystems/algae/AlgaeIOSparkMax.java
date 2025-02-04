@@ -8,10 +8,21 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -20,19 +31,18 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import static frc.robot.Constants.AlgaeSubsystemConstants.*;
 
 public class AlgaeIOSparkMax implements AlgaeIO {
-  private final SparkMax m_intakeMotor;
-  private final SparkMax m_armLeftMotor;
-  private final SparkMax m_armRightMotor;
+  private final SparkMax m_intakeMotor = new SparkMax(INTAKE_MOTOR_ID, MotorType.kBrushless);
+  private final SparkMax m_armLeftMotor = new SparkMax(ARM_LEFT_MOTOR_ID, MotorType.kBrushless);
+  private final SparkMax m_armRightMotor = new SparkMax(ARM_RIGHT_MOTOR_ID, MotorType.kBrushless);
 
-  private final SparkClosedLoopController m_armLeftController;
-  private final AbsoluteEncoder m_armLeftAbsEncoder;
+  private final SparkClosedLoopController m_armLeftController = m_armLeftMotor.getClosedLoopController();
+  private final AbsoluteEncoder m_armLeftAbsEncoder = m_armLeftMotor.getAbsoluteEncoder();
+  private final ProfiledPIDController m_pidController;
+
+  // Feedforward for arm motor //
+  private final ArmFeedforward m_armLeftFeedforward = new ArmFeedforward(ARM_KS, ARM_KG, ARM_KV, ARM_KA);
 
   public AlgaeIOSparkMax() {
-    m_intakeMotor = new SparkMax(INTAKE_MOTOR_ID, MotorType.kBrushless);
-
-    m_armLeftMotor = new SparkMax(ARM_LEFT_MOTOR_ID, MotorType.kBrushless);
-    m_armRightMotor = new SparkMax(ARM_RIGHT_MOTOR_ID, MotorType.kBrushless);
-
     // Intake Motor Configuration //
     SparkMaxConfig m_intakeMotorConfig = new SparkMaxConfig();
     m_intakeMotorConfig
@@ -105,7 +115,7 @@ public class AlgaeIOSparkMax implements AlgaeIO {
     // Left Motor Closed Loop Configuration //
     m_armLeftMotorConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-      .pidf(P, I, D, F, PID_SLOT)
+      .pidf(ARM_P, ARM_I, ARM_D, ARM_F, PID_SLOT)
       .minOutput(-0.5, PID_SLOT)
       .maxOutput(0.5, PID_SLOT)
       .positionWrappingEnabled(true)
@@ -114,17 +124,17 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .positionWrappingMaxInput(0.5)
       .outputRange(-1, 1)
       .maxMotion
-        .maxVelocity(MAX_MAXMOTION_VELOCITY)
-        .maxAcceleration(MAX_MAXMOTION_ACCELERATION)
-        .allowedClosedLoopError(MAXMOTION_ALLOWED_ERROR, PID_SLOT)
+        .maxVelocity(ARM_MAX_MAXMOTION_VELOCITY)
+        .maxAcceleration(ARM_MAX_MAXMOTION_ACCELERATION)
+        .allowedClosedLoopError(ARM_MAXMOTION_ALLOWED_ERROR, PID_SLOT)
         .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal, PID_SLOT);
 
     // Left Motor Signals Configuration //
     m_armLeftMotorConfig.signals
       .absoluteEncoderPositionAlwaysOn(true)       // Turn on absolute encoder position
       .absoluteEncoderPositionPeriodMs(5)         // Set absolute encoder position period to 5 ms
-      .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
-      .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
+      .absoluteEncoderVelocityAlwaysOn(true)       // Turn off absolute encoder velocity
+      .absoluteEncoderVelocityPeriodMs(5)         // Set absolute encoder velocity period to 5 ms
       .analogPositionAlwaysOn(false)               // Turn off analog position
       .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
       .analogVelocityAlwaysOn(false)               // Turn off analog velocity
@@ -201,14 +211,36 @@ public class AlgaeIOSparkMax implements AlgaeIO {
         ResetMode.kNoResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    // Closed Loop Controllers and Encoder Instatiations //
-    m_armLeftController = m_armLeftMotor.getClosedLoopController();
-    m_armLeftAbsEncoder = m_armLeftMotor.getAbsoluteEncoder();
-
     // Set the motors to start at 0 //
     m_intakeMotor.set(0);
     m_armLeftMotor.set(0);
     m_armRightMotor.set(0);
+
+    // PID Controller
+    m_pidController = new ProfiledPIDController(
+        ARM_P,
+        ARM_I,
+        ARM_D,
+        new Constraints(
+            ARM_MAX_MAXMOTION_VELOCITY,
+            ARM_MAX_MAXMOTION_ACCELERATION));
+
+    m_pidController.setTolerance(ARM_MAXMOTION_ALLOWED_ERROR);
+
+  }
+
+  private double convertAngleToAbsEncoder(double angle) {
+    return angle / (2 * Math.PI);
+  }
+
+  private double convertAbsEncoderToAngle(double encoderPosition) {
+    return encoderPosition * 2 * Math.PI;
+  }
+
+  private double calculateFeedforward(double setpoint) {
+    double pidOutput = m_pidController.calculate(m_armLeftAbsEncoder.getPosition(), setpoint);
+    State setpointState = m_pidController.getSetpoint();
+    return m_armLeftFeedforward.calculate(setpointState.position, setpointState.velocity);
   }
 
   @Override
@@ -223,7 +255,20 @@ public class AlgaeIOSparkMax implements AlgaeIO {
 
   @Override
   public void setArmSetpoint(double setpoint) {
-    m_armLeftController.setReference(setpoint, ControlType.kMAXMotionPositionControl, PID_SLOT);
+    m_armLeftController.setReference(
+      setpoint,
+      ControlType.kMAXMotionPositionControl,
+      PID_SLOT);
+  }
+
+  @Override
+  public void setArmSetpointFF(double setpoint) {
+    m_armLeftController.setReference(
+      setpoint,
+      ControlType.kMAXMotionPositionControl,
+      PID_SLOT,
+      calculateFeedforward(setpoint),
+      ArbFFUnits.kVoltage);
   }
 
   @Override
@@ -246,17 +291,21 @@ public class AlgaeIOSparkMax implements AlgaeIO {
 
     // Get left arm motor data //
     inputs.armLeftMotorVoltage = m_armLeftMotor.getBusVoltage();
+    inputs.armLeftMotorDutyCycle = m_armLeftMotor.getAppliedOutput();
     inputs.armLeftMotorCurrent = m_armLeftMotor.getOutputCurrent();
     inputs.armLeftMotorTemperature = m_armLeftMotor.getMotorTemperature();
-    inputs.armLeftMotorSetpoint = m_armLeftAbsEncoder.getPosition();
+    inputs.armLeftMotorPosition = m_armLeftAbsEncoder.getPosition();
+    inputs.armLeftMotorVelocity = m_armLeftAbsEncoder.getVelocity();
 
     // Get right arm motor data //
-    inputs.armRightMotorVoltage = m_armRightMotor.getBusVoltage(); 
+    inputs.armRightMotorVoltage = m_armRightMotor.getBusVoltage();
+    inputs.armRightMotorDutyCycle = m_armLeftMotor.getAppliedOutput();
     inputs.armRightMotorCurrent = m_armRightMotor.getOutputCurrent();
     inputs.armRightMotorTemperature = m_armRightMotor.getMotorTemperature();
 
     // Get intake motor data //
     inputs.intakeMotorVoltage = m_intakeMotor.getBusVoltage();
+    inputs.intakeMotorDutyCycle = m_intakeMotor.getAppliedOutput();
     inputs.intakeMotorCurrent = m_intakeMotor.getOutputCurrent();
     inputs.intakeMotorTemperature = m_intakeMotor.getMotorTemperature();
 
