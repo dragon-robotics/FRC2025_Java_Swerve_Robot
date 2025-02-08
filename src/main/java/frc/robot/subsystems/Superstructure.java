@@ -34,7 +34,20 @@ public class Superstructure extends SubsystemBase {
     L1,
     L2,
     L3,
-    L4
+    L4,
+    SCORE_CORAL_TAG_6,
+    SCORE_CORAL_TAG_7,
+    SCORE_CORAL_TAG_8,
+    SCORE_CORAL_TAG_9,
+    SCORE_CORAL_TAG_10,
+    SCORE_CORAL_TAG_11,
+    SCORE_CORAL_TAG_17,
+    SCORE_CORAL_TAG_18,
+    SCORE_CORAL_TAG_19,
+    SCORE_CORAL_TAG_20,
+    SCORE_CORAL_TAG_21,
+    SCORE_CORAL_TAG_22,
+    SCORE_PROCESSOR
   }
 
   public enum CurrentSuperState {
@@ -62,6 +75,7 @@ public class Superstructure extends SubsystemBase {
     SCORE_CORAL_TAG_20,
     SCORE_CORAL_TAG_21,
     SCORE_CORAL_TAG_22,
+    SCORE_PROCESSOR
   }
 
   private WantedSuperState wantedSuperState = WantedSuperState.STOPPED;

@@ -117,6 +117,9 @@ public class RobotContainer {
   private final CommandJoystick m_operatorButtonBoxController =
       new CommandJoystick(OperatorConstants.OPERATOR_BUTTON_PORT);
 
+  private final CommandJoystick m_testerButtonBoxController =
+      new CommandJoystick(OperatorConstants.TEST_PORT);
+
   private final SendableChooser<Command> autoChooser;
 
   // // Create all the shuffleboard tab for testing //
