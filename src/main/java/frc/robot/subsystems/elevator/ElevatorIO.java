@@ -39,6 +39,9 @@ public interface ElevatorIO {
 
         // Is the current limit tripped? //
         public boolean elevatorCurrentLimitTripped;
+
+        // Is the elevator at the slow down threshold? //
+        public boolean elevatorAtSlowDownThreshold;
     }
 
     default void updateInputs(ElevatorIOInputs inputs) {}

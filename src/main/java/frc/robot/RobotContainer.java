@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import org.photonvision.PhotonUtils;
 
-import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.ElevatorSubsystemConstants;
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.GeneralConstants.RobotMode;
 import frc.robot.commands.Teleop.IntakeAlgaeUntilAlgaeDetected;
@@ -27,6 +27,7 @@ import frc.robot.subsystems.algae.AlgaeIOSparkMax;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
 import frc.robot.subsystems.coral.CoralIOSparkMax;
 import frc.robot.subsystems.coral.CoralSubsystem;
+import frc.robot.subsystems.elevator.ElevatorIOSparkMax;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
@@ -74,7 +75,7 @@ public class RobotContainer {
   public final VisionSubsystem m_visionSubsystem = new VisionSubsystem(m_swerveDriveSubsystem.getState());
   public final AlgaeSubsystem m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
   public final CoralSubsystem m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
-  public final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
+  public final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
 
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -140,10 +141,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("IntakeCoralUntilCoralDetected", new IntakeCoralUntilCoralDetected(m_coralSubsystem));
     NamedCommands.registerCommand("ScoreCoral", new ScoreCoral(m_coralSubsystem));
 
-    NamedCommands.registerCommand("MoveToL1", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_1));
-    NamedCommands.registerCommand("MoveToL2", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_2));
-    NamedCommands.registerCommand("MoveToL3", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_3));
-    NamedCommands.registerCommand("MoveToL4", new MoveElevator(m_elevatorSubsystem, ElevatorConstants.LVL_4));
+    NamedCommands.registerCommand("MoveToL1", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_1));
+    NamedCommands.registerCommand("MoveToL2", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_2));
+    NamedCommands.registerCommand("MoveToL3", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_3));
+    NamedCommands.registerCommand("MoveToL4", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_4));
 
     driveHeading.HeadingController.setPID(3, 0.0, 0.5);
     // driveHeading.HeadingController.enableContinuousInput(-Math.PI, Math.PI);

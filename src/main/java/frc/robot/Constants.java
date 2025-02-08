@@ -191,7 +191,7 @@ public final class Constants {
   }
 
   /** Elevator Subsystem Constants */
-  public static class ElevatorConstants {
+  public static class ElevatorSubsystemConstants {
     public static final int LEFT_MOTOR_ID = 5;
     public static final int RIGHT_MOTOR_ID = 6;
 
@@ -204,23 +204,40 @@ public final class Constants {
     public static final double STARTING_LIMIT = 0.0;
     public static final double ENDING_LIMIT = 100.0;
 
-    public static final int PID_SLOT = 0;
+    public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot1;
 
-    public static final double P = 3.0;           // TODO: To be tuned later
-    public static final double I = 0.0;           // TODO: To be tuned later
-    public static final double D = 0.0;           // TODO: To be tuned later
-    public static final double F = 0.0;           // TODO: To be tuned later
-    public static final double IZ = 0.0;          // TODO: To be tuned later
-    public static final double MIN_OUTPUT = -1;   // TODO: To be tuned later
-    public static final double MAX_OUTPUT = 1;    // TODO: To be tuned later
+    public static final double P = 3.0;                   // TODO: To be tuned later
+    public static final double I = 0.0;                   // TODO: To be tuned later
+    public static final double D = 0.0;                   // TODO: To be tuned later
+    public static final double F = 0.0;                   // TODO: To be tuned later
+    public static final double IZ = 0.0;                  // TODO: To be tuned later
+    public static final double MIN_OUTPUT = -1;           // TODO: To be tuned later
+    public static final double MAX_OUTPUT = 1;            // TODO: To be tuned later
+    public static final double POS_WRAP_MIN_INPUT = 0;    // TODO: To be tuned later
+    public static final double POS_WRAP_MAX_INPUT = 180;  // TODO: To be tuned later
+
+    // MaxMotion Constants //
+    public static final double MAX_MAXMOTION_VELOCITY = 4000;
+    public static final double MAX_MAXMOTION_ACCELERATION = 4000;
+    public static final double MAXMOTION_ALLOWED_ERROR = 0.01;
+
+    // Elevator Encoder Constants //
+    public static final int AVERAGE_DEPTH = 64;
+    public static final int COUNTS_PER_REVOLUTION = 4096;
+
+    // Elevator Physical Constants //
+    public static final double ELEVATOR_REDUCTION = 12;  // Mounted on 12:1 gear reduction
+    public static final double ELEVATOR_MASS_KG = Units.lbsToKilograms(20);
+    
 
     // Elevator Feedforward Constants
     public static final double ELEVATOR_KS = 0.0;   // TODO: To be tuned later
-    public static final double ELEVATOR_KV = 0.762; // TODO: To be tuned later
-    public static final double ELEVATOR_KA = 0.762; // TODO: To be tuned later
+    public static final double ELEVATOR_KV = 0.0;   // TODO: To be tuned later
+    public static final double ELEVATOR_KA = 0.0;   // TODO: To be tuned later
     public static final double ELEVATOR_KG = 0.0;   // TODO: To be tuned later
 
     /* Desired absolute encoder setpoint for moving elevator (to be tuned later using relative encoder) */
+    public static final double HOME_GOAL = 10; // TODO: To be tuned later
     public static final double LVL_1 = 30;  // TODO: To be tuned later
     public static final double LVL_2 = 40;  // TODO: To be tuned later
     public static final double LVL_3 = 50;  // TODO: To be tuned later

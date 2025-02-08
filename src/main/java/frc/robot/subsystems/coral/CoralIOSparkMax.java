@@ -13,22 +13,17 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import static frc.robot.Constants.CoralSubsystemConstants.*;
 
 public class CoralIOSparkMax implements CoralIO {
-  private final SparkMax m_intakeMotor;
-  private final DigitalInput m_beamBreak;
+  private final SparkMax m_intakeMotor = new SparkMax(MOTOR_ID, MotorType.kBrushless);
+  private final DigitalInput m_beamBreak = new DigitalInput(BEAM_BREAK_1_DIGITAL_CHANNEL);
 
   public CoralIOSparkMax() {
-    // Instantiate Beam Break Sensor //
-    m_beamBreak = new DigitalInput(BEAM_BREAK_1_DIGITAL_CHANNEL);
-
-    // Instantiate Intake Motor //
-    m_intakeMotor = new SparkMax(MOTOR_ID, MotorType.kBrushless);
-
     // Intake Motor Configuration //
     SparkMaxConfig m_intakeMotorConfig = new SparkMaxConfig();
     m_intakeMotorConfig
       .voltageCompensation(NOMINAL_VOLTAGE)
       .smartCurrentLimit(STALL_CURRENT_LIMIT, FREE_CURRENT_LIMIT)
       .secondaryCurrentLimit(SECONDARY_CURRENT_LIMIT)
+      .openLoopRampRate(RAMP_RATE_IN_SEC)
       .idleMode(IdleMode.kBrake);
 
     // Intake Motor Signals Configuration //

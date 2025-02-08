@@ -30,6 +30,7 @@ public class Superstructure extends SubsystemBase {
     ALIGN_TO_REEF_LEFT,
     ALIGN_TO_REEF_RIGHT,
     ALIGN_TO_REEF_CENTER,
+    HOME,
     L1,
     L2,
     L3,
@@ -44,10 +45,23 @@ public class Superstructure extends SubsystemBase {
     ALGAE_STOWED,
     ALIGN_TO_REEF_LEFT,
     ALIGN_TO_REEF_RIGHT,
+    HOME,
     L1,
     L2,
     L3,
-    L4
+    L4,
+    SCORE_CORAL_TAG_6,
+    SCORE_CORAL_TAG_7,
+    SCORE_CORAL_TAG_8,
+    SCORE_CORAL_TAG_9,
+    SCORE_CORAL_TAG_10,
+    SCORE_CORAL_TAG_11,
+    SCORE_CORAL_TAG_17,
+    SCORE_CORAL_TAG_18,
+    SCORE_CORAL_TAG_19,
+    SCORE_CORAL_TAG_20,
+    SCORE_CORAL_TAG_21,
+    SCORE_CORAL_TAG_22,
   }
 
   private WantedSuperState wantedSuperState = WantedSuperState.STOPPED;

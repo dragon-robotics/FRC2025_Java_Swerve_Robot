@@ -98,6 +98,7 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .voltageCompensation(ARM_NOMINAL_VOLTAGE)
       .smartCurrentLimit(ARM_STALL_CURRENT_LIMIT)
       .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
+      .openLoopRampRate(ARM_RAMP_RATE_IN_SEC)
       .idleMode(IdleMode.kBrake);
 
     // Left Motor Soft Limits //
@@ -133,7 +134,7 @@ public class AlgaeIOSparkMax implements AlgaeIO {
     m_armLeftMotorConfig.signals
       .absoluteEncoderPositionAlwaysOn(true)       // Turn on absolute encoder position
       .absoluteEncoderPositionPeriodMs(5)         // Set absolute encoder position period to 5 ms
-      .absoluteEncoderVelocityAlwaysOn(true)       // Turn off absolute encoder velocity
+      .absoluteEncoderVelocityAlwaysOn(true)       // Turn on absolute encoder velocity
       .absoluteEncoderVelocityPeriodMs(5)         // Set absolute encoder velocity period to 5 ms
       .analogPositionAlwaysOn(false)               // Turn off analog position
       .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
@@ -166,6 +167,7 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .voltageCompensation(ARM_NOMINAL_VOLTAGE)
       .smartCurrentLimit(ARM_STALL_CURRENT_LIMIT)
       .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
+      .openLoopRampRate(ARM_RAMP_RATE_IN_SEC)
       .idleMode(IdleMode.kBrake)
       .follow(ARM_LEFT_MOTOR_ID);
 
