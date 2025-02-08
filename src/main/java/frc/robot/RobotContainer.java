@@ -22,6 +22,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.algae.AlgaeIO;
 import frc.robot.subsystems.algae.AlgaeIOSparkMax;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
@@ -67,58 +68,18 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
-  public final CommandSwerveDrivetrain m_swerveDriveSubsystem = TunerConstants.createDrivetrain(
-    250,
-    SwerveConstants.ODOMETRY_STD,
-    VisionConstants.DEFAULT_TAG_STDDEV);
-
-  public final VisionSubsystem m_visionSubsystem = new VisionSubsystem(m_swerveDriveSubsystem.getState());
-  public final AlgaeSubsystem m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
-  public final CoralSubsystem m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
-  public final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
-
-  private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-  private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
-
-  /* Setting up bindings for necessary control of the swerve drive platform */
-  private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(MaxSpeed * 0.05)
-      .withRotationalDeadband(MaxAngularRate * 0.05) // Add a 5% deadband
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage) // Use open-loop control for drive motors
-      .withDesaturateWheelSpeeds(true); // Desaturate wheel speeds to prevent clipping
-  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-  private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-  private final SwerveRequest.FieldCentricFacingAngle driveHeading = new SwerveRequest.FieldCentricFacingAngle()
-      .withDeadband(MaxSpeed * 0.05)
-      .withRotationalDeadband(MaxAngularRate * 0.05)
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage) // Use open-loop control for drive motors
-      .withDesaturateWheelSpeeds(true);
-
-  // Setup Telemetry //
-  private final Telemetry logger = new Telemetry(MaxSpeed);
-
-  // Setup Slew Rate Limiters for driving //
-  private final SlewRateLimiter translationLimiter = new SlewRateLimiter(MaxSpeed);
-  private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(MaxSpeed);
-  private final SlewRateLimiter rotationLimiter = new SlewRateLimiter(MaxAngularRate);
-
-  private double joystickLastTouched = 0.0; // When the joystick was last touched
-  private Optional<Rotation2d> currentHeading = Optional.empty();
+  public final CommandSwerveDrivetrain m_swerveDriveSubsystem;
+  public final CoralSubsystem m_coralSubsystem;
+  public final ElevatorSubsystem m_elevatorSubsystem;
+  public final AlgaeSubsystem m_algaeSubsystem;
+  public final VisionSubsystem m_visionSubsystem;
+  public final Superstructure m_superstructureSubsystem;
 
   // Define Driver and Operator controllers //
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.DRIVER_PORT);
-
-  private final CommandXboxController m_operatorController =
-      new CommandXboxController(OperatorConstants.OPERATOR_PORT);
-
-  private final CommandJoystick m_operatorButtonBoxController =
-      new CommandJoystick(OperatorConstants.OPERATOR_BUTTON_PORT);
-
-  private final CommandJoystick m_testerButtonBoxController =
-      new CommandJoystick(OperatorConstants.TEST_PORT);
+  private final CommandXboxController m_driverController;
+  private final CommandXboxController m_operatorController;
+  private final CommandJoystick m_operatorButtonBoxController;
+  private final CommandJoystick m_testerController;
 
   private final SendableChooser<Command> autoChooser;
 
@@ -138,20 +99,41 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Register Named Commands //
-    NamedCommands.registerCommand("IntakeAlgaeUntilAlgaeDetected", new IntakeAlgaeUntilAlgaeDetected(m_algaeSubsystem));
-    NamedCommands.registerCommand("ScoreAlgae", new ScoreAlgae(m_algaeSubsystem));
-    NamedCommands.registerCommand("IntakeCoralUntilCoralDetected", new IntakeCoralUntilCoralDetected(m_coralSubsystem));
-    NamedCommands.registerCommand("ScoreCoral", new ScoreCoral(m_coralSubsystem));
+    // // Register Named Commands //
+    // NamedCommands.registerCommand("IntakeAlgaeUntilAlgaeDetected", new IntakeAlgaeUntilAlgaeDetected(m_algaeSubsystem));
+    // NamedCommands.registerCommand("ScoreAlgae", new ScoreAlgae(m_algaeSubsystem));
+    // NamedCommands.registerCommand("IntakeCoralUntilCoralDetected", new IntakeCoralUntilCoralDetected(m_coralSubsystem));
+    // NamedCommands.registerCommand("ScoreCoral", new ScoreCoral(m_coralSubsystem));
 
-    NamedCommands.registerCommand("MoveToL1", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_1));
-    NamedCommands.registerCommand("MoveToL2", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_2));
-    NamedCommands.registerCommand("MoveToL3", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_3));
-    NamedCommands.registerCommand("MoveToL4", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_4));
+    // NamedCommands.registerCommand("MoveToL1", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_1));
+    // NamedCommands.registerCommand("MoveToL2", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_2));
+    // NamedCommands.registerCommand("MoveToL3", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_3));
+    // NamedCommands.registerCommand("MoveToL4", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_4));
 
-    driveHeading.HeadingController.setPID(3, 0.0, 0.5);
-    // driveHeading.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-    driveHeading.HeadingController.setTolerance(0.01);
+    // Instantiate the joysticks //
+    m_driverController = new CommandXboxController(OperatorConstants.DRIVER_PORT);
+    m_operatorController = new CommandXboxController(OperatorConstants.OPERATOR_PORT);
+    m_operatorButtonBoxController = new CommandJoystick(OperatorConstants.OPERATOR_BUTTON_PORT);
+    m_testerController = new CommandJoystick(OperatorConstants.TEST_PORT);
+
+    // Instantiate all the subsystems //
+    m_swerveDriveSubsystem = TunerConstants.createDrivetrain(
+        250,
+        SwerveConstants.ODOMETRY_STD,
+        VisionConstants.DEFAULT_TAG_STDDEV);
+    m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
+    m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
+    m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
+    m_visionSubsystem = new VisionSubsystem(m_swerveDriveSubsystem.getState());
+
+    // Create the superstructure subsystem //
+    m_superstructureSubsystem = new Superstructure(
+        m_swerveDriveSubsystem,
+        m_coralSubsystem,
+        m_elevatorSubsystem,
+        m_algaeSubsystem,
+        m_visionSubsystem,
+        this);
 
     // Init Auto Chooser //
     autoChooser = AutoBuilder.buildAutoChooser("TestAuto");
@@ -175,158 +157,101 @@ public class RobotContainer {
     // #region Xbox Controller Bindings
 
     m_swerveDriveSubsystem.setDefaultCommand(
-        new RunCommand(() -> {
-
-            // Apply deadband to joystick inputs
-            double leftY = MathUtil.applyDeadband(-m_driverController.getLeftY(), 0.1) * MaxSpeed; // Forward/Backward
-            double leftX = MathUtil.applyDeadband(-m_driverController.getLeftX(), 0.1) * MaxSpeed; // Left/Right
-            double rightX = MathUtil.applyDeadband(-m_driverController.getRightX(), 0.1) * MaxAngularRate; // Rotation
-
-            if (Math.abs(rightX) > 0.1) {
-                joystickLastTouched = Timer.getFPGATimestamp();
-            }
-            if (Math.abs(rightX) > 0.1
-                    || (MathUtil.isNear(joystickLastTouched, Timer.getFPGATimestamp(), 0.1)
-                        && Math.abs(m_swerveDriveSubsystem.getState().Speeds.omegaRadiansPerSecond) > Math.toRadians(10))) {
-                m_swerveDriveSubsystem.setControl(drive.withVelocityX(leftY).withVelocityY(leftX).withRotationalRate(rightX));
-                currentHeading = Optional.empty();
-            } else {
-                if (currentHeading.isEmpty()) {
-                    currentHeading = Optional.of(m_swerveDriveSubsystem.getState().Pose.getRotation());
-                }
-
-                // Based on alliance color, add 180 degrees to the current heading
-                Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
-                if(alliance == Alliance.Red) {
-                  Rotation2d adjHeading = currentHeading.get().plus(Rotation2d.fromDegrees(180));
-                  // System.out.println(
-                  //     "Current Alliance: " + alliance.toString() +
-                  //     " Current Heading: " + currentHeading.get().getDegrees() +
-                  //     " Adjusted Heading: " + adjHeading.getDegrees());
-                  m_swerveDriveSubsystem.setControl(
-                      driveHeading.withVelocityX(leftY)
-                      .withVelocityY(leftX)
-                      .withTargetDirection(adjHeading));
-                } else {
-                  m_swerveDriveSubsystem.setControl(driveHeading.withVelocityX(leftY).withVelocityY(leftX)
-                          .withTargetDirection(currentHeading.get()));
-                }
-
-                m_swerveDriveSubsystem.setControl(driveHeading.withVelocityX(leftY).withVelocityY(leftX)
-                .withTargetDirection(currentHeading.get()));
-
-
-            }  
-        }, m_swerveDriveSubsystem)
+        m_superstructureSubsystem.DefaultDriveCommand(
+          () -> -m_driverController.getLeftY(),
+          () -> -m_driverController.getLeftX(),
+          () -> -m_driverController.getRightX(),
+          () -> m_driverController.getHID().getRightBumperButton())
       );
 
-    if (GeneralConstants.CURRENT_MODE == RobotMode.TEST){
-
-      // Run SysId routines when holding back/start and X/Y.
-      // Note that each routine should be run exactly once in a single log.
-      m_driverController.back().and(m_driverController.y()).whileTrue(m_swerveDriveSubsystem.sysIdDynamic(Direction.kForward));
-      m_driverController.back().and(m_driverController.x()).whileTrue(m_swerveDriveSubsystem.sysIdDynamic(Direction.kReverse));
-      m_driverController.start().and(m_driverController.y()).whileTrue(m_swerveDriveSubsystem.sysIdQuasistatic(Direction.kForward));
-      m_driverController.start().and(m_driverController.x()).whileTrue(m_swerveDriveSubsystem.sysIdQuasistatic(Direction.kReverse));
-
-      // m_intakeSubsystem.setDefaultCommand(new TestIntake(m_intakeSubsystem, () -> -m_operatorController.getRightY()));
-      // m_uptakeSubsystem.setDefaultCommand(new TestUptake(m_uptakeSubsystem, () -> -m_operatorController.getLeftY()));
-      // m_armSubsystem.setDefaultCommand(Commands.run(() -> m_armSubsystem.setArmSpeed(0.0), m_armSubsystem));
-      // m_shooterSubsystem.setDefaultCommand(new TestShooter(m_shooterSubsystem, () -> -m_operatorController.getRightTriggerAxis(), () -> -m_operatorController.getLeftTriggerAxis()));
-
-      // m_operatorController.a()
-      //     .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(0.1), m_armSubsystem));
-
-      // m_operatorController.b()
-      //     .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(-0.1), m_armSubsystem));
-
-    }
-
     // Use the "A" button to reset the Gyro orientation //
-    m_driverController.a().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldCentric()));
+    m_driverController.a().onTrue(m_superstructureSubsystem.SeedFieldCentric());
 
     // Use the "B" button to x-lock the wheels //
-    m_driverController.b().whileTrue(m_swerveDriveSubsystem.applyRequest(() -> brake));
-    
-    // Bind the X button to snap to 90 degrees
-    m_driverController.x().whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
-        driveHeading.withTargetDirection(Rotation2d.fromDegrees(90))
-            .withVelocityX(MathUtil.applyDeadband(m_driverController.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(MathUtil.applyDeadband(m_driverController.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
-    ));
+    m_driverController.b().whileTrue(m_superstructureSubsystem.SwerveBrake());
 
-    // Bind the Y button to snap to 180 degrees
-    m_driverController.y().whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
-        driveHeading.withTargetDirection(Rotation2d.fromDegrees(180))
-            .withVelocityX(MathUtil.applyDeadband(m_driverController.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(MathUtil.applyDeadband(m_driverController.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
-    ));
+    // // Aim and Range to a target Apriltag //
+    // m_driverController.rightBumper().whileTrue(new RunCommand(() -> {
+    //   // Read in relevant data from the Camera
+    //   boolean targetVisible = false;
+    //   double targetYaw = 0.0;
+    //   double targetRange = 0.0;
+    //   var results = m_visionSubsystem.getCamera().getAllUnreadResults();
+    //   if (!results.isEmpty()) {
+    //       // Camera processed a new frame since last
+    //       // Get the last one in the list.
+    //       var result = results.get(results.size() - 1);
+    //       if (result.hasTargets()) {
+    //           // At least one AprilTag was seen by the camera
+    //           for (var target : result.getTargets()) {
+    //               if (target.getFiducialId() == 22) {
+    //                   // Found Tag 17, record its information
+    //                   targetYaw = target.getYaw();
+    //                   target.getSkew();
+    //                   targetRange =
+    //                           PhotonUtils.calculateDistanceToTargetMeters(
+    //                                   Units.inchesToMeters(13.75), // Measured with a tape measure, or in CAD.
+    //                                   0.308, // From 2024 game manual for ID 7
+    //                                   Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
+    //                                   Units.degreesToRadians(target.getPitch()));
 
-    m_driverController.pov(0).whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
-      forwardStraight.withVelocityX(0.5).withVelocityY(0))
-    );
-    m_driverController.pov(180).whileTrue(m_swerveDriveSubsystem.applyRequest(() ->
-      forwardStraight.withVelocityX(-0.5).withVelocityY(0))
-    );
+    //                   targetVisible = true;
+    //               }
+    //           }
+    //       }
+    //   }
 
-    // Aim and Range to a target Apriltag //
-    m_driverController.rightBumper().whileTrue(new RunCommand(() -> {
-      // Read in relevant data from the Camera
-      boolean targetVisible = false;
-      double targetYaw = 0.0;
-      double targetRange = 0.0;
-      var results = m_visionSubsystem.getCamera().getAllUnreadResults();
-      if (!results.isEmpty()) {
-          // Camera processed a new frame since last
-          // Get the last one in the list.
-          var result = results.get(results.size() - 1);
-          if (result.hasTargets()) {
-              // At least one AprilTag was seen by the camera
-              for (var target : result.getTargets()) {
-                  if (target.getFiducialId() == 22) {
-                      // Found Tag 17, record its information
-                      targetYaw = target.getYaw();
-                      target.getSkew();
-                      targetRange =
-                              PhotonUtils.calculateDistanceToTargetMeters(
-                                      Units.inchesToMeters(13.75), // Measured with a tape measure, or in CAD.
-                                      0.308, // From 2024 game manual for ID 7
-                                      Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
-                                      Units.degreesToRadians(target.getPitch()));
+    //   // If the target is visible, aim and range to it
+    //   if (targetVisible) {
+    //     // Driver wants auto-alignment to tag 17
+    //     // And, tag 17 is in sight, so we can turn toward it.
+    //     // Override the driver's turn and fwd/rev command with an automatic one
+    //     // That turns toward the tag, and gets the range right.
+    //     double strafe = (0.0 - targetYaw) * 0.01 * 1.0;
+    //     double forward = (0.2 - targetRange) * 0.2 * 1.0;
+    //     // double turn = (0.0 - targetYaw) * 0.01 * MaxAngularRate;
 
-                      targetVisible = true;
-                  }
-              }
-          }
-      }
+    //     System.out.println(
+    //         "Strafe: " + Double.toString(strafe) +
+    //         " Forward: " + Double.toString(forward) +
+    //         " TargetYaw: " + Double.toString(targetYaw) +
+    //         " TargetRange: " + Double.toString(targetRange));
 
-      // If the target is visible, aim and range to it
-      if (targetVisible) {
-        // Driver wants auto-alignment to tag 17
-        // And, tag 17 is in sight, so we can turn toward it.
-        // Override the driver's turn and fwd/rev command with an automatic one
-        // That turns toward the tag, and gets the range right.
-        double strafe = (0.0 - targetYaw) * 0.01 * 1.0;
-        double forward = (0.2 - targetRange) * 0.2 * 1.0;
-        // double turn = (0.0 - targetYaw) * 0.01 * MaxAngularRate;
+    //     m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.fromDegrees(120));
+    //     m_swerveDriveSubsystem.setControl(
+    //         driveHeading
+    //             .withVelocityX(forward)
+    //             .withVelocityY(strafe)
+    //             .withTargetDirection(Rotation2d.kZero));
+    //   }
+    // }, m_visionSubsystem, m_swerveDriveSubsystem))
+    // .whileFalse(new InstantCommand(() -> {m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.kZero);}));
 
-        System.out.println(
-            "Strafe: " + Double.toString(strafe) +
-            " Forward: " + Double.toString(forward) +
-            " TargetYaw: " + Double.toString(targetYaw) +
-            " TargetRange: " + Double.toString(targetRange));
 
-        m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.fromDegrees(120));
-        m_swerveDriveSubsystem.setControl(
-            driveHeading
-                .withVelocityX(forward)
-                .withVelocityY(strafe)
-                .withTargetDirection(Rotation2d.kZero));
-      }
-    }, m_visionSubsystem, m_swerveDriveSubsystem))
-    .whileFalse(new InstantCommand(() -> {m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.kZero);}));
+    // #endregion
 
-    m_swerveDriveSubsystem.registerTelemetry(logger::telemeterize);
+    // if (GeneralConstants.CURRENT_MODE == RobotMode.TEST){
+
+    //   // Run SysId routines when holding back/start and X/Y.
+    //   // Note that each routine should be run exactly once in a single log.
+    //   m_driverController.back().and(m_driverController.y()).whileTrue(m_swerveDriveSubsystem.sysIdDynamic(Direction.kForward));
+    //   m_driverController.back().and(m_driverController.x()).whileTrue(m_swerveDriveSubsystem.sysIdDynamic(Direction.kReverse));
+    //   m_driverController.start().and(m_driverController.y()).whileTrue(m_swerveDriveSubsystem.sysIdQuasistatic(Direction.kForward));
+    //   m_driverController.start().and(m_driverController.x()).whileTrue(m_swerveDriveSubsystem.sysIdQuasistatic(Direction.kReverse));
+
+    //   // m_intakeSubsystem.setDefaultCommand(new TestIntake(m_intakeSubsystem, () -> -m_operatorController.getRightY()));
+    //   // m_uptakeSubsystem.setDefaultCommand(new TestUptake(m_uptakeSubsystem, () -> -m_operatorController.getLeftY()));
+    //   // m_armSubsystem.setDefaultCommand(Commands.run(() -> m_armSubsystem.setArmSpeed(0.0), m_armSubsystem));
+    //   // m_shooterSubsystem.setDefaultCommand(new TestShooter(m_shooterSubsystem, () -> -m_operatorController.getRightTriggerAxis(), () -> -m_operatorController.getLeftTriggerAxis()));
+
+    //   // m_operatorController.a()
+    //   //     .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(0.1), m_armSubsystem));
+
+    //   // m_operatorController.b()
+    //   //     .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(-0.1), m_armSubsystem));
+
+    // }
+
 
   }
 

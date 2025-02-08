@@ -9,9 +9,6 @@ import com.revrobotics.spark.SparkMaxAlternateEncoder;
 import com.revrobotics.spark.SparkRelativeEncoder;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
-import static frc.robot.Constants.ElevatorSubsystemConstants.LVL_1;
-
 import com.revrobotics.sim.SparkMaxSim;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
@@ -109,6 +106,14 @@ public class ElevatorSubsystem extends SubsystemBase {
    */
   public boolean isCurrentLimitTripped() {
     return m_elevatorIOInputs.elevatorCurrentLimitTripped;
+  }
+
+  /**
+   * Set the wanted state of the elevator
+   * @param wantedState
+   */
+  public void setWantedState(WantedState wantedState) {
+    m_wantedState = wantedState;
   }
 
   /**

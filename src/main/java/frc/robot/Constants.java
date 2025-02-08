@@ -363,6 +363,11 @@ public final class Constants {
     public static final double DRIVE_KV = 0.124;
     public static final double DRIVE_KA = 0;
 
+    public static final double HEADING_KP = 3;
+    public static final double HEADING_KI = 0;
+    public static final double HEADING_KD = 0.5;
+    public static final double HEADING_TOLERANCE = 0.01;
+
     public static final double ANGLE_GEAR_RATIO = 12.8;
     public static final double DRIVE_GEAR_RATIO = 6.12;
     public static final double PULSE_PER_ROTATION = 1;

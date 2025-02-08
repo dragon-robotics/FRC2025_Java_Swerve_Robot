@@ -65,7 +65,7 @@ public class CoralSubsystem extends SubsystemBase {
   }
 
   /**
-   * Set the wanted state of the arm
+   * Set the wanted state of the coral intake
    * @param wantedState
    */
   public void setWantedState(WantedState wantedState) {
