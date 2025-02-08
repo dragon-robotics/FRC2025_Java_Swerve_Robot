@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 3.991,
-        "y": 5.335
+        "x": 3.941,
+        "y": 5.325
       },
       "prevControl": {
-        "x": 3.851059493284727,
-        "y": 5.5847543655500225
+        "x": 3.801059493284727,
+        "y": 5.574754365550023
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -64.027
+    "rotation": -59.99999999999999
   },
   "reversed": false,
   "folder": "LC2",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -53.326
+    "rotation": -54.011
   },
   "useDefaultConstraints": true
 }

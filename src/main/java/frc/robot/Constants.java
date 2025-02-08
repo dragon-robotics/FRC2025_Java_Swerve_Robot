@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.revrobotics.spark.ClosedLoopSlot;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -64,7 +66,7 @@ public final class Constants {
         
         // Main Apriltag alignment cam mounted facing forward, half a meter forward of center, half a meter up from center.
         public static final Transform3d APTAG_ALIGN_CAM_POS =
-            new Transform3d(new Translation3d(0.5, 0.0, 0.5),
+            new Transform3d(new Translation3d(Units.inchesToMeters(6), 0.0, Units.inchesToMeters(13.75)),
             new Rotation3d(0, 0, 0));
 
         // Front-Left Camera: Mounted at front-left corner, pointing outward at 45 degrees
@@ -113,109 +115,133 @@ public final class Constants {
     }
 
   /** Intake Subsystem Constants */
-  public static class IntakeConstants {
+  public static class CoralSubsystemConstants {
     public static final int MOTOR_ID = 1;
     
     public static final double NOMINAL_VOLTAGE = 10.0;
-    public static final int STALL_CURRENT_LIMIT = 55;
-    public static final int FREE_CURRENT_LIMIT = 40;
+    public static final int FREE_CURRENT_LIMIT = 30;
+    public static final int STALL_CURRENT_LIMIT = 50;
     public static final double SECONDARY_CURRENT_LIMIT = 60.0;
-    public static final double RAMP_RATE_IN_SEC = 0.1; // Ramp rate in seconds
+    public static final double RAMP_RATE_IN_SEC = 0.25; // Ramp rate in seconds
     
-    // public static final int BEAM_BREAK_DIGITAL_CHANNEL = 0;
-    public static final double NOTE_DETECT_CURRENT_THRESHOLD = 30.0;
+    public static final int BEAM_BREAK_1_DIGITAL_CHANNEL = 0;
+    public static final int BEAM_BREAK_2_DIGITAL_CHANNEL = 1;
+    public static final double CORAL_DETECT_CURRENT_THRESHOLD = 30.0;
+
+    /* Desired intake speed for intake and outtake */
+    public static final double INTAKE_SPEED = 0.5;
+    public static final double OUTTAKE_SPEED = 0.5;
   }
 
-  /** Uptake Subsystem Constants */
-  public static class UptakeConstants {
-    public static final int LEFT_MOTOR_ID = 3;
-    public static final int RIGHT_MOTOR_ID = 4;
+  public static class AlgaeSubsystemConstants {
+    public static final int ARM_LEFT_MOTOR_ID = 2;
+    public static final int ARM_RIGHT_MOTOR_ID = 3;
+    public static final int INTAKE_MOTOR_ID = 4;
+
+    public static final double ARM_NOMINAL_VOLTAGE = 10.0;
+    public static final int ARM_STALL_CURRENT_LIMIT = 40;
+    public static final double ARM_SECONDARY_CURRENT_LIMIT = 60.0;
+    public static final double ARM_RAMP_RATE_IN_SEC = 0.25; // Ramp rate in seconds
+
+    public static final double INTAKE_NOMINAL_VOLTAGE = 10.0;
+    public static final int INTAKE_FREE_CURRENT_LIMIT = 30;
+    public static final int INTAKE_STALL_CURRENT_LIMIT = 50;
+    public static final double INTAKE_SECONDARY_CURRENT_LIMIT = 60.0;
+
+    public static final double ALGAE_DETECT_CURRENT_THRESHOLD = 40.0;
+
+    public static final double ABS_ENC_OFFSET_VAL = 0.7346013; // @TODO: To be tuned later
     
-    public static final double NOMINAL_VOLTAGE = 10.0;
-    public static final int STALL_CURRENT_LIMIT = 55;
-    public static final int FREE_CURRENT_LIMIT = 40;
-    public static final double SECONDARY_CURRENT_LIMIT = 60.0;
-    public static final double RAMP_RATE_IN_SEC = 0.1; // Ramp rate in seconds
-    
-    public static final int NOTE_BEAM_BREAK_DIGITAL_CHANNEL = 0;
-  }
+    public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot0;
 
-  /** Shooter Subsystem Constants */
-  public static class ShooterConstants {
-    public static final int LED_CHANNEL = 9;
+    // Arm PID Constants //
+    public static final double ARM_P = 3.0;
+    public static final double ARM_I = 0.0;
+    public static final double ARM_D = 0.0;
+    public static final double ARM_F = 0.0;
+    public static final double ARM_IZ = 0.0;
+    public static final double ARM_MIN_OUTPUT = -1;
+    public static final double ARM_MAX_OUTPUT = 1;
 
-    public static final int TOP_MOTOR_ID = 5;
-    public static final int BOTTOM_MOTOR_ID = 6;
+    // MaxMotion Constants //
+    public static final double ARM_MAX_MAXMOTION_VELOCITY = 4000;
+    public static final double ARM_MAX_MAXMOTION_ACCELERATION = 4000;
+    public static final double ARM_MAXMOTION_ALLOWED_ERROR = 0.01;
 
-    public static final double NOMINAL_VOLTAGE = 10.0;
-    public static final int STALL_CURRENT_LIMIT = 55;
-    public static final int FREE_CURRENT_LIMIT = 40;
-    public static final double SECONDARY_CURRENT_LIMIT = 60.0;
-    public static final double RAMP_RATE_IN_SEC = 0.1; // Ramp rate in seconds
+    // Arm Physical Constants //
+    public static final double ARM_REDUCTION = 20;  // Mounted on 20:1 gear reduction
+    public static final double ARM_MASS_KG = Units.lbsToKilograms(10.165);
+    public static final double ARM_LENGTH_M = Units.inchesToMeters(17);
 
-    public static final int NOTE_BEAM_BREAK_DIGITAL_CHANNEL = 1;
-
-    public static final double P = 0.0;
-    public static final double I = 0.0;
-    public static final double D = 0.0;
-    public static final double F = 0.0;
-    public static final double IZ = 0.0;
-    public static final double MIN_OUTPUT = -0.2;
-    public static final double MAX_OUTPUT = 0.8;
-
-    /* Desired and max RPM for the shooter (to be tuned later) */
-    public static final double DESIRED_SHOOTER_RPM = 4000;
-    public static final double MAX_RPM = 5000;
-
-    public static final double NOTE_DETECT_CURRENT_THRESHOLD = 20.0;
-  }
-
-  public static class ArmConstants {
-    public static final int LEFT_MOTOR_ID = 7;
-    public static final int RIGHT_MOTOR_ID = 9;
-
-    public static final double NOMINAL_VOLTAGE = 10.0;
-    public static final int STALL_CURRENT_LIMIT = 40;
-    public static final double SECONDARY_CURRENT_LIMIT = 60.0;
-
-    public static final double ABS_ENC_OFFSET_VAL = 0.7346013;
-
-    public static final double P = 1.0;
-    public static final double I = 0.0;
-    public static final double D = 0.0;
-    public static final double F = 0.156;
-    public static final double IZ = 0.0;
-    public static final double MIN_OUTPUT = -0.3;
-    public static final double MAX_OUTPUT = 0.3;
-
-    public static final int SMART_MOTION_SLOT = 0;
-    public static final int SMART_MOTION_MAX_VELOCITY = 2000;
-    public static final int SMART_MOTION_MIN_OUTPUT_VELOCITY = 0;
-    public static final int SMART_MOTION_MAX_ACCEL = 1500;
-    public static final int SMART_MOTION_ALLOWED_ERROR = 10;
+    // Algae Arm Feedforward Constants
+    public static final double ARM_KS = 0.0;   // TODO: To be tuned later
+    public static final double ARM_KV = 0.762; // TODO: To be tuned later
+    public static final double ARM_KA = 0.762; // TODO: To be tuned later
+    public static final double ARM_KG = 0.0;   // TODO: To be tuned later
 
     /* Desired absolute encoder setpoint for moving shooter and amp mechanism (to be tuned later using absolute encoder) */
-    public static final double INITIAL_GOAL = 0.03;
-    public static final double SHOOTER_GOAL = 0.13;
-    public static final double AMP_GOAL = 0.32;
-    public static final double AMP_ASSIST_GOAL = 0.4;
+    public static final double ARM_HOME_GOAL = 0.03;
+    public static final double ARM_INTAKE_GOAL = 0.13;
+    public static final double ARM_HOLD_GOAL = 0.2;
+    public static final double ARM_PROCESSOR_OUTTAKE_GOAL = 0.13;
+
+    /* Desired intake speed for intake and outtake */
+    public static final double INTAKE_SPEED = 0.5;
+    public static final double OUTTAKE_SPEED = -0.5;
   }
 
   /** Elevator Subsystem Constants */
-  public static class ElevatorConstants {
-    public static final int LEFT_MOTOR_ID = 10;
-    public static final int RIGHT_MOTOR_ID = 11;
+  public static class ElevatorSubsystemConstants {
+    public static final int LEFT_MOTOR_ID = 5;
+    public static final int RIGHT_MOTOR_ID = 6;
 
     public static final double NOMINAL_VOLTAGE = 10.0;
+    public static final int FREE_CURRENT_LIMIT = 30;
     public static final int STALL_CURRENT_LIMIT = 40;
     public static final double SECONDARY_CURRENT_LIMIT = 60.0;
+    public static final double RAMP_RATE_IN_SEC = 0.25; // Ramp rate in seconds
 
-    public static final float STARTING_LIMIT = 0.0f;
-    public static final float ENDING_LIMIT = 100.0f;
+    public static final double STARTING_LIMIT = 0.0;
+    public static final double ENDING_LIMIT = 100.0;
 
-    /* Desired absolute encoder setpoint for moving elevator (to be tuned later using absolute encoder) */
-    public static final double LVL_1 = 0.32;
-    public static final double LVL_2 = 0.4;
+    public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot1;
+
+    public static final double P = 3.0;                   // TODO: To be tuned later
+    public static final double I = 0.0;                   // TODO: To be tuned later
+    public static final double D = 0.0;                   // TODO: To be tuned later
+    public static final double F = 0.0;                   // TODO: To be tuned later
+    public static final double IZ = 0.0;                  // TODO: To be tuned later
+    public static final double MIN_OUTPUT = -1;           // TODO: To be tuned later
+    public static final double MAX_OUTPUT = 1;            // TODO: To be tuned later
+    public static final double POS_WRAP_MIN_INPUT = 0;    // TODO: To be tuned later
+    public static final double POS_WRAP_MAX_INPUT = 180;  // TODO: To be tuned later
+
+    // MaxMotion Constants //
+    public static final double MAX_MAXMOTION_VELOCITY = 4000;
+    public static final double MAX_MAXMOTION_ACCELERATION = 4000;
+    public static final double MAXMOTION_ALLOWED_ERROR = 0.01;
+
+    // Elevator Encoder Constants //
+    public static final int AVERAGE_DEPTH = 64;
+    public static final int COUNTS_PER_REVOLUTION = 4096;
+
+    // Elevator Physical Constants //
+    public static final double ELEVATOR_REDUCTION = 12;  // Mounted on 12:1 gear reduction
+    public static final double ELEVATOR_MASS_KG = Units.lbsToKilograms(20);
+    
+
+    // Elevator Feedforward Constants
+    public static final double ELEVATOR_KS = 0.0;   // TODO: To be tuned later
+    public static final double ELEVATOR_KV = 0.0;   // TODO: To be tuned later
+    public static final double ELEVATOR_KA = 0.0;   // TODO: To be tuned later
+    public static final double ELEVATOR_KG = 0.0;   // TODO: To be tuned later
+
+    /* Desired absolute encoder setpoint for moving elevator (to be tuned later using relative encoder) */
+    public static final double HOME_GOAL = 10; // TODO: To be tuned later
+    public static final double LVL_1 = 30;  // TODO: To be tuned later
+    public static final double LVL_2 = 40;  // TODO: To be tuned later
+    public static final double LVL_3 = 50;  // TODO: To be tuned later
+    public static final double LVL_4 = 70;  // TODO: To be tuned later
   }
 
   public static class LEDConstants {
@@ -320,15 +346,28 @@ public final class Constants {
     public static final double DARK_GRAY = 0.97;
     public static final double BLACK = 0.99;
   }
-
-  /** Limelight Subsystem Constants */
-  public static class LimelightConstants {
-    public static final double HORIZONTAL_KP = 0.8;
-  }
-  /** PhotonVision Subsystem Constants */
   
   public static class SwerveConstants {
     // General constants for swerve drive //
+    public static final double STEER_KP = 100;
+    public static final double STEER_KI = 0;
+    public static final double STEER_KD = 0.5;
+    public static final double STEER_KS = 0.1;
+    public static final double STEER_KV = 1.59;
+    public static final double STEER_KA = 0;
+
+    public static final double DRIVE_KP = 0.1;
+    public static final double DRIVE_KI = 0;
+    public static final double DRIVE_KD = 0;
+    public static final double DRIVE_KS = 0;
+    public static final double DRIVE_KV = 0.124;
+    public static final double DRIVE_KA = 0;
+
+    public static final double HEADING_KP = 3;
+    public static final double HEADING_KI = 0;
+    public static final double HEADING_KD = 0.5;
+    public static final double HEADING_TOLERANCE = 0.01;
+
     public static final double ANGLE_GEAR_RATIO = 12.8;
     public static final double DRIVE_GEAR_RATIO = 6.12;
     public static final double PULSE_PER_ROTATION = 1;

@@ -30,6 +30,8 @@ public class Telemetry {
      */
     public Telemetry(double maxSpeed) {
         MaxSpeed = maxSpeed;
+        // Set the logger to log to the first flashdrive plugged in
+        // SignalLogger.setPath("/media/sdb1/");
         SignalLogger.start();
     }
 

@@ -31,7 +31,7 @@ public class TunerConstants {
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
     private static final Slot0Configs driveGains = new Slot0Configs()
         .withKP(0.1).withKI(0).withKD(0)
-        .withKS(0).withKV(0.124);
+        .withKS(0).withKV(0.124).withKA(0);
 
     // The closed-loop output type to use for the drive motors;
     // This affects the PID/FF gains for the drive motors
@@ -51,7 +51,7 @@ public class TunerConstants {
 
     // The stator current at which the wheels start to slip;
     // This needs to be tuned to your individual robot
-    private static final Current kSlipCurrent = Amps.of(70);
+    private static final Current kSlipCurrent = Amps.of(80);
 
     // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
@@ -59,23 +59,20 @@ public class TunerConstants {
         .withCurrentLimits(
             new CurrentLimitsConfigs()
                 .withStatorCurrentLimitEnable(true)
-                .withStatorCurrentLimit(Amps.of(60))
+                .withStatorCurrentLimit(Amps.of(80))
                 .withSupplyCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(40))
-        // .withClosedLoopRamps(
-        //     new ClosedLoopRampsConfigs()
-        //         .withDutyCycleClosedLoopRampPeriod(0.25)
-        //         .withTorqueClosedLoopRampPeriod(0.25)
-        //         .withVoltageClosedLoopRampPeriod(0.25))
+                .withSupplyCurrentLowerLimit(Amps.of(40))
+                .withSupplyCurrentLowerTime(Seconds.of(1))
+                .withSupplyCurrentLimit(Amps.of(60)))
         .withVoltage(
             new VoltageConfigs()
-                .withPeakForwardVoltage(10.0)
-                .withPeakReverseVoltage(-10.0))
+                .withPeakForwardVoltage(Volts.of(10))
+                .withPeakReverseVoltage(Volts.of(-10)))
         .withOpenLoopRamps(
             new OpenLoopRampsConfigs()
-                .withDutyCycleOpenLoopRampPeriod(0.25)
-                .withTorqueOpenLoopRampPeriod(0.25)
-                .withVoltageOpenLoopRampPeriod(0.25))
+                .withDutyCycleOpenLoopRampPeriod(Seconds.of(0.25))
+                .withTorqueOpenLoopRampPeriod(Seconds.of(0.25))
+                .withVoltageOpenLoopRampPeriod(Seconds.of(0.25)))
         .withMotorOutput(
             new MotorOutputConfigs()
                 .withNeutralMode(NeutralModeValue.Brake));
@@ -86,24 +83,19 @@ public class TunerConstants {
                 // Swerve azimuth does not require much torque output, so we can set a relatively low
                 // stator current limit to help avoid brownouts without impacting performance.
                 .withStatorCurrentLimitEnable(true)
-                .withStatorCurrentLimit(Amps.of(30))
+                .withStatorCurrentLimit(Amps.of(40))
                 .withSupplyCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(20)
+                .withSupplyCurrentLimit(Amps.of(20))
         )
-        // .withClosedLoopRamps(
-        //     new ClosedLoopRampsConfigs()
-        //         .withDutyCycleClosedLoopRampPeriod(0.25)
-        //         .withTorqueClosedLoopRampPeriod(0.25)
-        //         .withVoltageClosedLoopRampPeriod(0.25))
         .withVoltage(
             new VoltageConfigs()
-                .withPeakForwardVoltage(10)
-                .withPeakReverseVoltage(-10))
+                .withPeakForwardVoltage(Volts.of(10))
+                .withPeakReverseVoltage(Volts.of(-10)))
         .withOpenLoopRamps(
             new OpenLoopRampsConfigs()
-                .withDutyCycleOpenLoopRampPeriod(0.25)
-                .withTorqueOpenLoopRampPeriod(0.25)
-                .withVoltageOpenLoopRampPeriod(0.25))
+                .withDutyCycleOpenLoopRampPeriod(Seconds.of(0.25))
+                .withTorqueOpenLoopRampPeriod(Seconds.of(0.25))
+                .withVoltageOpenLoopRampPeriod(Seconds.of(0.25)))
         .withMotorOutput(
             new MotorOutputConfigs()
                 .withNeutralMode(NeutralModeValue.Brake));                ;
