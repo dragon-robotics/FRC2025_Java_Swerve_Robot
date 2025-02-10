@@ -36,7 +36,7 @@ public class AlgaeSubsystem extends SubsystemBase {
   public enum WantedState {
     IDLE,
     HOME,
-    COLLECT,
+    INTAKE,
     HOLD,
     EJECT,
     OFF
@@ -45,7 +45,7 @@ public class AlgaeSubsystem extends SubsystemBase {
   public enum SystemState {
     IDLING,
     AT_HOME,
-    COLLECTING,
+    INTAKING,
     HOLDING,
     EJECTING,
     OFF
@@ -118,11 +118,11 @@ public class AlgaeSubsystem extends SubsystemBase {
       case OFF -> SystemState.OFF;
       case EJECT -> SystemState.EJECTING;
       case HOLD -> SystemState.HOLDING;
-      case COLLECT -> {
+      case INTAKE -> {
         if (isCurrentLimitTripped()) {
           yield SystemState.HOLDING;
         }
-        yield SystemState.COLLECTING;
+        yield SystemState.INTAKING;
       }
       default -> SystemState.AT_HOME;
     };
@@ -161,8 +161,8 @@ public class AlgaeSubsystem extends SubsystemBase {
         // Hold the arm at the ejecting position and spin the intake to eject the algae //
         handleMotors(ARM_PROCESSOR_OUTTAKE_GOAL, OUTTAKE_SPEED);       
         break;
-      case COLLECTING:
-        // Hold the arm at the collecting position and spin the intake to collect the algae //  
+      case INTAKING:
+        // Hold the arm at the INTAKing position and spin the intake to INTAKE the algae //  
         handleMotors(ARM_INTAKE_GOAL, INTAKE_SPEED);
         break;
       case HOLDING:

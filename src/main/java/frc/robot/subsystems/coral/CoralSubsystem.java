@@ -29,7 +29,7 @@ public class CoralSubsystem extends SubsystemBase {
   // Coral Subsystem States //
   public enum WantedState {
     IDLE,
-    COLLECT,
+    INTAKE,
     HOLD,
     EJECT,
     OFF
@@ -37,7 +37,7 @@ public class CoralSubsystem extends SubsystemBase {
 
   public enum SystemState {
     IDLING,
-    COLLECTING,
+    INTAKING,
     HOLDING,
     EJECTING,
     OFF
@@ -81,11 +81,11 @@ public class CoralSubsystem extends SubsystemBase {
       case OFF -> SystemState.OFF;
       case EJECT -> SystemState.EJECTING;
       case HOLD -> SystemState.HOLDING;
-      case COLLECT -> {
+      case INTAKE -> {
         if (isBeamBreakTripped()) {
           yield SystemState.HOLDING;
         }
-        yield SystemState.COLLECTING;
+        yield SystemState.INTAKING;
       }
       default -> SystemState.IDLING;
     };
@@ -114,7 +114,7 @@ public class CoralSubsystem extends SubsystemBase {
       case IDLING:
         m_coralIO.setIntakeMotorPercentage(0);
         break;
-      case COLLECTING:
+      case INTAKING:
         m_coralIO.setIntakeMotorPercentage(INTAKE_SPEED);
         break;
       case HOLDING:
