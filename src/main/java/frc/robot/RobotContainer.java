@@ -170,6 +170,17 @@ public class RobotContainer {
     // Use the "B" button to x-lock the wheels //
     m_driverController.b().whileTrue(m_superstructureSubsystem.SwerveBrake());
 
+    // Use the left bumper to trigger intake //
+    m_driverController.leftBumper()
+        .onTrue(
+            m_superstructureSubsystem.setWantedSuperStateCommand(
+                Superstructure.WantedSuperState.INTAKE_CORAL_LEFT))
+        .onFalse(
+            m_superstructureSubsystem.setWantedSuperStateCommand(
+                Superstructure.WantedSuperState.GENERAL));
+
+    
+
     // // Aim and Range to a target Apriltag //
     // m_driverController.rightBumper().whileTrue(new RunCommand(() -> {
     //   // Read in relevant data from the Camera

@@ -21,8 +21,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
@@ -44,7 +46,8 @@ public class Superstructure extends SubsystemBase {
   private final Telemetry logger;
 
   public enum WantedSuperState {
-    STOPPED,  // Default state
+    STOPPED, // Stopped state
+    GENERAL, // Default / General driving state
     INTAKE_CORAL_LEFT,
     INTAKE_CORAL_RIGHT,
     INTAKE_ALGAE,
@@ -73,7 +76,8 @@ public class Superstructure extends SubsystemBase {
   }
 
   public enum CurrentSuperState {
-    STOPPED,  // Default state
+    STOPPED, // Default state
+    GENERAL, // General driving state
     INTAKE_CORAL_LEFT,
     INTAKE_CORAL_RIGHT,
     INTAKE_ALGAE,
@@ -112,19 +116,20 @@ public class Superstructure extends SubsystemBase {
   private final SwerveRequest.FieldCentricFacingAngle driveMaintainHeading;
 
   private double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // Max speed at 12 volts
-  private double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+  private double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max
+                                                                                    // angular velocity
 
   private double rotationLastTriggered = 0.0; // Keeps track of the last time the rotation was triggered
   private Optional<Rotation2d> currentHeading = Optional.empty(); // Keeps track of current heading
 
-    /** Creates a new Superstructure. */
-    public Superstructure(
-        CommandSwerveDrivetrain swerve,
-        CoralSubsystem coral,
-        ElevatorSubsystem elevator,
-        AlgaeSubsystem algae,
-        VisionSubsystem vision,
-        RobotContainer container) {
+  /** Creates a new Superstructure. */
+  public Superstructure(
+      CommandSwerveDrivetrain swerve,
+      CoralSubsystem coral,
+      ElevatorSubsystem elevator,
+      AlgaeSubsystem algae,
+      VisionSubsystem vision,
+      RobotContainer container) {
     m_swerve = swerve;
     m_coral = coral;
     m_elevator = elevator;
@@ -149,23 +154,23 @@ public class Superstructure extends SubsystemBase {
     // Instantiate point (point swerve wheels in a specific direction) //
     point = new SwerveRequest.PointWheelsAt();
 
-    // Instantiate robot centric drive (forward is based on forward pose of the robot) //
+    // Instantiate robot centric drive (forward is based on forward pose of the
+    // robot) //
     driveRobotCentric = new SwerveRequest.RobotCentric()
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     // Instantiate field centric drive (maintain heading) //
     driveMaintainHeading = new SwerveRequest.FieldCentricFacingAngle()
-      .withDeadband(maxSpeed * 0.05)
-      .withRotationalDeadband(maxAngularRate * 0.05)
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage) // Use open-loop control for drive motors
-      .withDesaturateWheelSpeeds(true);
-    
+        .withDeadband(maxSpeed * 0.05)
+        .withRotationalDeadband(maxAngularRate * 0.05)
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage) // Use open-loop control for drive motors
+        .withDesaturateWheelSpeeds(true);
+
     // Set the PID constants for the Maintain Heading controller //
     driveMaintainHeading.HeadingController.setPID(
         SwerveConstants.HEADING_KP,
         SwerveConstants.HEADING_KI,
-        SwerveConstants.HEADING_KD
-    );
+        SwerveConstants.HEADING_KD);
     driveMaintainHeading.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     driveMaintainHeading.HeadingController.setTolerance(SwerveConstants.HEADING_TOLERANCE);
 
@@ -177,11 +182,10 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command DefaultDriveCommand(
-    DoubleSupplier translationSup,
-    DoubleSupplier strafeSup,
-    DoubleSupplier rotationSup,
-    BooleanSupplier halfSpeedSup
-  ) {
+      DoubleSupplier translationSup,
+      DoubleSupplier strafeSup,
+      DoubleSupplier rotationSup,
+      BooleanSupplier halfSpeedSup) {
     return new RunCommand(() -> {
 
       double rawTranslation = translationSup.getAsDouble();
@@ -190,7 +194,7 @@ public class Superstructure extends SubsystemBase {
 
       // Apply deadband to joystick inputs //
       double translation = MathUtil.applyDeadband(
-          rawTranslation, 
+          rawTranslation,
           SwerveConstants.SWERVE_DEADBAND); // Forward/Backward
       double strafe = MathUtil.applyDeadband(
           rawStrafe,
@@ -205,12 +209,12 @@ public class Superstructure extends SubsystemBase {
         translation = 0;
         strafe = 0;
       } else {
-        // Square the inputs (while preserving the sign) to increase fine control while permitting full power //
+        // Square the inputs (while preserving the sign) to increase fine control while
+        // permitting full power //
         translation = Math.copySign(translation * translation, translation);
         strafe = Math.copySign(strafe * strafe, strafe);
         rotation = Math.copySign(rotation * rotation, rotation);
       }
-          
 
       // Scale the output by half if half speed is enabled //
       if (halfSpeedSup.getAsBoolean()) {
@@ -225,31 +229,31 @@ public class Superstructure extends SubsystemBase {
       rotation *= maxAngularRate; // Rotation
 
       boolean rotationTriggered = Math.abs(rawRotation) > SwerveConstants.SWERVE_DEADBAND;
-      boolean rotationActive
-        = MathUtil.isNear(rotationLastTriggered, Timer.getFPGATimestamp(), 0.1) &&
+      boolean rotationActive = MathUtil.isNear(rotationLastTriggered, Timer.getFPGATimestamp(), 0.1) &&
           (Math.abs(m_swerve.getState().Speeds.omegaRadiansPerSecond) > Math.toRadians(10));
 
       // Check if the rotation of the joystick has been triggered //
-      if (rotationTriggered){
+      if (rotationTriggered) {
         // Timestamp the last time the rotation was triggered //
         rotationLastTriggered = Timer.getFPGATimestamp();
       }
 
       if (rotationTriggered || rotationActive) {
-          // If the rotation is triggered or active, set the swerve drive to rotate in place //
-          m_swerve.setControl(
-              drive
-                  .withVelocityX(translation)
-                  .withVelocityY(strafe)
-                  .withRotationalRate(rotation));
-          currentHeading = Optional.empty();
+        // If the rotation is triggered or active, set the swerve drive to rotate in
+        // place //
+        m_swerve.setControl(
+            drive
+                .withVelocityX(translation)
+                .withVelocityY(strafe)
+                .withRotationalRate(rotation));
+        currentHeading = Optional.empty();
       } else {
-          // Initialize the current heading if it is empty
-          if (currentHeading.isEmpty()) {
-              currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
-          }
+        // Initialize the current heading if it is empty
+        if (currentHeading.isEmpty()) {
+          currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
+        }
 
-          m_swerve.setControl(
+        m_swerve.setControl(
             driveMaintainHeading
                 .withVelocityX(translation)
                 .withVelocityY(strafe)
@@ -259,7 +263,7 @@ public class Superstructure extends SubsystemBase {
     }, m_swerve);
   }
 
-  public Command SwerveBrake () {
+  public Command SwerveBrake() {
     return m_swerve.applyRequest(() -> brake);
   }
 
@@ -284,13 +288,16 @@ public class Superstructure extends SubsystemBase {
     return currentSuperState;
   }
 
-  private void applyState() {
+  private void applyStates() {
     switch (currentSuperState) {
       case INTAKE_CORAL_LEFT:
         intakeCoral(true);
         break;
       case INTAKE_CORAL_RIGHT:
         intakeCoral(false);
+        break;
+      case GENERAL:
+        setDefault();
         break;
       case STOPPED:
       default:
@@ -303,20 +310,46 @@ public class Superstructure extends SubsystemBase {
     m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
     m_elevator.setWantedState(ElevatorSubsystem.WantedState.IDLE);
     m_algae.setWantedState(AlgaeSubsystem.WantedState.IDLE);
+    m_swerve.setControl(drive.withVelocityX(0).withVelocityY(0).withRotationalRate(0));
+  }
+
+  private void setDefault(){
+    m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
+    m_elevator.setWantedState(ElevatorSubsystem.WantedState.IDLE);
+    m_algae.setWantedState(AlgaeSubsystem.WantedState.IDLE);
   }
 
   private void intakeCoral(boolean left) {
-    if (left) {
-      wantedSuperState = WantedSuperState.INTAKE_CORAL_LEFT;
-    } else {
-      wantedSuperState = WantedSuperState.INTAKE_CORAL_RIGHT;
-    }
+
+    // Set coral to intake //
+    m_coral.setWantedState(CoralSubsystem.WantedState.INTAKE);
+    // Set elevator to idle //
+    m_elevator.setWantedState(ElevatorSubsystem.WantedState.IDLE);
+
+    // Set drivetrain to the left coral station angle for intake //
+    currentHeading = left ?
+        Optional.of(GeneralConstants.LEFT_CORAL_STATION_INTAKE_ANGLE) : // If left, set to left side angle
+        Optional.of(GeneralConstants.RIGHT_CORAL_STATION_INTAKE_ANGLE); // If right, set to right side angle
+
+    // // Set the swerve drive to maintain the heading of the coral station angle //
+    // m_swerve.setControl(
+    //     driveMaintainHeading
+    //         .withTargetDirection(intakeHeading));
   }
 
+  /** State pushers */
+  public void setWantedSuperState(WantedSuperState wantedSuperState) {
+    this.wantedSuperState = wantedSuperState;
+  }
 
+  public Command setWantedSuperStateCommand(WantedSuperState wantedSuperState) {
+    return new InstantCommand(() -> setWantedSuperState(wantedSuperState));
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    currentSuperState = handleStateTransitions();
+    applyStates();
   }
 }

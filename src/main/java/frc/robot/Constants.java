@@ -10,6 +10,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -18,11 +19,15 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
@@ -30,100 +35,132 @@ public final class Constants {
   // public static final Mode currentMode = Mode.REAL;
 
   // public static enum Mode {
-  //   /** Running on a real robot. */
-  //   REAL,
+  // /** Running on a real robot. */
+  // REAL,
 
-  //   /** Running a physics simulator. */
-  //   SIM,
+  // /** Running a physics simulator. */
+  // SIM,
 
-  //   /** Replaying from a log file. */
-  //   REPLAY
+  // /** Replaying from a log file. */
+  // REPLAY
   // }
 
-  
   /** General robot constants */
   public static final class GeneralConstants {
 
     // Robot mode
     public static final RobotMode CURRENT_MODE = RobotMode.COMP;
-  
+
     public static enum RobotMode {
       /** Running on test mode */
       TEST,
       /** Running on competition mode */
       COMP
     }
+
+    // Robot heading constants for different field elements //
+    public static final Rotation2d LEFT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(-54.011);
+    public static final Rotation2d RIGHT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(54.011);
+    public static final Rotation2d ALGAE_PROCESSOR_STATION_ANGLE = Rotation2d.fromDegrees(-90);
+
+    // Blue Reef Station ID Angle Constant //
+
+    // Red Reef Station ID Angle Constant //
+    public static final Rotation2d REEF_STATION_ID_6_ANGLE = Rotation2d.fromDegrees(-60);
+    public static final Rotation2d REEF_STATION_ID_7_ANGLE = Rotation2d.fromDegrees(0);
+    public static final Rotation2d REEF_STATION_ID_8_ANGLE = Rotation2d.fromDegrees(60);
+    public static final Rotation2d REEF_STATION_ID_9_ANGLE = Rotation2d.fromDegrees(120);
+    public static final Rotation2d REEF_STATION_ID_10_ANGLE = Rotation2d.fromDegrees(180);
+    public static final Rotation2d REEF_STATION_ID_11_ANGLE = Rotation2d.fromDegrees(-120);
+
+    public static final Rotation2d REEF_STATION_ID_17_ANGLE = Rotation2d.fromDegrees(60);
+    public static final Rotation2d REEF_STATION_ID_18_ANGLE = Rotation2d.fromDegrees(0);
+    public static final Rotation2d REEF_STATION_ID_19_ANGLE = Rotation2d.fromDegrees(-60);
+    public static final Rotation2d REEF_STATION_ID_20_ANGLE = Rotation2d.fromDegrees(-120);
+    public static final Rotation2d REEF_STATION_ID_21_ANGLE = Rotation2d.fromDegrees(180);
+    public static final Rotation2d REEF_STATION_ID_22_ANGLE = Rotation2d.fromDegrees(120);
   }
 
   public static class VisionConstants {
-        public static final String[] APTAG_CAMERA_NAMES = {
-          "AprilTagAlignCamera",
-          "AprilTagPoseEstCameraFL",
-          "AprilTagPoseEstCameraFR",
-          "AprilTagPoseEstCameraBL",
-          "AprilTagPoseEstCameraBR"
-        };
-        
-        // Main Apriltag alignment cam mounted facing forward, half a meter forward of center, half a meter up from center.
-        public static final Transform3d APTAG_ALIGN_CAM_POS =
-            new Transform3d(new Translation3d(Units.inchesToMeters(6), 0.0, Units.inchesToMeters(13.75)),
-            new Rotation3d(0, 0, 0));
+    public static final String[] APTAG_CAMERA_NAMES = {
+        "AprilTagAlignLeftCamera",
+        "AprilTagAlignRightCamera",
+        "AprilTagPoseEstCameraFL",
+        "AprilTagPoseEstCameraFR",
+        "AprilTagPoseEstCameraBL",
+        "AprilTagPoseEstCameraBR"
+    };
 
-        // Front-Left Camera: Mounted at front-left corner, pointing outward at 45 degrees
-        public static final Transform3d APTAG_POSE_EST_CAM_FL_POS =
-        new Transform3d(
-            new Translation3d(0.5, 0.5, 1), // Example position (x, y, z)
-            new Rotation3d(0, 0, Units.degreesToRadians(45))
-        );
+    // Main Apriltag alignment cam mounted facing forward, half a meter forward of
+    // center, half a meter up from center.
+    public static final Transform3d APTAG_ALIGN_LEFT_CAM_POS = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(8.608),
+            Units.inchesToMeters(7.0785),
+            Units.inchesToMeters(12.9575)),
+        new Rotation3d(0, 0, 0));
 
-        // Front-Right Camera: Mounted at front-right corner, pointing outward at -45 degrees
-        public static final Transform3d APTAG_POSE_EST_CAM_FR_POS =
-            new Transform3d(
-                new Translation3d(0.5, -0.5, 1), // Example position (x, y, z)
-                new Rotation3d(0, 0, Units.degreesToRadians(-45))
-            );
+    // Main Apriltag alignment cam mounted facing forward, half a meter forward of
+    // center, half a meter up from center.
+    public static final Transform3d APTAG_ALIGN_RIGHT_CAM_POS = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(8.608),
+            Units.inchesToMeters(-7.0785),
+            Units.inchesToMeters(12.9575)),
+        new Rotation3d(0, 0, 0));
 
-        // Back-Left Camera: Mounted at back-left corner, pointing outward at 135 degrees
-        public static final Transform3d APTAG_POSE_EST_CAM_BL_POS =
-            new Transform3d(
-                new Translation3d(-0.5, 0.5, 1), // Example position (x, y, z)
-                new Rotation3d(0, 0, Units.degreesToRadians(135))
-            );
+    // Front-Left Camera: Mounted at front-left corner, pointing outward at 45
+    // degrees
+    public static final Transform3d APTAG_POSE_EST_CAM_FL_POS = new Transform3d(
+        new Translation3d(0.5, 0.5, 1), // Example position (x, y, z)
+        new Rotation3d(0, 0, Units.degreesToRadians(45)));
 
-        // Back-Right Camera: Mounted at back-right corner, pointing outward at -135 degrees
-        public static final Transform3d APTAG_POSE_EST_CAM_BR_POS =
-            new Transform3d(
-                new Translation3d(-0.5, -0.5, 1), // Example position (x, y, z)
-                new Rotation3d(0, 0, Units.degreesToRadians(-135))
-            );
-        public static final Transform3d[] APTAG_POSE_EST_CAM_POSITIONS = {
-          APTAG_POSE_EST_CAM_FL_POS,
-          APTAG_POSE_EST_CAM_FR_POS,
-          APTAG_POSE_EST_CAM_BL_POS,
-          APTAG_POSE_EST_CAM_BR_POS
-        };
+    // Front-Right Camera: Mounted at front-right corner, pointing outward at -45
+    // degrees
+    public static final Transform3d APTAG_POSE_EST_CAM_FR_POS = new Transform3d(
+        new Translation3d(0.5, -0.5, 1), // Example position (x, y, z)
+        new Rotation3d(0, 0, Units.degreesToRadians(-45)));
 
-        // The layout of the AprilTags on the field
-        public static final AprilTagFieldLayout APTAG_FIELD_LAYOUT =
-                AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    // Back-Left Camera: Mounted at back-left corner, pointing outward at 135
+    // degrees
+    public static final Transform3d APTAG_POSE_EST_CAM_BL_POS = new Transform3d(
+        new Translation3d(-0.5, 0.5, 1), // Example position (x, y, z)
+        new Rotation3d(0, 0, Units.degreesToRadians(135)));
 
-        // The standard deviations of our vision estimated poses, which affect correction rate
-        // (Fake values. Experiment and determine estimation noise on an actual robot.)
-        public static final Matrix<N3, N1> SINGLE_TAG_STDDEV = VecBuilder.fill(4, 4, 8);
-        public static final Matrix<N3, N1> MULTI_TAG_STDDEV = VecBuilder.fill(0.5, 0.5, 1);
-        public static final Matrix<N3, N1> DEFAULT_TAG_STDDEV = VecBuilder.fill(0.9, 0.9, 0.9);
-    }
+    // Back-Right Camera: Mounted at back-right corner, pointing outward at -135
+    // degrees
+    public static final Transform3d APTAG_POSE_EST_CAM_BR_POS = new Transform3d(
+        new Translation3d(-0.5, -0.5, 1), // Example position (x, y, z)
+        new Rotation3d(0, 0, Units.degreesToRadians(-135)));
+    public static final Transform3d[] APTAG_POSE_EST_CAM_POSITIONS = {
+        APTAG_POSE_EST_CAM_FL_POS,
+        APTAG_POSE_EST_CAM_FR_POS,
+        APTAG_POSE_EST_CAM_BL_POS,
+        APTAG_POSE_EST_CAM_BR_POS
+    };
+
+    // The layout of the AprilTags on the field
+    public static final AprilTagFieldLayout APTAG_FIELD_LAYOUT = AprilTagFieldLayout
+        .loadField(AprilTagFields.kDefaultField);
+
+    // The standard deviations of our vision estimated poses, which affect
+    // correction rate
+    // (Fake values. Experiment and determine estimation noise on an actual robot.)
+    public static final Matrix<N3, N1> SINGLE_TAG_STDDEV = VecBuilder.fill(4, 4, 8);
+    public static final Matrix<N3, N1> MULTI_TAG_STDDEV = VecBuilder.fill(0.5, 0.5, 1);
+    public static final Matrix<N3, N1> DEFAULT_TAG_STDDEV = VecBuilder.fill(0.9, 0.9, 0.9);
+  }
 
   /** Intake Subsystem Constants */
   public static class CoralSubsystemConstants {
     public static final int MOTOR_ID = 1;
-    
+
     public static final double NOMINAL_VOLTAGE = 10.0;
     public static final int FREE_CURRENT_LIMIT = 30;
     public static final int STALL_CURRENT_LIMIT = 50;
     public static final double SECONDARY_CURRENT_LIMIT = 60.0;
     public static final double RAMP_RATE_IN_SEC = 0.25; // Ramp rate in seconds
-    
+
     public static final int BEAM_BREAK_1_DIGITAL_CHANNEL = 0;
     public static final int BEAM_BREAK_2_DIGITAL_CHANNEL = 1;
     public static final double CORAL_DETECT_CURRENT_THRESHOLD = 30.0;
@@ -151,7 +188,7 @@ public final class Constants {
     public static final double ALGAE_DETECT_CURRENT_THRESHOLD = 40.0;
 
     public static final double ABS_ENC_OFFSET_VAL = 0.7346013; // @TODO: To be tuned later
-    
+
     public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot0;
 
     // Arm PID Constants //
@@ -169,17 +206,20 @@ public final class Constants {
     public static final double ARM_MAXMOTION_ALLOWED_ERROR = 0.01;
 
     // Arm Physical Constants //
-    public static final double ARM_REDUCTION = 20;  // Mounted on 20:1 gear reduction
+    public static final double ARM_REDUCTION = 20; // Mounted on 20:1 gear reduction
     public static final double ARM_MASS_KG = Units.lbsToKilograms(10.165);
     public static final double ARM_LENGTH_M = Units.inchesToMeters(17);
 
     // Algae Arm Feedforward Constants
-    public static final double ARM_KS = 0.0;   // TODO: To be tuned later
+    public static final double ARM_KS = 0.0; // TODO: To be tuned later
     public static final double ARM_KV = 0.762; // TODO: To be tuned later
     public static final double ARM_KA = 0.762; // TODO: To be tuned later
-    public static final double ARM_KG = 0.0;   // TODO: To be tuned later
+    public static final double ARM_KG = 0.0; // TODO: To be tuned later
 
-    /* Desired absolute encoder setpoint for moving shooter and amp mechanism (to be tuned later using absolute encoder) */
+    /*
+     * Desired absolute encoder setpoint for moving shooter and amp mechanism (to be
+     * tuned later using absolute encoder)
+     */
     public static final double ARM_HOME_GOAL = 0.03;
     public static final double ARM_INTAKE_GOAL = 0.13;
     public static final double ARM_HOLD_GOAL = 0.2;
@@ -206,15 +246,15 @@ public final class Constants {
 
     public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot1;
 
-    public static final double P = 3.0;                   // TODO: To be tuned later
-    public static final double I = 0.0;                   // TODO: To be tuned later
-    public static final double D = 0.0;                   // TODO: To be tuned later
-    public static final double F = 0.0;                   // TODO: To be tuned later
-    public static final double IZ = 0.0;                  // TODO: To be tuned later
-    public static final double MIN_OUTPUT = -1;           // TODO: To be tuned later
-    public static final double MAX_OUTPUT = 1;            // TODO: To be tuned later
-    public static final double POS_WRAP_MIN_INPUT = 0;    // TODO: To be tuned later
-    public static final double POS_WRAP_MAX_INPUT = 180;  // TODO: To be tuned later
+    public static final double P = 3.0; // TODO: To be tuned later
+    public static final double I = 0.0; // TODO: To be tuned later
+    public static final double D = 0.0; // TODO: To be tuned later
+    public static final double F = 0.0; // TODO: To be tuned later
+    public static final double IZ = 0.0; // TODO: To be tuned later
+    public static final double MIN_OUTPUT = -1; // TODO: To be tuned later
+    public static final double MAX_OUTPUT = 1; // TODO: To be tuned later
+    public static final double POS_WRAP_MIN_INPUT = 0; // TODO: To be tuned later
+    public static final double POS_WRAP_MAX_INPUT = 180; // TODO: To be tuned later
 
     // MaxMotion Constants //
     public static final double MAX_MAXMOTION_VELOCITY = 4000;
@@ -226,22 +266,24 @@ public final class Constants {
     public static final int COUNTS_PER_REVOLUTION = 4096;
 
     // Elevator Physical Constants //
-    public static final double ELEVATOR_REDUCTION = 12;  // Mounted on 12:1 gear reduction
+    public static final double ELEVATOR_REDUCTION = 12; // Mounted on 12:1 gear reduction
     public static final double ELEVATOR_MASS_KG = Units.lbsToKilograms(20);
-    
 
     // Elevator Feedforward Constants
-    public static final double ELEVATOR_KS = 0.0;   // TODO: To be tuned later
-    public static final double ELEVATOR_KV = 0.0;   // TODO: To be tuned later
-    public static final double ELEVATOR_KA = 0.0;   // TODO: To be tuned later
-    public static final double ELEVATOR_KG = 0.0;   // TODO: To be tuned later
+    public static final double ELEVATOR_KS = 0.0; // TODO: To be tuned later
+    public static final double ELEVATOR_KV = 0.0; // TODO: To be tuned later
+    public static final double ELEVATOR_KA = 0.0; // TODO: To be tuned later
+    public static final double ELEVATOR_KG = 0.0; // TODO: To be tuned later
 
-    /* Desired absolute encoder setpoint for moving elevator (to be tuned later using relative encoder) */
+    /*
+     * Desired absolute encoder setpoint for moving elevator (to be tuned later
+     * using relative encoder)
+     */
     public static final double HOME_GOAL = 10; // TODO: To be tuned later
-    public static final double LVL_1 = 30;  // TODO: To be tuned later
-    public static final double LVL_2 = 40;  // TODO: To be tuned later
-    public static final double LVL_3 = 50;  // TODO: To be tuned later
-    public static final double LVL_4 = 70;  // TODO: To be tuned later
+    public static final double LVL_1 = 30; // TODO: To be tuned later
+    public static final double LVL_2 = 40; // TODO: To be tuned later
+    public static final double LVL_3 = 50; // TODO: To be tuned later
+    public static final double LVL_4 = 70; // TODO: To be tuned later
   }
 
   public static class LEDConstants {
@@ -346,7 +388,7 @@ public final class Constants {
     public static final double DARK_GRAY = 0.97;
     public static final double BLACK = 0.99;
   }
-  
+
   public static class SwerveConstants {
     // General constants for swerve drive //
     public static final double STEER_KP = 100;
@@ -374,7 +416,9 @@ public final class Constants {
     public static final double WHEEL_DIAMETER_INCHES = 4.0;
     public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(WHEEL_DIAMETER_INCHES);
     public static final double MAX_SPEED_FEET_PER_SECOND = 18.2; // 18.2 feet per second
-    public static final double MAX_SPEED_METERS_PER_SECOND = Units.feetToMeters(MAX_SPEED_FEET_PER_SECOND); // 18.2 feet per second
+    public static final double MAX_SPEED_METERS_PER_SECOND = Units.feetToMeters(MAX_SPEED_FEET_PER_SECOND); // 18.2 feet
+                                                                                                            // per
+                                                                                                            // second
 
     public static final double ROBOT_MASS = (148 - 20.3) * 0.453592;
     public static final double CHASSIS_MASS = ROBOT_MASS;
@@ -409,7 +453,7 @@ public final class Constants {
     public static final int BTN_9 = 9;
     public static final int BTN_10 = 10;
     public static final int BTN_11 = 11;
-    public static final int BTN_12 = 12;        
+    public static final int BTN_12 = 12;
   }
 
   public static class JoystickConstants {
