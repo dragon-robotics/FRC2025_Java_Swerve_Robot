@@ -69,17 +69,18 @@ public class VisionSubsystem extends SubsystemBase {
       var cameraProp = new SimCameraProperties();
       cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(90));
       cameraProp.setCalibError(0.35, 0.10);
-      cameraProp.setFPS(30);
-      cameraProp.setAvgLatencyMs(40);
-      cameraProp.setLatencyStdDevMs(15);
+      cameraProp.setFPS(80);
+      cameraProp.setAvgLatencyMs(15);
+      cameraProp.setLatencyStdDevMs(5);
+      
       // Create a PhotonCameraSim which will update the linked PhotonCamera's values
-      // with visible
-      // targets.
+      // with visible targets.
       aprilTagAlignLeftCameraSim = new PhotonCameraSim(aprilTagAlignLeftCamera, cameraProp);
       aprilTagAlignRightCameraSim = new PhotonCameraSim(aprilTagAlignRightCamera, cameraProp);
+      
       // Add the simulated camera to view the targets on this simulated field.
       visionSim.addCamera(aprilTagAlignLeftCameraSim, APTAG_ALIGN_LEFT_CAM_POS);
-      visionSim.addCamera(aprilTagAlignLeftCameraSim, APTAG_ALIGN_RIGHT_CAM_POS);
+      visionSim.addCamera(aprilTagAlignRightCameraSim, APTAG_ALIGN_RIGHT_CAM_POS);
 
       aprilTagAlignLeftCameraSim.enableDrawWireframe(true);
       aprilTagAlignRightCameraSim.enableDrawWireframe(true);

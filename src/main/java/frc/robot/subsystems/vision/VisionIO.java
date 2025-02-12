@@ -15,17 +15,20 @@ public interface VisionIO {
          */
         public boolean[] hasTargets = new boolean[]{false, false};
         /**
-         * The target yaw and range for each camera for the tag with the closest id
+         * The target yaw and range for each camera for the tag with the best id
          */
-        public double[][] targetYawRange = new double[][]{{0.0, 0.0}, {0.0, 0.0}};
+        public double[][] targetYawAndRange = new double[][]{{-999.0, -999.0}, {-999.0, -999.0}};
         /**
-         * The closest apriltag id seen for each camera
+         * The best apriltag id seen for each camera
          */
         public int[] tagId = new int[]{0, 0};
         /**
          * Target single tag id to track
          */
         public int targetTagId = 0;
-
+        /**
+         * Camera to use for vision tracking (true = left, false = right, default = right/left)
+         */
+        public boolean cameraToUse = false;
     }
 }

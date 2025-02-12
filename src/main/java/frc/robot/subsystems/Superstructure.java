@@ -6,17 +6,26 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static frc.robot.Constants.VisionConstants.APTAG_ALIGN_LEFT_CAM_POS;
+import static frc.robot.Constants.VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS;
+import static frc.robot.Constants.VisionConstants.DESIRED_RANGE;
+import static frc.robot.Constants.VisionConstants.DESIRED_YAW;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+
+import org.photonvision.PhotonUtils;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -115,9 +124,10 @@ public class Superstructure extends SubsystemBase {
   private final SwerveRequest.RobotCentric driveRobotCentric;
   private final SwerveRequest.FieldCentricFacingAngle driveMaintainHeading;
 
-  private double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // Max speed at 12 volts
-  private double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max
-                                                                                    // angular velocity
+  private final double maxSpeed;
+  private final double maxAngularRate;
+  private PIDController visionRangePID;
+  private PIDController visionAimPID;
 
   private double rotationLastTriggered = 0.0; // Keeps track of the last time the rotation was triggered
   private Optional<Rotation2d> currentHeading = Optional.empty(); // Keeps track of current heading
@@ -140,6 +150,10 @@ public class Superstructure extends SubsystemBase {
     // Instatiate swerve max speed and angular rate //
     maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // Max speed at 12 volts
     maxAngularRate = RotationsPerSecond.of(1).in(RadiansPerSecond); // 1 rotation per second max angular velocity
+
+    // Instantiate vision PID controllers //
+    visionRangePID = new PIDController(VisionConstants.RANGE_P, VisionConstants.RANGE_I, VisionConstants.RANGE_D);
+    visionAimPID = new PIDController(VisionConstants.AIM_P, VisionConstants.AIM_I, VisionConstants.AIM_D);
 
     // Instantiate default field centric drive (no need to maintain heading) //
     drive = new SwerveRequest.FieldCentric()
@@ -261,6 +275,83 @@ public class Superstructure extends SubsystemBase {
       }
 
     }, m_swerve);
+  }
+
+  public Command AimAndRangeApriltag(
+    BooleanSupplier isLeft
+  ) {
+    return new RunCommand(() -> {
+      // Read in relevant data from the Camera
+      boolean targetVisible = false;
+      boolean isLeftCamera = isLeft.getAsBoolean();
+      double tagYaw = 0.0;
+      double tagRange = 0.0;
+      int bestTagId = 0;
+
+      var results = m_vision.getCamera(isLeft.getAsBoolean()).getAllUnreadResults();
+      if (!results.isEmpty()) {
+          // Camera processed a new frame since last
+          // Get the last one in the list.
+          var result = results.get(results.size() - 1);
+          if (result.hasTargets()) {
+              // Get the best target
+              var bestTag = result.getBestTarget();
+              bestTagId = bestTag.getFiducialId();
+
+              if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
+                  // Found a red station tag, record its information
+                  tagYaw = bestTag.getYaw();
+                  bestTag.getSkew();
+                  tagRange =
+                          PhotonUtils.calculateDistanceToTargetMeters(
+                                  isLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
+                                  0.308, // From 2025 game manual for red station tags
+                                  Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
+                                  Units.degreesToRadians(bestTag.getPitch()));
+
+                  targetVisible = true;
+              }
+          }
+      }
+
+      // If the target is visible, aim and range to it
+      if (targetVisible) {
+        // Override the driver's turn and fwd/rev command with an automatic one
+        // That turns strafe towards the tag, and gets the range right.
+
+        // Calculate range error
+        double rangeError = tagRange - DESIRED_RANGE; // 8.364 inches is the distance to the wall of the reef
+        double forwardCorrection = visionRangePID.calculate(tagRange, DESIRED_RANGE);
+
+        // Calculate yaw error
+        double yawError = tagYaw - DESIRED_YAW;
+        double strafeCorrection = visionAimPID.calculate(tagYaw, DESIRED_YAW);
+
+        double forward = -forwardCorrection;
+        double strafe = strafeCorrection;
+
+        // Optionally clamp outputs to your robot’s maximum speed.
+        forward = MathUtil.clamp(forward, -maxSpeed, maxSpeed);
+        strafe  = MathUtil.clamp(strafe, -maxSpeed, maxSpeed);
+
+        System.out.println(
+            "Strafe: " + Double.toString(strafe) +
+            " Forward: " + Double.toString(forward) +
+            " TagRange: " + Double.toString(tagRange) +
+            " RangeError: " + Double.toString(rangeError) +
+            " RangeCorrection: " + Double.toString(forwardCorrection) +
+            " TagYaw: " + Double.toString(tagYaw) +
+            " YawError: " + Double.toString(yawError) +
+            " YawCorrection: " + Double.toString(strafeCorrection));
+
+        m_swerve.setOperatorPerspectiveForward(GeneralConstants.REEF_STATION_ID_ANGLE_MAP.get(bestTagId));
+        m_swerve.setControl(
+            driveMaintainHeading
+                .withVelocityX(forward)
+                .withVelocityY(strafe)
+                .withTargetDirection(Rotation2d.kZero));
+      }
+    }, m_vision, m_swerve);
   }
 
   public Command SwerveBrake() {

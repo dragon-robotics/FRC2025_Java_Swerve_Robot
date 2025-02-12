@@ -179,65 +179,10 @@ public class RobotContainer {
             m_superstructureSubsystem.setWantedSuperStateCommand(
                 Superstructure.WantedSuperState.GENERAL));
 
-    
-
-    // // Aim and Range to a target Apriltag //
-    // m_driverController.rightBumper().whileTrue(new RunCommand(() -> {
-    //   // Read in relevant data from the Camera
-    //   boolean targetVisible = false;
-    //   double targetYaw = 0.0;
-    //   double targetRange = 0.0;
-    //   var results = m_visionSubsystem.getCamera().getAllUnreadResults();
-    //   if (!results.isEmpty()) {
-    //       // Camera processed a new frame since last
-    //       // Get the last one in the list.
-    //       var result = results.get(results.size() - 1);
-    //       if (result.hasTargets()) {
-    //           // At least one AprilTag was seen by the camera
-    //           for (var target : result.getTargets()) {
-    //               if (target.getFiducialId() == 22) {
-    //                   // Found Tag 17, record its information
-    //                   targetYaw = target.getYaw();
-    //                   target.getSkew();
-    //                   targetRange =
-    //                           PhotonUtils.calculateDistanceToTargetMeters(
-    //                                   Units.inchesToMeters(13.75), // Measured with a tape measure, or in CAD.
-    //                                   0.308, // From 2024 game manual for ID 7
-    //                                   Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
-    //                                   Units.degreesToRadians(target.getPitch()));
-
-    //                   targetVisible = true;
-    //               }
-    //           }
-    //       }
-    //   }
-
-    //   // If the target is visible, aim and range to it
-    //   if (targetVisible) {
-    //     // Driver wants auto-alignment to tag 17
-    //     // And, tag 17 is in sight, so we can turn toward it.
-    //     // Override the driver's turn and fwd/rev command with an automatic one
-    //     // That turns toward the tag, and gets the range right.
-    //     double strafe = (0.0 - targetYaw) * 0.01 * 1.0;
-    //     double forward = (0.2 - targetRange) * 0.2 * 1.0;
-    //     // double turn = (0.0 - targetYaw) * 0.01 * MaxAngularRate;
-
-    //     System.out.println(
-    //         "Strafe: " + Double.toString(strafe) +
-    //         " Forward: " + Double.toString(forward) +
-    //         " TargetYaw: " + Double.toString(targetYaw) +
-    //         " TargetRange: " + Double.toString(targetRange));
-
-    //     m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.fromDegrees(120));
-    //     m_swerveDriveSubsystem.setControl(
-    //         driveHeading
-    //             .withVelocityX(forward)
-    //             .withVelocityY(strafe)
-    //             .withTargetDirection(Rotation2d.kZero));
-    //   }
-    // }, m_visionSubsystem, m_swerveDriveSubsystem))
-    // .whileFalse(new InstantCommand(() -> {m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.kZero);}));
-
+    // Aim and Range to a target Apriltag //
+    m_driverController.x().whileTrue(m_superstructureSubsystem.AimAndRangeApriltag(() -> m_driverController.getHID().getRightStickButton()))
+    // m_driverController.rightBumper().whileTrue(m_superstructureSubsystem.AimAndRangeApriltag(() -> true))
+    .whileFalse(new InstantCommand(() -> {m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.kZero);}));
 
     // #endregion
 

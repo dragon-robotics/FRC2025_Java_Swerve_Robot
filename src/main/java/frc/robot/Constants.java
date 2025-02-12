@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.Map;
+
 import com.revrobotics.spark.ClosedLoopSlot;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -64,6 +66,12 @@ public final class Constants {
     public static final Rotation2d ALGAE_PROCESSOR_STATION_ANGLE = Rotation2d.fromDegrees(-90);
 
     // Blue Reef Station ID Angle Constant //
+    public static final Rotation2d REEF_STATION_ID_17_ANGLE = Rotation2d.fromDegrees(60);
+    public static final Rotation2d REEF_STATION_ID_18_ANGLE = Rotation2d.fromDegrees(0);
+    public static final Rotation2d REEF_STATION_ID_19_ANGLE = Rotation2d.fromDegrees(-60);
+    public static final Rotation2d REEF_STATION_ID_20_ANGLE = Rotation2d.fromDegrees(-120);
+    public static final Rotation2d REEF_STATION_ID_21_ANGLE = Rotation2d.fromDegrees(180);
+    public static final Rotation2d REEF_STATION_ID_22_ANGLE = Rotation2d.fromDegrees(120);
 
     // Red Reef Station ID Angle Constant //
     public static final Rotation2d REEF_STATION_ID_6_ANGLE = Rotation2d.fromDegrees(-60);
@@ -73,12 +81,25 @@ public final class Constants {
     public static final Rotation2d REEF_STATION_ID_10_ANGLE = Rotation2d.fromDegrees(180);
     public static final Rotation2d REEF_STATION_ID_11_ANGLE = Rotation2d.fromDegrees(-120);
 
-    public static final Rotation2d REEF_STATION_ID_17_ANGLE = Rotation2d.fromDegrees(60);
-    public static final Rotation2d REEF_STATION_ID_18_ANGLE = Rotation2d.fromDegrees(0);
-    public static final Rotation2d REEF_STATION_ID_19_ANGLE = Rotation2d.fromDegrees(-60);
-    public static final Rotation2d REEF_STATION_ID_20_ANGLE = Rotation2d.fromDegrees(-120);
-    public static final Rotation2d REEF_STATION_ID_21_ANGLE = Rotation2d.fromDegrees(180);
-    public static final Rotation2d REEF_STATION_ID_22_ANGLE = Rotation2d.fromDegrees(120);
+    public static final Map<Integer, Rotation2d> REEF_STATION_ID_ANGLE_MAP = Map.ofEntries(
+      Map.entry(6, REEF_STATION_ID_6_ANGLE),
+      Map.entry(7, REEF_STATION_ID_7_ANGLE),
+      Map.entry(8, REEF_STATION_ID_8_ANGLE),
+      Map.entry(9, REEF_STATION_ID_9_ANGLE),
+      Map.entry(10, REEF_STATION_ID_10_ANGLE),
+      Map.entry(11, REEF_STATION_ID_11_ANGLE),
+      Map.entry(17, REEF_STATION_ID_17_ANGLE),
+      Map.entry(18, REEF_STATION_ID_18_ANGLE),
+      Map.entry(19, REEF_STATION_ID_19_ANGLE),
+      Map.entry(20, REEF_STATION_ID_20_ANGLE),
+      Map.entry(21, REEF_STATION_ID_21_ANGLE),
+      Map.entry(22, REEF_STATION_ID_22_ANGLE)
+    );
+
+    // Reef station tag ID array //
+    public static final int[] REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
+    public static final int[] BLUE_REEF_STATION_TAG_IDS = {17, 18, 19, 20, 21, 22};
+    public static final int[] RED_REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11};
   }
 
   public static class VisionConstants {
@@ -149,6 +170,18 @@ public final class Constants {
     public static final Matrix<N3, N1> SINGLE_TAG_STDDEV = VecBuilder.fill(4, 4, 8);
     public static final Matrix<N3, N1> MULTI_TAG_STDDEV = VecBuilder.fill(0.5, 0.5, 1);
     public static final Matrix<N3, N1> DEFAULT_TAG_STDDEV = VecBuilder.fill(0.9, 0.9, 0.9);
+
+    // Vision range and aim PID constants //
+    public static final double RANGE_P = 2;
+    public static final double RANGE_I = 0;
+    public static final double RANGE_D = 0;
+
+    public static final double AIM_P = 0.05;
+    public static final double AIM_I = 0;
+    public static final double AIM_D = 0;
+
+    public static final double DESIRED_RANGE = Units.inchesToMeters(8.364); // 5.364 inches to the frame perimeter + 3 inch for bumpers
+    public static final double DESIRED_YAW = 0.5;
   }
 
   /** Intake Subsystem Constants */
@@ -405,7 +438,7 @@ public final class Constants {
     public static final double DRIVE_KV = 0.124;
     public static final double DRIVE_KA = 0;
 
-    public static final double HEADING_KP = 3;
+    public static final double HEADING_KP = 7;
     public static final double HEADING_KI = 0;
     public static final double HEADING_KD = 0.5;
     public static final double HEADING_TOLERANCE = 0.01;
