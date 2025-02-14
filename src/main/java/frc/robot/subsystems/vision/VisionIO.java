@@ -7,6 +7,11 @@ public interface VisionIO {
     
     class VisionIOInputs {
         /**
+         * Are the cameras connected to the network?
+         */
+        public boolean leftCameraConnected;
+        public boolean rightCameraConnected;
+        /**
          * Last timestamp of the vision data for each camera
          */
         public double[] lastTimestamp = new double[]{0.0, 0.0};

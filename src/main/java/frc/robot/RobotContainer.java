@@ -53,7 +53,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -154,8 +157,6 @@ public class RobotContainer {
    */
   private void configureBindings() {
 
-    // #region Xbox Controller Bindings
-
     m_swerveDriveSubsystem.setDefaultCommand(
         m_superstructureSubsystem.DefaultDriveCommand(
           () -> -m_driverController.getLeftY(),
@@ -170,44 +171,33 @@ public class RobotContainer {
     // Use the "B" button to x-lock the wheels //
     m_driverController.b().whileTrue(m_superstructureSubsystem.SwerveBrake());
 
-    // Use the left bumper to trigger intake //
+    // Press the left bumper to trigger coral intake //
     m_driverController.leftBumper()
         .onTrue(
             m_superstructureSubsystem.setWantedSuperStateCommand(
-                Superstructure.WantedSuperState.INTAKE_CORAL_LEFT))
-        .onFalse(
-            m_superstructureSubsystem.setWantedSuperStateCommand(
-                Superstructure.WantedSuperState.GENERAL));
+                Superstructure.WantedSuperState.INTAKE_CORAL));
 
-    // Aim and Range to a target Apriltag //
-    m_driverController.x().whileTrue(m_superstructureSubsystem.AimAndRangeApriltag(() -> m_driverController.getHID().getRightStickButton()))
-    // m_driverController.rightBumper().whileTrue(m_superstructureSubsystem.AimAndRangeApriltag(() -> true))
-    .whileFalse(new InstantCommand(() -> {m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.kZero);}));
+    // // Press the right bumper to align robot to tag + left/right offset + raise elevator
+    // // Release the right bumper to score the coral and reset to default state //
+    // m_driverController.rightBumper()
+    //     .whileTrue(
+    //         new ParallelCommandGroup(
+    //             m_superstructureSubsystem.AimAndRangeApriltag(),
+    //             m_superstructureSubsystem.setWantedSuperStateCommand(
+    //                 Superstructure.WantedSuperState.ALIGN_TO_SCORE_CORAL)))
+    //     .onFalse(
+    //         m_superstructureSubsystem.setWantedSuperStateCommand(Superstructure.WantedSuperState.SCORE_CORAL)
+    //         .andThen(new InstantCommand(() -> m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.kZero)));
+    //         .andThen(new WaitCommand(0.5)) // Wait for the coral to be scored
+    //         .andThen(m_superstructureSubsystem.setWantedSuperStateCommand(Superstructure.WantedSuperState.DEFAULT)));
 
-    // #endregion
+    m_driverController.rightBumper()
+        .whileTrue(m_superstructureSubsystem.AimAndRangeApriltag())
+        .onFalse(new InstantCommand(() -> m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.kZero)));
 
-    // if (GeneralConstants.CURRENT_MODE == RobotMode.TEST){
-
-    //   // Run SysId routines when holding back/start and X/Y.
-    //   // Note that each routine should be run exactly once in a single log.
-    //   m_driverController.back().and(m_driverController.y()).whileTrue(m_swerveDriveSubsystem.sysIdDynamic(Direction.kForward));
-    //   m_driverController.back().and(m_driverController.x()).whileTrue(m_swerveDriveSubsystem.sysIdDynamic(Direction.kReverse));
-    //   m_driverController.start().and(m_driverController.y()).whileTrue(m_swerveDriveSubsystem.sysIdQuasistatic(Direction.kForward));
-    //   m_driverController.start().and(m_driverController.x()).whileTrue(m_swerveDriveSubsystem.sysIdQuasistatic(Direction.kReverse));
-
-    //   // m_intakeSubsystem.setDefaultCommand(new TestIntake(m_intakeSubsystem, () -> -m_operatorController.getRightY()));
-    //   // m_uptakeSubsystem.setDefaultCommand(new TestUptake(m_uptakeSubsystem, () -> -m_operatorController.getLeftY()));
-    //   // m_armSubsystem.setDefaultCommand(Commands.run(() -> m_armSubsystem.setArmSpeed(0.0), m_armSubsystem));
-    //   // m_shooterSubsystem.setDefaultCommand(new TestShooter(m_shooterSubsystem, () -> -m_operatorController.getRightTriggerAxis(), () -> -m_operatorController.getLeftTriggerAxis()));
-
-    //   // m_operatorController.a()
-    //   //     .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(0.1), m_armSubsystem));
-
-    //   // m_operatorController.b()
-    //   //     .whileTrue(Commands.run(() -> m_armSubsystem.setArmSpeed(-0.1), m_armSubsystem));
-
-    // }
-
+    // Operator button box controls //
+    
+    // Test Controls //
 
   }
 

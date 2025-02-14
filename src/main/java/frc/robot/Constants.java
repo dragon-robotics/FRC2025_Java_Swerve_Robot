@@ -200,6 +200,7 @@ public final class Constants {
 
     /* Desired intake speed for intake and outtake */
     public static final double INTAKE_SPEED = 0.5;
+    public static final double SLOW_INTAKE_SPEED = 0.2;
     public static final double OUTTAKE_SPEED = 0.5;
   }
 
@@ -313,10 +314,10 @@ public final class Constants {
      * using relative encoder)
      */
     public static final double HOME_GOAL = 10; // TODO: To be tuned later
-    public static final double LVL_1 = 30; // TODO: To be tuned later
-    public static final double LVL_2 = 40; // TODO: To be tuned later
-    public static final double LVL_3 = 50; // TODO: To be tuned later
-    public static final double LVL_4 = 70; // TODO: To be tuned later
+    public static final double L1 = 30; // TODO: To be tuned later
+    public static final double L2 = 40; // TODO: To be tuned later
+    public static final double L3 = 50; // TODO: To be tuned later
+    public static final double L4 = 70; // TODO: To be tuned later
   }
 
   public static class LEDConstants {

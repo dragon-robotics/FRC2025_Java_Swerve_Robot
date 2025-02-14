@@ -55,66 +55,53 @@ public class Superstructure extends SubsystemBase {
   private final Telemetry logger;
 
   public enum WantedSuperState {
-    STOPPED, // Stopped state
-    GENERAL, // Default / General driving state
-    INTAKE_CORAL_LEFT,
-    INTAKE_CORAL_RIGHT,
+    STOPPED,                        // Stopped state
+    DEFAULT,                        // Default driving state
+    DEFAULT_WITH_CORAL,             // Default driving state w/ coral
+    DEFAULT_WITH_ALGAE,             // Default driving state w/ algae
+    DEFAULT_WITH_CORAL_AND_ALGAE,   // Default driving state w/ coral and algae
+    ALIGN_INTAKE_CORAL_LEFT,
+    ALIGN_INTAKE_CORAL_RIGHT,
+    INTAKE_CORAL,
     INTAKE_ALGAE,
-    ALGAE_STOWED,
-    ALIGN_TO_REEF_LEFT,
-    ALIGN_TO_REEF_RIGHT,
-    ALIGN_TO_REEF_CENTER,
-    HOME,
-    L1,
-    L2,
-    L3,
-    L4,
-    SCORE_CORAL_TAG_6,
-    SCORE_CORAL_TAG_7,
-    SCORE_CORAL_TAG_8,
-    SCORE_CORAL_TAG_9,
-    SCORE_CORAL_TAG_10,
-    SCORE_CORAL_TAG_11,
-    SCORE_CORAL_TAG_17,
-    SCORE_CORAL_TAG_18,
-    SCORE_CORAL_TAG_19,
-    SCORE_CORAL_TAG_20,
-    SCORE_CORAL_TAG_21,
-    SCORE_CORAL_TAG_22,
+    ALIGN_REEF_LEFT_L1,
+    ALIGN_REEF_LEFT_L2,
+    ALIGN_REEF_LEFT_L3,
+    ALIGN_REEF_LEFT_L4,
+    ALIGN_REEF_RIGHT_L1,
+    ALIGN_REEF_RIGHT_L2,
+    ALIGN_REEF_RIGHT_L3,
+    ALIGN_REEF_RIGHT_L4,
+    ALIGN_TO_SCORE_CORAL,
+    SCORE_CORAL,
     SCORE_PROCESSOR
   }
 
   public enum CurrentSuperState {
-    STOPPED, // Default state
-    GENERAL, // General driving state
-    INTAKE_CORAL_LEFT,
-    INTAKE_CORAL_RIGHT,
+    STOPPED,                        // Stopped state
+    DEFAULT,                        // Default driving state
+    DEFAULT_WITH_CORAL,             // Default driving state w/ coral
+    DEFAULT_WITH_ALGAE,             // Default driving state w/ algae
+    DEFAULT_WITH_CORAL_AND_ALGAE,   // Default driving state w/ coral and algae
+    ALIGN_INTAKE_CORAL_LEFT,
+    ALIGN_INTAKE_CORAL_RIGHT,
+    INTAKE_CORAL,
     INTAKE_ALGAE,
-    ALGAE_STOWED,
-    ALIGN_TO_REEF_LEFT,
-    ALIGN_TO_REEF_RIGHT,
-    HOME,
-    L1,
-    L2,
-    L3,
-    L4,
-    SCORE_CORAL_TAG_6,
-    SCORE_CORAL_TAG_7,
-    SCORE_CORAL_TAG_8,
-    SCORE_CORAL_TAG_9,
-    SCORE_CORAL_TAG_10,
-    SCORE_CORAL_TAG_11,
-    SCORE_CORAL_TAG_17,
-    SCORE_CORAL_TAG_18,
-    SCORE_CORAL_TAG_19,
-    SCORE_CORAL_TAG_20,
-    SCORE_CORAL_TAG_21,
-    SCORE_CORAL_TAG_22,
+    ALIGN_REEF_LEFT_L1,
+    ALIGN_REEF_LEFT_L2,
+    ALIGN_REEF_LEFT_L3,
+    ALIGN_REEF_LEFT_L4,
+    ALIGN_REEF_RIGHT_L1,
+    ALIGN_REEF_RIGHT_L2,
+    ALIGN_REEF_RIGHT_L3,
+    ALIGN_REEF_RIGHT_L4,
+    ALIGN_TO_SCORE_CORAL,
+    SCORE_CORAL,
     SCORE_PROCESSOR
   }
 
-  private WantedSuperState wantedSuperState = WantedSuperState.STOPPED;
-  private CurrentSuperState currentSuperState = CurrentSuperState.STOPPED;
+  private WantedSuperState wantedSuperState;
+  private CurrentSuperState currentSuperState;
   private CurrentSuperState previousSuperState;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
@@ -129,8 +116,12 @@ public class Superstructure extends SubsystemBase {
   private PIDController visionRangePID;
   private PIDController visionAimPID;
 
-  private double rotationLastTriggered = 0.0; // Keeps track of the last time the rotation was triggered
-  private Optional<Rotation2d> currentHeading = Optional.empty(); // Keeps track of current heading
+  private double rotationLastTriggered; // Keeps track of the last time the rotation was triggered
+  private Optional<Rotation2d> currentHeading; // Keeps track of current heading
+
+  private boolean useLeftCamera;
+  private boolean intakeCoralLeft;
+  private ElevatorSubsystem.WantedState elevatorWantedState;
 
   /** Creates a new Superstructure. */
   public Superstructure(
@@ -187,6 +178,22 @@ public class Superstructure extends SubsystemBase {
         SwerveConstants.HEADING_KD);
     driveMaintainHeading.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     driveMaintainHeading.HeadingController.setTolerance(SwerveConstants.HEADING_TOLERANCE);
+
+    // Instantiate current and wanted super states as stopped //
+    wantedSuperState = WantedSuperState.STOPPED;
+    currentSuperState = CurrentSuperState.STOPPED;
+
+    // Instantiate current heading as empty //
+    currentHeading = Optional.empty(); // Keeps track of current heading
+
+    // Instantiate the rotation last triggered as 0 //
+    rotationLastTriggered = 0.0;
+
+    // Instantiate the elevator wanted state as home //
+    elevatorWantedState = ElevatorSubsystem.WantedState.HOME;
+
+    // Default we use the right camera //
+    useLeftCamera = false;
 
     // Instantiate the logger for telemetry //
     logger = new Telemetry(maxSpeed);
@@ -277,41 +284,38 @@ public class Superstructure extends SubsystemBase {
     }, m_swerve);
   }
 
-  public Command AimAndRangeApriltag(
-    BooleanSupplier isLeft
-  ) {
+  public Command AimAndRangeApriltag() {
     return new RunCommand(() -> {
       // Read in relevant data from the Camera
       boolean targetVisible = false;
-      boolean isLeftCamera = isLeft.getAsBoolean();
       double tagYaw = 0.0;
       double tagRange = 0.0;
       int bestTagId = 0;
 
-      var results = m_vision.getCamera(isLeft.getAsBoolean()).getAllUnreadResults();
+      var results = m_vision.getCamera(useLeftCamera).getAllUnreadResults();
       if (!results.isEmpty()) {
-          // Camera processed a new frame since last
-          // Get the last one in the list.
-          var result = results.get(results.size() - 1);
-          if (result.hasTargets()) {
-              // Get the best target
-              var bestTag = result.getBestTarget();
-              bestTagId = bestTag.getFiducialId();
+        // Camera processed a new frame since last
+        // Get the last one in the list.
+        var result = results.get(results.size() - 1);
+        if (result.hasTargets()) {
+          // Get the best target
+          var bestTag = result.getBestTarget();
+          bestTagId = bestTag.getFiducialId();
 
-              if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
-                  // Found a red station tag, record its information
-                  tagYaw = bestTag.getYaw();
-                  bestTag.getSkew();
-                  tagRange =
-                          PhotonUtils.calculateDistanceToTargetMeters(
-                                  isLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
-                                  0.308, // From 2025 game manual for red station tags
-                                  Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
-                                  Units.degreesToRadians(bestTag.getPitch()));
+          if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
+            // Found a red station tag, record its information
+            tagYaw = bestTag.getYaw();
+            bestTag.getSkew();
+            tagRange =
+                PhotonUtils.calculateDistanceToTargetMeters(
+                    useLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
+                    0.308, // From 2025 game manual for red station tags
+                    Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
+                    Units.degreesToRadians(bestTag.getPitch()));
 
-                  targetVisible = true;
-              }
+            targetVisible = true;
           }
+        }
       }
 
       // If the target is visible, aim and range to it
@@ -365,11 +369,85 @@ public class Superstructure extends SubsystemBase {
   private CurrentSuperState handleStateTransitions() {
     previousSuperState = currentSuperState;
     switch (wantedSuperState) {
-      case INTAKE_CORAL_LEFT:
-        currentSuperState = CurrentSuperState.INTAKE_CORAL_LEFT;
+      case DEFAULT:
+        if (m_coral.getSystemState() == CoralSubsystem.SystemState.HOLDING &&
+            m_algae.getSystemState() == AlgaeSubsystem.SystemState.HOLDING) {
+          currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL_AND_ALGAE;
+        } else if (m_coral.getSystemState() == CoralSubsystem.SystemState.HOLDING) {
+          currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL;
+        } else if (m_algae.getSystemState() == AlgaeSubsystem.SystemState.HOLDING) {
+          currentSuperState = CurrentSuperState.DEFAULT_WITH_ALGAE;
+        } else {
+          currentSuperState = CurrentSuperState.DEFAULT;
+        }
         break;
-      case INTAKE_CORAL_RIGHT:
-        currentSuperState = CurrentSuperState.INTAKE_CORAL_RIGHT;
+      case DEFAULT_WITH_CORAL:
+        currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL;
+        break;
+      case DEFAULT_WITH_ALGAE:
+        currentSuperState = CurrentSuperState.DEFAULT_WITH_ALGAE;
+        break;
+      case DEFAULT_WITH_CORAL_AND_ALGAE:
+        currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL_AND_ALGAE;
+        break;
+      case ALIGN_INTAKE_CORAL_LEFT:
+        currentSuperState = CurrentSuperState.ALIGN_INTAKE_CORAL_LEFT;
+        break;
+      case ALIGN_INTAKE_CORAL_RIGHT:
+        currentSuperState = CurrentSuperState.ALIGN_INTAKE_CORAL_RIGHT;
+        break;
+      case INTAKE_CORAL:
+        if (m_coral.getSystemState() == CoralSubsystem.SystemState.HOLDING &&
+            m_algae.getSystemState() == AlgaeSubsystem.SystemState.HOLDING) {
+          currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL_AND_ALGAE;
+        } else if (m_coral.getSystemState() == CoralSubsystem.SystemState.HOLDING) {
+          currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL;
+        } else {
+          currentSuperState = CurrentSuperState.INTAKE_CORAL;
+        }
+        break;
+      case INTAKE_ALGAE:
+        if (m_coral.getSystemState() == CoralSubsystem.SystemState.HOLDING &&
+            m_algae.getSystemState() == AlgaeSubsystem.SystemState.HOLDING) {
+          currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL_AND_ALGAE;
+        } else if (m_algae.getSystemState() == AlgaeSubsystem.SystemState.HOLDING) {
+          currentSuperState = CurrentSuperState.DEFAULT_WITH_ALGAE;
+        } else {
+          currentSuperState = CurrentSuperState.INTAKE_ALGAE;
+        }
+        break;
+      case ALIGN_REEF_LEFT_L1:
+        currentSuperState = CurrentSuperState.ALIGN_REEF_LEFT_L1;
+        break;
+      case ALIGN_REEF_LEFT_L2:
+        currentSuperState = CurrentSuperState.ALIGN_REEF_LEFT_L2;
+        break;
+      case ALIGN_REEF_LEFT_L3:
+        currentSuperState = CurrentSuperState.ALIGN_REEF_LEFT_L3;
+        break;
+      case ALIGN_REEF_LEFT_L4:
+        currentSuperState = CurrentSuperState.ALIGN_REEF_LEFT_L4;
+        break;
+      case ALIGN_REEF_RIGHT_L1:
+        currentSuperState = CurrentSuperState.ALIGN_REEF_RIGHT_L1;
+        break;
+      case ALIGN_REEF_RIGHT_L2:
+        currentSuperState = CurrentSuperState.ALIGN_REEF_RIGHT_L2;
+        break;
+      case ALIGN_REEF_RIGHT_L3:
+        currentSuperState = CurrentSuperState.ALIGN_REEF_RIGHT_L3;
+        break;
+      case ALIGN_REEF_RIGHT_L4:
+        currentSuperState = CurrentSuperState.ALIGN_REEF_RIGHT_L4;
+        break;
+      case ALIGN_TO_SCORE_CORAL:
+        currentSuperState = CurrentSuperState.ALIGN_TO_SCORE_CORAL;
+        break;
+      case SCORE_CORAL:
+        currentSuperState = CurrentSuperState.SCORE_CORAL;
+        break;
+      case SCORE_PROCESSOR:
+        currentSuperState = CurrentSuperState.SCORE_PROCESSOR;
         break;
       case STOPPED:
       default:
@@ -381,14 +459,70 @@ public class Superstructure extends SubsystemBase {
 
   private void applyStates() {
     switch (currentSuperState) {
-      case INTAKE_CORAL_LEFT:
-        intakeCoral(true);
+      case DEFAULT:
+        setDefault(false, false);
         break;
-      case INTAKE_CORAL_RIGHT:
-        intakeCoral(false);
+      case DEFAULT_WITH_CORAL:
+        setDefault(true, false);
         break;
-      case GENERAL:
-        setDefault();
+      case DEFAULT_WITH_ALGAE:
+        setDefault(false, true);
+        break;
+      case DEFAULT_WITH_CORAL_AND_ALGAE:
+        setDefault(true, true);
+        break;
+      case ALIGN_INTAKE_CORAL_LEFT:
+        intakeCoralLeft = true;
+        break;
+      case ALIGN_INTAKE_CORAL_RIGHT:
+        intakeCoralLeft = false;
+        break;
+      case INTAKE_CORAL:
+        intakeCoral(intakeCoralLeft);
+        break;
+      case INTAKE_ALGAE:
+        intakeAlgae();
+        break;
+      case ALIGN_REEF_LEFT_L1:
+        elevatorWantedState = ElevatorSubsystem.WantedState.L1; // Set the elevator to L1
+        useLeftCamera = true;                                   // Use the left camera
+        break;
+      case ALIGN_REEF_LEFT_L2:
+        elevatorWantedState = ElevatorSubsystem.WantedState.L2; // Set the elevator to L2
+        useLeftCamera = true;                                   // Use the left camera
+        break;
+      case ALIGN_REEF_LEFT_L3:
+        elevatorWantedState = ElevatorSubsystem.WantedState.L3; // Set the elevator to L1
+        useLeftCamera = true;                                   // Use the left camera
+        break;
+      case ALIGN_REEF_LEFT_L4:
+        elevatorWantedState = ElevatorSubsystem.WantedState.L4; // Set the elevator to L1
+        useLeftCamera = true;                                   // Use the left camera
+        break;
+      case ALIGN_REEF_RIGHT_L1:
+        elevatorWantedState = ElevatorSubsystem.WantedState.L1; // Set the elevator to L1
+        useLeftCamera = false;                                  // Use the right camera
+        break;
+      case ALIGN_REEF_RIGHT_L2:
+        elevatorWantedState = ElevatorSubsystem.WantedState.L2; // Set the elevator to L1
+        useLeftCamera = false;                                  // Use the right camera
+        break;
+      case ALIGN_REEF_RIGHT_L3:
+        elevatorWantedState = ElevatorSubsystem.WantedState.L3; // Set the elevator to L3
+        useLeftCamera = false;                                  // Use the right camera
+        break;
+      case ALIGN_REEF_RIGHT_L4:
+        elevatorWantedState = ElevatorSubsystem.WantedState.L4; // Set the elevator to L4
+        useLeftCamera = false;                                  // Use the right camera
+        break;
+      case ALIGN_TO_SCORE_CORAL:
+        alignToScoreCoral();
+        break;
+      case SCORE_CORAL:
+        m_coral.setWantedState(CoralSubsystem.WantedState.EJECT);
+        break;
+      case SCORE_PROCESSOR:
+        scoreAlgae();
         break;
       case STOPPED:
       default:
@@ -397,35 +531,68 @@ public class Superstructure extends SubsystemBase {
     }
   }
 
-  private void stopped() {
-    m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
-    m_elevator.setWantedState(ElevatorSubsystem.WantedState.IDLE);
-    m_algae.setWantedState(AlgaeSubsystem.WantedState.IDLE);
-    m_swerve.setControl(drive.withVelocityX(0).withVelocityY(0).withRotationalRate(0));
-  }
-
-  private void setDefault(){
-    m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
-    m_elevator.setWantedState(ElevatorSubsystem.WantedState.IDLE);
-    m_algae.setWantedState(AlgaeSubsystem.WantedState.IDLE);
+  private void setDefault(boolean hasCoral, boolean hasAlgae) {
+    if(hasCoral && hasAlgae){
+      // Default state with coral and algae //
+      m_coral.setWantedState(CoralSubsystem.WantedState.HOLD);
+      m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
+      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOLD);
+    } else if (hasCoral && !hasAlgae){
+      // Default state with coral //
+      m_coral.setWantedState(CoralSubsystem.WantedState.HOLD);
+      m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
+      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOME);
+    } else if (!hasCoral && hasAlgae){
+      // Default state with algae //
+      m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
+      m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
+      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOLD);
+    } else {
+      // Default state without coral or algae on robot //
+      m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
+      m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
+      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOME);
+    }
   }
 
   private void intakeCoral(boolean left) {
 
     // Set coral to intake //
     m_coral.setWantedState(CoralSubsystem.WantedState.INTAKE);
-    // Set elevator to idle //
-    m_elevator.setWantedState(ElevatorSubsystem.WantedState.IDLE);
+    // Set elevator to home //
+    m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
+    // Set algae to home //
+    m_algae.setWantedState(AlgaeSubsystem.WantedState.HOME);
 
     // Set drivetrain to the left coral station angle for intake //
     currentHeading = left ?
         Optional.of(GeneralConstants.LEFT_CORAL_STATION_INTAKE_ANGLE) : // If left, set to left side angle
         Optional.of(GeneralConstants.RIGHT_CORAL_STATION_INTAKE_ANGLE); // If right, set to right side angle
+  }
 
-    // // Set the swerve drive to maintain the heading of the coral station angle //
-    // m_swerve.setControl(
-    //     driveMaintainHeading
-    //         .withTargetDirection(intakeHeading));
+  private void intakeAlgae() {
+    m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
+    m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
+    m_algae.setWantedState(AlgaeSubsystem.WantedState.INTAKE);
+  }
+
+  private void alignToScoreCoral() {
+    m_coral.setWantedState(CoralSubsystem.WantedState.HOLD);
+    m_elevator.setWantedState(elevatorWantedState);
+    m_algae.setWantedState(AlgaeSubsystem.WantedState.HOME);
+  }
+
+  private void scoreAlgae() {
+    m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
+    m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
+    m_algae.setWantedState(AlgaeSubsystem.WantedState.EJECT);
+  }
+  
+  private void stopped() {
+    m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
+    m_elevator.setWantedState(ElevatorSubsystem.WantedState.IDLE);
+    m_algae.setWantedState(AlgaeSubsystem.WantedState.IDLE);
+    m_swerve.setControl(drive.withVelocityX(0).withVelocityY(0).withRotationalRate(0));
   }
 
   /** State pushers */

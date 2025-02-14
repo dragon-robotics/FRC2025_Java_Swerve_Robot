@@ -57,6 +57,8 @@ public class AlgaeSubsystem extends SubsystemBase {
   private WantedState m_wantedState = WantedState.IDLE;
   private SystemState m_systemState = SystemState.IDLING;
 
+  private boolean m_hasAlgae = false;
+
 
 //   // SysID Routine for Arm Tuning //
 //   // SysId Routine and seutp
@@ -110,6 +112,14 @@ public class AlgaeSubsystem extends SubsystemBase {
   }
 
   /**
+   * Get the current state of the coral intake
+   * @return m_systemState
+   */
+  public SystemState getSystemState() {
+    return m_systemState;
+  }
+
+  /**
    * Handle the state transition
    * @return the new state
    */
@@ -159,7 +169,8 @@ public class AlgaeSubsystem extends SubsystemBase {
     switch (m_systemState) {
       case EJECTING:
         // Hold the arm at the ejecting position and spin the intake to eject the algae //
-        handleMotors(ARM_PROCESSOR_OUTTAKE_GOAL, OUTTAKE_SPEED);       
+        handleMotors(ARM_PROCESSOR_OUTTAKE_GOAL, OUTTAKE_SPEED);    
+        m_hasAlgae = false;   
         break;
       case INTAKING:
         // Hold the arm at the INTAKing position and spin the intake to INTAKE the algae //  
@@ -168,6 +179,7 @@ public class AlgaeSubsystem extends SubsystemBase {
       case HOLDING:
         // Hold the arm at the holding position and stop the intake from spinning //
         handleMotors(ARM_HOLD_GOAL, 0);
+        m_hasAlgae = true;
         break;
       case AT_HOME:
         // Hold the arm at the home position and stop the intake from spinning //

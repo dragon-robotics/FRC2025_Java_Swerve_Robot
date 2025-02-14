@@ -46,20 +46,20 @@ public class ElevatorSubsystem extends SubsystemBase {
   public enum WantedState {
     IDLE,
     HOME,
-    LVL_1,
-    LVL_2,
-    LVL_3,
-    LVL_4,
+    L1,
+    L2,
+    L3,
+    L4,
     OFF
   }
 
   public enum SystemState {
     IDLING,
     AT_HOME,
-    AT_LVL_1,
-    AT_LVL_2,
-    AT_LVL_3,
-    AT_LVL_4,
+    AT_L1,
+    AT_L2,
+    AT_L3,
+    AT_L4,
     OFF
   }
 
@@ -123,10 +123,10 @@ public class ElevatorSubsystem extends SubsystemBase {
   private SystemState handleStateTransition() {
     return switch (m_wantedState) {
       case OFF -> SystemState.OFF;
-      case LVL_1 -> SystemState.AT_LVL_1;
-      case LVL_2 -> SystemState.AT_LVL_2;
-      case LVL_3 -> SystemState.AT_LVL_3;
-      case LVL_4 -> SystemState.AT_LVL_4;
+      case L1 -> SystemState.AT_L1;
+      case L2 -> SystemState.AT_L2;
+      case L3 -> SystemState.AT_L3;
+      case L4 -> SystemState.AT_L4;
       case HOME -> SystemState.AT_HOME;
       default -> SystemState.AT_HOME;
     };
@@ -157,17 +157,17 @@ public class ElevatorSubsystem extends SubsystemBase {
       case AT_HOME:
         m_elevatorIO.setElevatorMotorSetpoint(HOME_GOAL);
         break;
-      case AT_LVL_1:
-        m_elevatorIO.setElevatorMotorSetpoint(LVL_1);
+      case AT_L1:
+        m_elevatorIO.setElevatorMotorSetpoint(L1);
         break;
-      case AT_LVL_2:
-        m_elevatorIO.setElevatorMotorSetpoint(LVL_2);
+      case AT_L2:
+        m_elevatorIO.setElevatorMotorSetpoint(L2);
         break;
-      case AT_LVL_3:
-        m_elevatorIO.setElevatorMotorSetpoint(LVL_3);
+      case AT_L3:
+        m_elevatorIO.setElevatorMotorSetpoint(L3);
         break;
-      case AT_LVL_4:
-        m_elevatorIO.setElevatorMotorSetpoint(LVL_4);
+      case AT_L4:
+        m_elevatorIO.setElevatorMotorSetpoint(L4);
         break;
       case OFF:
         break;

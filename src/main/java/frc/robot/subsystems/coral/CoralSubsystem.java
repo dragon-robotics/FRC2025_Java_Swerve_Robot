@@ -30,6 +30,7 @@ public class CoralSubsystem extends SubsystemBase {
   public enum WantedState {
     IDLE,
     INTAKE,
+    SLOW_INTAKE,
     HOLD,
     EJECT,
     OFF
@@ -38,6 +39,7 @@ public class CoralSubsystem extends SubsystemBase {
   public enum SystemState {
     IDLING,
     INTAKING,
+    SLOW_INTAKING,
     HOLDING,
     EJECTING,
     OFF
@@ -48,6 +50,8 @@ public class CoralSubsystem extends SubsystemBase {
 
   private WantedState m_wantedState = WantedState.IDLE;
   private SystemState m_systemState = SystemState.IDLING;
+
+  public boolean m_hasCoral = false;
 
   /**
    * Creates a new IntakeSubsystem.
@@ -73,6 +77,14 @@ public class CoralSubsystem extends SubsystemBase {
   }
 
   /**
+   * Get the current state of the coral intake
+   * @return m_systemState
+   */
+  public SystemState getSystemState() {
+    return m_systemState;
+  }
+
+  /**
    * Handle the state transition
    * @return the new state
    */
@@ -80,10 +92,21 @@ public class CoralSubsystem extends SubsystemBase {
     return switch (m_wantedState) {
       case OFF -> SystemState.OFF;
       case EJECT -> SystemState.EJECTING;
-      case HOLD -> SystemState.HOLDING;
-      case INTAKE -> {
+      case HOLD -> {
         if (isBeamBreakTripped()) {
           yield SystemState.HOLDING;
+        }
+        yield SystemState.IDLING;
+      }
+      case SLOW_INTAKE -> {
+        if (!isBeamBreakTripped()) {
+          yield SystemState.HOLDING;
+        }
+        yield SystemState.SLOW_INTAKING;
+      }
+      case INTAKE -> {
+        if (isBeamBreakTripped()) {
+          yield SystemState.SLOW_INTAKING;
         }
         yield SystemState.INTAKING;
       }
@@ -117,11 +140,17 @@ public class CoralSubsystem extends SubsystemBase {
       case INTAKING:
         m_coralIO.setIntakeMotorPercentage(INTAKE_SPEED);
         break;
+      case SLOW_INTAKING:
+        m_coralIO.setIntakeMotorPercentage(SLOW_INTAKE_SPEED);
+        setWantedState(WantedState.SLOW_INTAKE); // Slowly intake until the beam break is untripped again
+        break;
       case HOLDING:
         m_coralIO.setIntakeMotorPercentage(0);
+        m_hasCoral = true;
         break;
       case EJECTING:
         m_coralIO.setIntakeMotorPercentage(OUTTAKE_SPEED);
+        m_hasCoral = false;
         break;
       case OFF:
         m_coralIO.setIntakeMotorPercentage(0);
