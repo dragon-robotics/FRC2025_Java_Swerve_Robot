@@ -199,6 +199,14 @@ public class RobotContainer {
     
     // Test Controls //
 
+    // Test the elevator //
+
+    // Test the coral intake //
+
+    // Test the algae arm //
+
+    // Test the algae intake //
+
   }
 
   /**
