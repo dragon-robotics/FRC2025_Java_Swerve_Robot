@@ -66,8 +66,6 @@ public class ElevatorIOSparkMax implements ElevatorIO {
       .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
       .pid(P, I, D, PID_SLOT)
       .outputRange(MIN_OUTPUT, MAX_OUTPUT)
-      .positionWrappingEnabled(true)
-      .positionWrappingInputRange(POS_WRAP_MIN_INPUT, POS_WRAP_MAX_INPUT)
       .maxMotion
         .maxVelocity(MAX_MAXMOTION_VELOCITY)
         .maxAcceleration(MAX_MAXMOTION_ACCELERATION)

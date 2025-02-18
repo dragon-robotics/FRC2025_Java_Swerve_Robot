@@ -275,8 +275,8 @@ public final class Constants {
     public static final double SECONDARY_CURRENT_LIMIT = 60.0;
     public static final double RAMP_RATE_IN_SEC = 0.1; // Ramp rate in seconds
 
-    public static final double STARTING_LIMIT = 0.0;
-    public static final double ENDING_LIMIT = 100.0;
+    public static final double STARTING_LIMIT = -0.1;
+    public static final double ENDING_LIMIT = -10;
 
     public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot1;
 
@@ -311,7 +311,7 @@ public final class Constants {
      * Desired absolute encoder setpoint for moving elevator (to be tuned later
      * using relative encoder)
      */
-    public static final double HOME_GOAL = -0.1; // TODO: To be tuned later
+    public static final double HOME_GOAL = -0.5; // TODO: To be tuned later
     public static final double L1 = -1; // TODO: To be tuned later
     public static final double L2 = -3; // TODO: To be tuned later
     public static final double L3 = -5; // TODO: To be tuned later
