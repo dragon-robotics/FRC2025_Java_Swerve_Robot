@@ -20,22 +20,22 @@ public interface ElevatorIO {
     class ElevatorIOInputs {
         
         // Are the motors connected to the CAN bus? //
-        public boolean elevatorLeftMotorConnected;
-        public boolean elevatorRightMotorConnected;
+        public boolean elevatorLeadMotorConnected;
+        public boolean elevatorFollowMotorConnected;
 
         // Left Elevator Motor data //
-        public double elevatorLeftMotorVoltage;
-        public double elevatorLeftMotorDutyCycle;
-        public double elevatorLeftMotorCurrent;
-        public double elevatorLeftMotorTemperature;
-        public double elevatorLeftMotorPosition;
-        public double elevatorLeftMotorVelocity;
+        public double elevatorLeadMotorVoltage;
+        public double elevatorLeadMotorDutyCycle;
+        public double elevatorLeadMotorCurrent;
+        public double elevatorLeadMotorTemperature;
+        public double elevatorLeadMotorPosition;
+        public double elevatorLeadMotorVelocity;
 
         // Right Elevator Motor data //
-        public double elevatorRightMotorVoltage;
-        public double elevatorRightMotorDutyCycle;
-        public double elevatorRightMotorCurrent;
-        public double elevatorRightMotorTemperature;
+        public double elevatorFollowMotorVoltage;
+        public double elevatorFollowMotorDutyCycle;
+        public double elevatorFollowMotorCurrent;
+        public double elevatorFollowMotorTemperature;
 
         // Is the current limit tripped? //
         public boolean elevatorCurrentLimitTripped;

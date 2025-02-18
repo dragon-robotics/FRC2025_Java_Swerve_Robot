@@ -205,8 +205,8 @@ public final class Constants {
   }
 
   public static class AlgaeSubsystemConstants {
-    public static final int ARM_LEFT_MOTOR_ID = 2;
-    public static final int ARM_RIGHT_MOTOR_ID = 3;
+    public static final int ARM_LEAD_MOTOR_ID = 2;
+    public static final int ARM_FOLLOW_MOTOR_ID = 3;
     public static final int INTAKE_MOTOR_ID = 4;
 
     public static final double ARM_NOMINAL_VOLTAGE = 10.0;
@@ -266,14 +266,14 @@ public final class Constants {
 
   /** Elevator Subsystem Constants */
   public static class ElevatorSubsystemConstants {
-    public static final int LEFT_MOTOR_ID = 5;
-    public static final int RIGHT_MOTOR_ID = 6;
+    public static final int LEAD_MOTOR_ID = 6;
+    public static final int FOLLOW_MOTOR_ID = 5;
 
     public static final double NOMINAL_VOLTAGE = 10.0;
     public static final int FREE_CURRENT_LIMIT = 30;
     public static final int STALL_CURRENT_LIMIT = 40;
     public static final double SECONDARY_CURRENT_LIMIT = 60.0;
-    public static final double RAMP_RATE_IN_SEC = 0.25; // Ramp rate in seconds
+    public static final double RAMP_RATE_IN_SEC = 0.1; // Ramp rate in seconds
 
     public static final double STARTING_LIMIT = 0.0;
     public static final double ENDING_LIMIT = 100.0;

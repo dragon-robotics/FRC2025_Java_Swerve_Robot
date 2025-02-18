@@ -29,23 +29,23 @@ public interface AlgaeIO {
     class AlgaeIOInputs {
         
         // Are the motors connected to the CAN bus? //
-        public boolean armLeftMotorConnected;
-        public boolean armRightMotorConnected;
+        public boolean armLeadMotorConnected;
+        public boolean armFollowMotorConnected;
         public boolean intakeMotorConnected;
 
         // Left Arm Motor data //
-        public double armLeftMotorVoltage;
-        public double armLeftMotorDutyCycle;
-        public double armLeftMotorCurrent;
-        public double armLeftMotorTemperature;
-        public double armLeftMotorPosition;
-        public double armLeftMotorVelocity;
+        public double armLeadMotorVoltage;
+        public double armLeadMotorDutyCycle;
+        public double armLeadMotorCurrent;
+        public double armLeadMotorTemperature;
+        public double armLeadMotorPosition;
+        public double armLeadMotorVelocity;
 
         // Right Arm Motor data //
-        public double armRightMotorVoltage;
-        public double armRightMotorDutyCycle;
-        public double armRightMotorCurrent;
-        public double armRightMotorTemperature;
+        public double armFollowMotorVoltage;
+        public double armFollowMotorDutyCycle;
+        public double armFollowMotorCurrent;
+        public double armFollowMotorTemperature;
 
         // Intake motor data //
         public double intakeMotorVoltage;
