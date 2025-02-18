@@ -227,7 +227,7 @@ public class ElevatorIOSparkMax implements ElevatorIO {
     inputs.elevatorFollowMotorTemperature = m_elevatorFollowMotor.getMotorTemperature();
 
     // Check if the current limit is tripped //
-    inputs.elevatorCurrentLimitTripped = m_elevatorLeadMotor.isFollower() && m_elevatorFollowMotor.isFollower();
+    inputs.elevatorCurrentLimitTripped = m_elevatorLeadMotor.getOutputCurrent() >= STALL_CURRENT_LIMIT;
 
     // Check if the elevator is at the slow down threshold //
     inputs.elevatorAtSlowDownThreshold = m_elevatorLeadMotor.getAlternateEncoder().getPosition() <= HOME_GOAL;
