@@ -280,15 +280,13 @@ public final class Constants {
 
     public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot1;
 
-    public static final double P = 3.0; // TODO: To be tuned later
+    public static final double P = 1.0; // TODO: To be tuned later
     public static final double I = 0.0; // TODO: To be tuned later
     public static final double D = 0.0; // TODO: To be tuned later
     public static final double F = 0.0; // TODO: To be tuned later
     public static final double IZ = 0.0; // TODO: To be tuned later
     public static final double MIN_OUTPUT = -1; // TODO: To be tuned later
     public static final double MAX_OUTPUT = 1; // TODO: To be tuned later
-    public static final double POS_WRAP_MIN_INPUT = 0; // TODO: To be tuned later
-    public static final double POS_WRAP_MAX_INPUT = 180; // TODO: To be tuned later
 
     // MaxMotion Constants //
     public static final double MAX_MAXMOTION_VELOCITY = 4000;
@@ -313,11 +311,11 @@ public final class Constants {
      * Desired absolute encoder setpoint for moving elevator (to be tuned later
      * using relative encoder)
      */
-    public static final double HOME_GOAL = 10; // TODO: To be tuned later
-    public static final double L1 = 30; // TODO: To be tuned later
-    public static final double L2 = 40; // TODO: To be tuned later
-    public static final double L3 = 50; // TODO: To be tuned later
-    public static final double L4 = 70; // TODO: To be tuned later
+    public static final double HOME_GOAL = -0.1; // TODO: To be tuned later
+    public static final double L1 = -1; // TODO: To be tuned later
+    public static final double L2 = -3; // TODO: To be tuned later
+    public static final double L3 = -5; // TODO: To be tuned later
+    public static final double L4 = -9; // TODO: To be tuned later
   }
 
   public static class LEDConstants {
