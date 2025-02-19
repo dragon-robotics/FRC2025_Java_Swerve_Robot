@@ -1,6 +1,10 @@
 package frc.robot.subsystems.elevator;
 
 public interface ElevatorIO {
+    default void seedElevatorMotorEncoderPosition(double position) {
+        throw new UnsupportedOperationException("seedElevatorMotorEncoderPosition is not implemented");
+    }
+    
     default void setElevatorMotorVoltage(double voltage) {
         throw new UnsupportedOperationException("setElevatorMotorVoltage is not implemented");
     }

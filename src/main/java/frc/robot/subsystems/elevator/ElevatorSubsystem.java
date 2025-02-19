@@ -149,6 +149,16 @@ public class ElevatorSubsystem extends SubsystemBase {
       m_systemState = SystemState.AT_HOME;
     }
 
+    // If the current limit is tripped (e.g. the elevator is at the top or bottom), stop the motor
+    if (isCurrentLimitTripped()) {
+      // If the elevator is at the bottom, set the encoder to 0 //
+      if (m_elevatorIOInputs.elevatorLeadMotorPosition > HOME_GOAL) {
+        m_elevatorIO.seedElevatorMotorEncoderPosition(0);
+      }
+      // Stop the motor on the elevator //
+      m_systemState = SystemState.IDLING;
+    }
+
     // Handle the state transition //
     switch (m_systemState) {
       case IDLING:
