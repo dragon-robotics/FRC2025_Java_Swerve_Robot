@@ -104,6 +104,13 @@ public class AlgaeSubsystem extends SubsystemBase {
   }
 
   /**
+   * Get whether the mechanism holds an algae
+   */
+  public boolean hasAlgae() {
+    return m_hasAlgae;
+  }
+
+  /**
    * Set the wanted state of the arm
    * @param wantedState
    */

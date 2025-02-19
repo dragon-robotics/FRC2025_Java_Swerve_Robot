@@ -4,26 +4,11 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
-
-import java.util.Optional;
-
-import org.photonvision.PhotonUtils;
-
-import frc.robot.Constants.ElevatorSubsystemConstants;
-import frc.robot.Constants.GeneralConstants;
-import frc.robot.Constants.GeneralConstants.RobotMode;
-import frc.robot.commands.Teleop.IntakeAlgaeUntilAlgaeDetected;
-import frc.robot.commands.Teleop.IntakeCoralUntilCoralDetected;
-import frc.robot.commands.Teleop.MoveElevator;
-import frc.robot.commands.Teleop.ScoreAlgae;
-import frc.robot.commands.Teleop.ScoreCoral;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.algae.AlgaeIO;
 import frc.robot.subsystems.algae.AlgaeIOSparkMax;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
 import frc.robot.subsystems.coral.CoralIOSparkMax;
@@ -33,33 +18,14 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.swerve.SwerveModule;
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
-
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -162,7 +128,7 @@ public class RobotContainer {
           () -> -m_driverController.getLeftY(),
           () -> -m_driverController.getLeftX(),
           () -> -m_driverController.getRightX(),
-          () -> m_driverController.getHID().getRightBumperButton())
+          () -> m_driverController.getHID().getXButton())
       );
 
     // Use the "A" button to reset the Gyro orientation //
@@ -192,8 +158,7 @@ public class RobotContainer {
     //         .andThen(m_superstructureSubsystem.setWantedSuperStateCommand(Superstructure.WantedSuperState.DEFAULT)));
 
     m_driverController.rightBumper()
-        .whileTrue(m_superstructureSubsystem.AimAndRangeApriltag())
-        .onFalse(new InstantCommand(() -> m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.kZero)));
+        .whileTrue(m_superstructureSubsystem.AimAndRangeApriltag());
 
     // Operator button box controls //
     

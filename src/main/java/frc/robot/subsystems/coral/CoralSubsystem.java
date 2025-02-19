@@ -60,12 +60,19 @@ public class CoralSubsystem extends SubsystemBase {
     m_coralIO = coralIO;
   }
 
-    /*
+  /*
    * Check if current limit is tripped
    * @return true if current limit is tripped
    */
   public boolean isBeamBreakTripped() {
     return m_coralIOInputs.beamBreakTripped;
+  }
+
+  /**
+   * Get whether the coral intake has a coral
+   */
+  public boolean hasCoral() {
+    return m_hasCoral;
   }
 
   /**

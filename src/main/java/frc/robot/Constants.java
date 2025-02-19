@@ -175,10 +175,12 @@ public final class Constants {
     public static final double RANGE_P = 2;
     public static final double RANGE_I = 0;
     public static final double RANGE_D = 0;
+    public static final double RANGE_TOLERANCE = 0.3;
 
-    public static final double AIM_P = 0.05;
+    public static final double AIM_P = 0.0625;
     public static final double AIM_I = 0;
     public static final double AIM_D = 0;
+    public static final double AIM_TOLERANCE = 0.5;
 
     public static final double DESIRED_RANGE = Units.inchesToMeters(8.364); // 5.364 inches to the frame perimeter + 3 inch for bumpers
     public static final double DESIRED_YAW = 0.5;
