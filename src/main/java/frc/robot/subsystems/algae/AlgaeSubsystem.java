@@ -180,7 +180,8 @@ public class AlgaeSubsystem extends SubsystemBase {
       case EJECTING:
         // Hold the arm at the ejecting position and spin the intake to eject the algae //
         handleMotors(ARM_PROCESSOR_OUTTAKE_GOAL, OUTTAKE_SPEED);    
-        m_hasAlgae = false;   
+        m_hasAlgae = false;
+        
         break;
       case INTAKING:
         // Hold the arm at the INTAKing position and spin the intake to INTAKE the algae //  

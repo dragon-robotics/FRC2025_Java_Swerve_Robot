@@ -16,6 +16,7 @@ import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -31,18 +32,43 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import static frc.robot.Constants.AlgaeSubsystemConstants.*;
 
 public class AlgaeIOSparkMax implements AlgaeIO {
-  private final SparkMax m_intakeMotor = new SparkMax(INTAKE_MOTOR_ID, MotorType.kBrushless);
-  private final SparkMax m_armLeadMotor = new SparkMax(ARM_LEAD_MOTOR_ID, MotorType.kBrushless);
-  private final SparkMax m_armFollowMotor = new SparkMax(ARM_FOLLOW_MOTOR_ID, MotorType.kBrushless);
+  private final SparkMax m_intakeMotor;
+  private final SparkMax m_armLeadMotor;
+  private final SparkMax m_armFollowMotor;
 
-  private final SparkClosedLoopController m_armLeadController = m_armLeadMotor.getClosedLoopController();
-  private final AbsoluteEncoder m_armLeadAbsEncoder = m_armLeadMotor.getAbsoluteEncoder();
-  private final ProfiledPIDController m_pidController;
+  private final SparkClosedLoopController m_armLeadController;
+  private final AbsoluteEncoder m_armLeadAbsEncoder;
+  private final ProfiledPIDController m_armPidController;
+
+  private double currentLimitCheckTime;
 
   // Feedforward for arm motor //
   private final ArmFeedforward m_armLeadFeedforward = new ArmFeedforward(ARM_KS, ARM_KG, ARM_KV, ARM_KA);
 
   public AlgaeIOSparkMax() {
+    // Initialize current limit check time //
+    currentLimitCheckTime = Timer.getFPGATimestamp();
+
+    // Instantiate the motors //
+    m_intakeMotor = new SparkMax(INTAKE_MOTOR_ID, MotorType.kBrushless);
+    m_armLeadMotor = new SparkMax(ARM_LEAD_MOTOR_ID, MotorType.kBrushless);
+    m_armFollowMotor = new SparkMax(ARM_FOLLOW_MOTOR_ID, MotorType.kBrushless);
+
+    // Instatiate the Sparkmax closed loop controller and the encoder //
+    m_armLeadController = m_armLeadMotor.getClosedLoopController();
+    m_armLeadAbsEncoder = m_armLeadMotor.getAbsoluteEncoder();
+
+    // Instantiate the armPidController //
+    m_armPidController = new ProfiledPIDController(
+        ARM_P,
+        ARM_I,
+        ARM_D,
+        new Constraints(
+            ARM_MAX_MAXMOTION_VELOCITY,
+            ARM_MAX_MAXMOTION_ACCELERATION));
+
+    m_armPidController.setTolerance(ARM_MAXMOTION_ALLOWED_ERROR);
+
     // Intake Motor Configuration //
     SparkMaxConfig m_intakeMotorConfig = new SparkMaxConfig();
     m_intakeMotorConfig
@@ -217,18 +243,6 @@ public class AlgaeIOSparkMax implements AlgaeIO {
     m_intakeMotor.set(0);
     m_armLeadMotor.set(0);
     m_armFollowMotor.set(0);
-
-    // PID Controller
-    m_pidController = new ProfiledPIDController(
-        ARM_P,
-        ARM_I,
-        ARM_D,
-        new Constraints(
-            ARM_MAX_MAXMOTION_VELOCITY,
-            ARM_MAX_MAXMOTION_ACCELERATION));
-
-    m_pidController.setTolerance(ARM_MAXMOTION_ALLOWED_ERROR);
-
   }
 
   private double convertAngleToAbsEncoder(double angle) {
@@ -240,8 +254,8 @@ public class AlgaeIOSparkMax implements AlgaeIO {
   }
 
   private double calculateFeedforward(double setpoint) {
-    double pidOutput = m_pidController.calculate(m_armLeadAbsEncoder.getPosition(), setpoint);
-    State setpointState = m_pidController.getSetpoint();
+    double pidOutput = m_armPidController.calculate(m_armLeadAbsEncoder.getPosition(), setpoint);
+    State setpointState = m_armPidController.getSetpoint();
     return m_armLeadFeedforward.calculate(setpointState.position, setpointState.velocity);
   }
 
@@ -312,6 +326,6 @@ public class AlgaeIOSparkMax implements AlgaeIO {
     inputs.intakeMotorTemperature = m_intakeMotor.getMotorTemperature();
 
     // Check if the current limit is tripped //
-    inputs.intakeCurrentLimitTripped = m_armLeadMotor.getOutputCurrent() > ALGAE_DETECT_CURRENT_THRESHOLD;
+    inputs.intakeCurrentLimitTripped = inputs.intakeMotorCurrent > ALGAE_DETECT_CURRENT_THRESHOLD;
   }
 }

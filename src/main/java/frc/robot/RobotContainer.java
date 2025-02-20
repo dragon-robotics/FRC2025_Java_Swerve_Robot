@@ -23,6 +23,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -165,12 +166,39 @@ public class RobotContainer {
     // Test Controls //
 
     // Test the elevator //
+    // L1 - Move to L1
+    m_operatorButtonBoxController.button(1)
+        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L1)));
+
+    m_operatorButtonBoxController.button(2)
+        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L2)));
+
+    m_operatorButtonBoxController.button(3)
+        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L3)));
+
+    m_operatorButtonBoxController.button(4)
+        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L4)));
+
+    m_operatorButtonBoxController.button(5)
+        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.HOME)));
 
     // Test the coral intake //
 
-    // Test the algae arm //
+    // Test the algae arm and intake //
+    m_operatorButtonBoxController.button(6)
+        .onTrue(new InstantCommand(() -> m_algaeSubsystem.setWantedState(AlgaeSubsystem.WantedState.HOME)));
 
-    // Test the algae intake //
+    m_operatorButtonBoxController.button(7)
+        .onTrue(new InstantCommand(() -> m_algaeSubsystem.setWantedState(AlgaeSubsystem.WantedState.INTAKE)));
+
+    m_operatorButtonBoxController.button(8)
+        .onTrue(new InstantCommand(() -> m_algaeSubsystem.setWantedState(AlgaeSubsystem.WantedState.DEALGAE)));
+
+    m_operatorButtonBoxController.button(9)
+        .onTrue(new InstantCommand(() -> m_algaeSubsystem.setWantedState(AlgaeSubsystem.WantedState.HOLD)));
+
+    m_operatorButtonBoxController.button(10)
+        .onTrue(new InstantCommand(() -> m_algaeSubsystem.setWantedState(AlgaeSubsystem.WantedState.EJECT)));
 
   }
 
