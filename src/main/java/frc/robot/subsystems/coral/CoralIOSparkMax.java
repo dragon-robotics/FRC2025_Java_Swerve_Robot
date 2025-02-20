@@ -3,6 +3,12 @@ package frc.robot.subsystems.coral;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix6.configs.CANdiConfiguration;
+import com.ctre.phoenix6.hardware.CANdi;
+import com.ctre.phoenix6.signals.S1CloseStateValue;
+import com.ctre.phoenix6.signals.S1FloatStateValue;
+import com.ctre.phoenix6.signals.S2CloseStateValue;
+import com.ctre.phoenix6.signals.S2FloatStateValue;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -13,10 +19,26 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import static frc.robot.Constants.CoralSubsystemConstants.*;
 
 public class CoralIOSparkMax implements CoralIO {
-  private final SparkMax m_intakeMotor = new SparkMax(MOTOR_ID, MotorType.kBrushless);
-  private final DigitalInput m_beamBreak = new DigitalInput(BEAM_BREAK_1_DIGITAL_CHANNEL);
+  private final SparkMax m_intakeMotor;
+  private final CANdi m_canDi;
+  private final CANdiConfiguration m_canDiConfigs;
 
   public CoralIOSparkMax() {
+
+    // Instantiate the intake motor //
+    m_intakeMotor = new SparkMax(MOTOR_ID, MotorType.kBrushless);
+
+    // Instantiate the CANdi Beam Break Sensor //
+    m_canDi = new CANdi(0);
+
+    // Configure the CANdi Beam Break Sensor //
+    m_canDiConfigs = new CANdiConfiguration();
+    m_canDiConfigs.DigitalInputs.S1CloseState = S1CloseStateValue.CloseWhenHigh;
+    m_canDiConfigs.DigitalInputs.S2CloseState = S2CloseStateValue.CloseWhenHigh;
+    m_canDiConfigs.DigitalInputs.S1FloatState = S1FloatStateValue.FloatDetect;
+    m_canDiConfigs.DigitalInputs.S2FloatState = S2FloatStateValue.FloatDetect;
+    m_canDi.getConfigurator().apply(m_canDiConfigs);
+
     // Intake Motor Configuration //
     SparkMaxConfig m_intakeMotorConfig = new SparkMaxConfig();
     m_intakeMotorConfig
@@ -86,7 +108,7 @@ public class CoralIOSparkMax implements CoralIO {
     inputs.intakeMotorTemperature = m_intakeMotor.getMotorTemperature();
 
     // Check if the beam break is tripped //
-    inputs.beamBreakTripped = !m_beamBreak.get();
+    inputs.beamBreakTripped = !m_canDi.getS1Closed().getValue();
 
     // Check if the current limit is tripped //
     inputs.intakeCurrentLimitTripped = m_intakeMotor.getOutputCurrent() > CORAL_DETECT_CURRENT_THRESHOLD;
