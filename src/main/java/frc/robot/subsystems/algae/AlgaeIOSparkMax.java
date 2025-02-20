@@ -49,7 +49,7 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .voltageCompensation(INTAKE_NOMINAL_VOLTAGE)
       .smartCurrentLimit(INTAKE_STALL_CURRENT_LIMIT, INTAKE_FREE_CURRENT_LIMIT)
       .secondaryCurrentLimit(INTAKE_STALL_CURRENT_LIMIT)
-      .idleMode(IdleMode.kCoast);
+      .idleMode(IdleMode.kBrake);
 
     // Intake Motor Signals Configuration //
     m_intakeMotorConfig.signals

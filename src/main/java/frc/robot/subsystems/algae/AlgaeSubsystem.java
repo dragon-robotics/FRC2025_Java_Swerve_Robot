@@ -37,6 +37,7 @@ public class AlgaeSubsystem extends SubsystemBase {
     IDLE,
     HOME,
     INTAKE,
+    DEALGAE,
     HOLD,
     EJECT,
     OFF
@@ -46,6 +47,7 @@ public class AlgaeSubsystem extends SubsystemBase {
     IDLING,
     AT_HOME,
     INTAKING,
+    DEALGAEING,
     HOLDING,
     EJECTING,
     OFF
@@ -134,6 +136,7 @@ public class AlgaeSubsystem extends SubsystemBase {
     return switch (m_wantedState) {
       case OFF -> SystemState.OFF;
       case EJECT -> SystemState.EJECTING;
+      case DEALGAE -> SystemState.DEALGAEING;
       case HOLD -> SystemState.HOLDING;
       case INTAKE -> {
         if (isCurrentLimitTripped()) {
@@ -182,6 +185,10 @@ public class AlgaeSubsystem extends SubsystemBase {
       case INTAKING:
         // Hold the arm at the INTAKing position and spin the intake to INTAKE the algae //  
         handleMotors(ARM_INTAKE_GOAL, INTAKE_SPEED);
+        break;
+      case DEALGAEING:
+        // Hold the arm at the dealgaeing position and spin the intake to dealgae the algae //
+        handleMotors(ARM_DEALGAE_GOAL, DEALGAE_SPEED);
         break;
       case HOLDING:
         // Hold the arm at the holding position and stop the intake from spinning //

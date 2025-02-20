@@ -258,11 +258,13 @@ public final class Constants {
      */
     public static final double ARM_HOME_GOAL = 0.03;
     public static final double ARM_INTAKE_GOAL = 0.13;
+    public static final double ARM_DEALGAE_GOAL = 0.2;
     public static final double ARM_HOLD_GOAL = 0.2;
     public static final double ARM_PROCESSOR_OUTTAKE_GOAL = 0.13;
 
     /* Desired intake speed for intake and outtake */
     public static final double INTAKE_SPEED = 0.5;
+    public static final double DEALGAE_SPEED = -0.8;
     public static final double OUTTAKE_SPEED = -0.5;
   }
 
