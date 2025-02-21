@@ -159,7 +159,9 @@ public class RobotContainer {
     //         .andThen(m_superstructureSubsystem.setWantedSuperStateCommand(Superstructure.WantedSuperState.DEFAULT)));
 
     m_driverController.rightBumper()
-        .whileTrue(m_superstructureSubsystem.AimAndRangeApriltag());
+        // .whileTrue(m_superstructureSubsystem.AimAndRangeApriltag())
+        .whileTrue(m_superstructureSubsystem.setWantedSuperStateCommand(Superstructure.WantedSuperState.ALIGN_TO_SCORE_CORAL))
+        .onFalse(m_superstructureSubsystem.setWantedSuperStateCommand(Superstructure.WantedSuperState.DEFAULT));
 
     // Operator button box controls //
     
@@ -168,19 +170,16 @@ public class RobotContainer {
     // Test the elevator //
     // L1 - Move to L1
     m_operatorButtonBoxController.button(1)
-        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L1)));
+        .whileTrue(m_superstructureSubsystem.setRobotStateCommand(Superstructure.WantedSuperState.ALIGN_REEF_LEFT_L1));
 
     m_operatorButtonBoxController.button(2)
-        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L2)));
+        .whileTrue(m_superstructureSubsystem.setRobotStateCommand(Superstructure.WantedSuperState.ALIGN_REEF_LEFT_L2));
 
     m_operatorButtonBoxController.button(3)
-        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L3)));
+        .whileTrue(m_superstructureSubsystem.setRobotStateCommand(Superstructure.WantedSuperState.ALIGN_REEF_LEFT_L3));
 
     m_operatorButtonBoxController.button(4)
-        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L4)));
-
-    m_operatorButtonBoxController.button(5)
-        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.HOME)));
+        .whileTrue(m_superstructureSubsystem.setRobotStateCommand(Superstructure.WantedSuperState.ALIGN_REEF_LEFT_L4));
 
     // Test the coral intake //
 

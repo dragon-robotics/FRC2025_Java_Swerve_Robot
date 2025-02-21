@@ -431,6 +431,9 @@ public class Superstructure extends SubsystemBase {
           currentSuperState = CurrentSuperState.SCORE_PROCESSOR;
         }
         break;
+      case ALIGN_TO_SCORE_CORAL:
+        currentSuperState = CurrentSuperState.ALIGN_TO_SCORE_CORAL;
+        break;
       case STOPPED:
       default:
         currentSuperState = CurrentSuperState.STOPPED;
