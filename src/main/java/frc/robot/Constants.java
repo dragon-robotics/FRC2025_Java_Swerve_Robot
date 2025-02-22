@@ -116,7 +116,7 @@ public final class Constants {
     // center, half a meter up from center.
     public static final Transform3d APTAG_ALIGN_LEFT_CAM_POS = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(8.608),
+            Units.inchesToMeters(10.608),
             Units.inchesToMeters(7.0785),
             Units.inchesToMeters(12.9575)),
         new Rotation3d(0, 0, 0));
@@ -125,7 +125,7 @@ public final class Constants {
     // center, half a meter up from center.
     public static final Transform3d APTAG_ALIGN_RIGHT_CAM_POS = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(8.608),
+            Units.inchesToMeters(10.608),
             Units.inchesToMeters(-7.0785),
             Units.inchesToMeters(12.9575)),
         new Rotation3d(0, 0, 0));
@@ -182,7 +182,7 @@ public final class Constants {
     public static final double AIM_D = 0;
     public static final double AIM_TOLERANCE = 0.5;
 
-    public static final double DESIRED_RANGE = Units.inchesToMeters(8.364); // 5.364 inches to the frame perimeter + 3 inch for bumpers
+    public static final double DESIRED_RANGE = Units.inchesToMeters(6.364); // 5.364 inches to the frame perimeter + 3 inch for bumpers
     public static final double DESIRED_YAW = 0.5;
   }
 
