@@ -4,23 +4,9 @@
 
 package frc.robot.subsystems.coral;
 
-import com.ctre.phoenix.led.ColorFlowAnimation;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import frc.robot.Constants.GeneralConstants.RobotMode;
-import frc.robot.subsystems.coral.CoralIO;
 import frc.robot.subsystems.coral.CoralIO.CoralIOInputs;
-import frc.robot.Constants.GeneralConstants;
 import static frc.robot.Constants.CoralSubsystemConstants.*;
 
-import java.util.function.BooleanSupplier;
-
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralSubsystem extends SubsystemBase {
