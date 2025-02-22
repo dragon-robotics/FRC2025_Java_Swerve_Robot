@@ -201,9 +201,9 @@ public final class Constants {
     public static final double CORAL_DETECT_CURRENT_THRESHOLD = 30.0;
 
     /* Desired intake speed for intake and outtake */
-    public static final double INTAKE_SPEED = 0.5;
-    public static final double SLOW_INTAKE_SPEED = 0.2;
-    public static final double OUTTAKE_SPEED = 0.5;
+    public static final double INTAKE_SPEED = 0.8;
+    public static final double SLOW_INTAKE_SPEED = 0.3;
+    public static final double OUTTAKE_SPEED = 0.8;
   }
 
   public static class AlgaeSubsystemConstants {
@@ -441,7 +441,7 @@ public final class Constants {
     public static final double DRIVE_KV = 0.124;
     public static final double DRIVE_KA = 0;
 
-    public static final double HEADING_KP = 7;
+    public static final double HEADING_KP = 3.5;
     public static final double HEADING_KI = 0;
     public static final double HEADING_KD = 0.5;
     public static final double HEADING_TOLERANCE = 0.01;
