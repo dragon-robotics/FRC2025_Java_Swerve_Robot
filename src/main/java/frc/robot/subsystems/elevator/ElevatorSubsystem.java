@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.elevator;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.elevator.ElevatorIO.ElevatorIOInputs;
 
@@ -42,11 +43,22 @@ public class ElevatorSubsystem extends SubsystemBase {
     return m_elevatorIOInputs.elevatorCurrentLimitTripped;
   }
 
+  public boolean isAtElevatorState() {
+    return switch(m_elevatorState){
+      case L1 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L1, 0.01);
+      case L2 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L2, 0.01);
+      case L3 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L3, 0.01);
+      case L4 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L4, 0.01);
+      case HOME -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), HOME, 0.01);
+      default -> false;
+    };
+  }
+
   /**
    * Set the height of the elevator
    * @param wantedElevatorState
    */
-  public void setHeight(ElevatorState wantedElevatorState) {
+  public void setElevatorState(ElevatorState wantedElevatorState) {
 
     m_elevatorState = wantedElevatorState;
 

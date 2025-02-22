@@ -203,6 +203,11 @@ public class ElevatorIOSparkMax implements ElevatorIO {
   }
 
   @Override
+  public double getElevatorSetpoint() {
+    return m_elevatorLeadRelEncoder.getPosition();
+  }
+
+  @Override
   public void setElevatorSetpointFF(double setpoint) {
     m_elevatorLeadController.setReference(
       setpoint,
@@ -235,6 +240,6 @@ public class ElevatorIOSparkMax implements ElevatorIO {
     inputs.elevatorCurrentLimitTripped = m_elevatorLeadMotor.getOutputCurrent() >= STALL_CURRENT_LIMIT;
 
     // Check if the elevator is at the slow down threshold //
-    inputs.elevatorAtSlowDownThreshold = m_elevatorLeadMotor.getAlternateEncoder().getPosition() >= HOME_GOAL;
+    inputs.elevatorAtSlowDownThreshold = m_elevatorLeadMotor.getAlternateEncoder().getPosition() >= HOME;
   }
 }

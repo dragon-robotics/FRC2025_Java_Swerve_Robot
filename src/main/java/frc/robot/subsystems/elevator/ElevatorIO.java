@@ -17,6 +17,10 @@ public interface ElevatorIO {
         throw new UnsupportedOperationException("setElevatorMotorPosition is not implemented");
     }
 
+    default double getElevatorSetpoint() {
+        throw new UnsupportedOperationException("getElevatorSetpoint is not implemented");
+    }
+
     default void setElevatorSetpointFF(double position) {
         throw new UnsupportedOperationException("setElevatorSetpointFF is not implemented");
     }
