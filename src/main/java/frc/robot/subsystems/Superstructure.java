@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
@@ -54,17 +55,8 @@ public class Superstructure extends SubsystemBase {
   private final RobotContainer m_container;
   private final Telemetry logger;
 
-  public enum WantedSuperState {
-    STOPPED,                        // Stopped state
-    DEFAULT,                        // Default driving state
-    DEFAULT_WITH_CORAL,             // Default driving state w/ coral
-    DEFAULT_WITH_ALGAE,             // Default driving state w/ algae
-    DEFAULT_WITH_CORAL_AND_ALGAE,   // Default driving state w/ coral and algae
-    ALIGN_INTAKE_CORAL_LEFT,
-    ALIGN_INTAKE_CORAL_RIGHT,
-    INTAKE_CORAL,
-    INTAKE_ALGAE,
-    ALIGN_REEF_LEFT_L1,
+  public enum ReefAlignmentStates {
+    ALIGN_REEF_LEFT_L1, // Default state
     ALIGN_REEF_LEFT_L2,
     ALIGN_REEF_LEFT_L3,
     ALIGN_REEF_LEFT_L4,
@@ -72,37 +64,9 @@ public class Superstructure extends SubsystemBase {
     ALIGN_REEF_RIGHT_L2,
     ALIGN_REEF_RIGHT_L3,
     ALIGN_REEF_RIGHT_L4,
-    ALIGN_TO_SCORE_CORAL,
-    SCORE_CORAL,
-    SCORE_PROCESSOR
   }
 
-  public enum CurrentSuperState {
-    STOPPED,                        // Stopped state
-    DEFAULT,                        // Default driving state
-    DEFAULT_WITH_CORAL,             // Default driving state w/ coral
-    DEFAULT_WITH_ALGAE,             // Default driving state w/ algae
-    DEFAULT_WITH_CORAL_AND_ALGAE,   // Default driving state w/ coral and algae
-    ALIGN_INTAKE_CORAL_LEFT,
-    ALIGN_INTAKE_CORAL_RIGHT,
-    INTAKE_CORAL,
-    INTAKE_ALGAE,
-    ALIGN_REEF_LEFT_L1,
-    ALIGN_REEF_LEFT_L2,
-    ALIGN_REEF_LEFT_L3,
-    ALIGN_REEF_LEFT_L4,
-    ALIGN_REEF_RIGHT_L1,
-    ALIGN_REEF_RIGHT_L2,
-    ALIGN_REEF_RIGHT_L3,
-    ALIGN_REEF_RIGHT_L4,
-    ALIGN_TO_SCORE_CORAL,
-    SCORE_CORAL,
-    SCORE_PROCESSOR
-  }
-
-  private WantedSuperState wantedSuperState;
-  private CurrentSuperState currentSuperState;
-  private CurrentSuperState previousSuperState;
+  private ReefAlignmentStates m_reefAlignmentState;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive;
@@ -121,7 +85,7 @@ public class Superstructure extends SubsystemBase {
 
   private boolean useLeftCamera;
   private boolean intakeCoralLeft;
-  private ElevatorSubsystem.WantedState elevatorWantedState;
+  private ElevatorSubsystem.ElevatorState elevatorWantedState;
 
   /** Creates a new Superstructure. */
   public Superstructure(
@@ -182,8 +146,7 @@ public class Superstructure extends SubsystemBase {
     driveMaintainHeading.HeadingController.setTolerance(SwerveConstants.HEADING_TOLERANCE);
 
     // Instantiate current and wanted super states as stopped //
-    wantedSuperState = WantedSuperState.STOPPED;
-    currentSuperState = CurrentSuperState.STOPPED;
+    m_reefAlignmentState = ReefAlignmentStates.ALIGN_REEF_LEFT_L1;
 
     // Instantiate current heading as empty //
     currentHeading = Optional.empty(); // Keeps track of current heading
@@ -192,7 +155,7 @@ public class Superstructure extends SubsystemBase {
     rotationLastTriggered = 0.0;
 
     // Instantiate the elevator wanted state as home //
-    elevatorWantedState = ElevatorSubsystem.WantedState.HOME;
+    elevatorWantedState = ElevatorSubsystem.ElevatorState.HOME;
 
     // Default we use the right camera //
     useLeftCamera = false;
@@ -286,6 +249,70 @@ public class Superstructure extends SubsystemBase {
     }, m_swerve);
   }
 
+  // Elevator Subsystem Commands //
+
+  public Command ElevatorHome() {
+    Command homeElevator = new InstantCommand(() -> {
+      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
+    }, m_elevator);
+
+    return homeElevator;
+  }
+
+  public Command ElevatorL1() {
+    Command setElevatorL1 = new InstantCommand(() -> {
+      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
+    }, m_elevator);
+
+    return setElevatorL1;
+  }
+
+  public Command ElevatorL2() {
+    Command setElevatorL2 = new InstantCommand(() -> {
+      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L2);
+    }, m_elevator);
+
+    return setElevatorL2;
+  }
+
+  public Command ElevatorL3() {
+    Command setElevatorL3 = new InstantCommand(() -> {
+      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L3);
+    }, m_elevator);
+
+    return setElevatorL3;
+  }
+
+  public Command ElevatorL4() {
+    Command setElevatorL4 = new InstantCommand(() -> {
+      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L4);
+    }, m_elevator);
+
+    return setElevatorL4;
+  }
+
+  // Coral Subsystem Commands //
+
+  public Command IntakeCoral(){
+
+    Command setRobotheading = new InstantCommand(() -> {
+      // Set the robot heading to the coral station angle for intake //
+      currentHeading = intakeCoralLeft ? 
+        Optional.of(GeneralConstants.LEFT_CORAL_STATION_INTAKE_ANGLE) : // If left, set to left side angle
+        Optional.of(GeneralConstants.RIGHT_CORAL_STATION_INTAKE_ANGLE); // If right, set to right side angle
+    });
+
+    Command engageCoralIntake = new InstantCommand(
+      () -> m_coral.setCoralState(CoralSubsystem.CoralState.INTAKE),
+      m_coral
+    );
+
+    Command runUntilCoralIsDetected = new WaitUntilCommand(() -> m_coral.hasCoral());
+
+    // Run until the beambreak or current limit is tripped // 
+    return setRobotheading.andThen(engageCoralIntake);
+  }
+
   public Command AimAndRangeApriltag() {
     return new RunCommand(() -> {
       // Read in relevant data from the Camera
@@ -370,283 +397,116 @@ public class Superstructure extends SubsystemBase {
     .until(() -> visionRangePID.atSetpoint() && visionAimPID.atSetpoint());
   }
 
-  public Command SwerveBrake() {
-    return m_swerve.applyRequest(() -> brake);
+  public Command AlignToScoreCoral(){
+
+    Command autoDriveToReefStation = AimAndRangeApriltag();
+
+    Command setElevatorLevel = new InstantCommand(() -> {
+      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
+    }, m_elevator);
+
+    Command waitUntilElevatorIsAtLevel = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+
+    return autoDriveToReefStation
+          .andThen(setElevatorLevel)
+          .andThen(waitUntilElevatorIsAtLevel);
   }
 
-  public Command SeedFieldCentric() {
-    return m_swerve.runOnce(() -> m_swerve.seedFieldCentric());
+  public Command ScoreCoral() {
+    Command scoreCoral = new InstantCommand(
+      () -> m_coral.setCoralState(CoralSubsystem.CoralState.EJECT),
+      m_coral
+    );
+
+    return scoreCoral;
   }
 
-  private CurrentSuperState handleStateTransitions() {
-    previousSuperState = currentSuperState;
-    switch (wantedSuperState) {
-      case DEFAULT:
-        if (m_coral.hasCoral() && m_algae.hasAlgae()) {
-          currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL_AND_ALGAE;
-        } else if (m_coral.hasCoral()) {
-          currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL;
-        } else if (m_algae.hasAlgae()) {
-          currentSuperState = CurrentSuperState.DEFAULT_WITH_ALGAE;
-        } else {
-          currentSuperState = CurrentSuperState.DEFAULT;
-        }
-        break;
-      case DEFAULT_WITH_CORAL:
-        currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL;
-        break;
-      case DEFAULT_WITH_ALGAE:
-        currentSuperState = CurrentSuperState.DEFAULT_WITH_ALGAE;
-        break;
-      case DEFAULT_WITH_CORAL_AND_ALGAE:
-        currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL_AND_ALGAE;
-        break;
-      case INTAKE_CORAL:
-        if (m_coral.hasCoral() && m_algae.hasAlgae()) {
-          currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL_AND_ALGAE;
-        } else if (m_coral.hasCoral()) {
-          currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL;
-        } else {
-          currentSuperState = CurrentSuperState.INTAKE_CORAL;
-        }
-        break;
-      case INTAKE_ALGAE:
-        if (m_coral.hasCoral() && m_algae.hasAlgae()) {
-          currentSuperState = CurrentSuperState.DEFAULT_WITH_CORAL_AND_ALGAE;
-        } else if (m_algae.hasAlgae()) {
-          currentSuperState = CurrentSuperState.DEFAULT_WITH_ALGAE;
-        } else {
-          currentSuperState = CurrentSuperState.INTAKE_ALGAE;
-        }
-        break;
-      case SCORE_CORAL:
-        // If the robot has no coral, else do nothing //
-        if (m_coral.hasCoral()) {
-          currentSuperState = CurrentSuperState.SCORE_CORAL;
-        }
-        break;
-      case SCORE_PROCESSOR:
-        // If the robot has no algae, else do nothing //
-        if (m_algae.hasAlgae()) {
-          currentSuperState = CurrentSuperState.SCORE_PROCESSOR;
-        }
-        break;
-      case STOPPED:
-      default:
-        currentSuperState = CurrentSuperState.STOPPED;
-        break;
-    }
-    return currentSuperState;
+  // Algae Subsystem Commands //
+
+  public Command IntakeAlgae(){
+
+    Command engageAlgaeIntake = new InstantCommand(
+      () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE),
+      m_algae
+    );
+
+    Command runUntilAlgaeIsDetected = new WaitUntilCommand(() -> m_algae.hasAlgae());
+
+    Command holdAlgae = new InstantCommand(
+      () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD),
+      m_algae
+    );
+
+    // Run until the beambreak or current limit is tripped // 
+    return engageAlgaeIntake;
   }
 
-  private void applyStates() {
-    switch (currentSuperState) {
-      case DEFAULT:
-        setDefault(false, false);
-        break;
-      case DEFAULT_WITH_CORAL:
-        setDefault(true, false);
-        break;
-      case DEFAULT_WITH_ALGAE:
-        setDefault(false, true);
-        break;
-      case DEFAULT_WITH_CORAL_AND_ALGAE:
-        setDefault(true, true);
-        break;
-      case INTAKE_CORAL:
-        intakeCoral(intakeCoralLeft);
-        break;
-      case INTAKE_ALGAE:
-        intakeAlgae();
-        break;
-      case ALIGN_TO_SCORE_CORAL:
-        alignToScoreCoral();
-        break;
-      case SCORE_CORAL:
-        // If there is a coral in the robot, score it, otherwise, do nothing //
-        if (m_coral.hasCoral()) {
-          m_coral.setWantedState(CoralSubsystem.WantedState.EJECT);
-        }
-        break;
-      case SCORE_PROCESSOR:
-        scoreAlgae();
-        break;
-      case STOPPED:
-      default:
-        stopped();
-        break;
-    }
+  public Command DeAlgaeify() {
+    Command engageAlgaeDeAlgaeify = new InstantCommand(
+      () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE),
+      m_algae
+    );
+
+    return engageAlgaeDeAlgaeify;
   }
 
-  private void setDefault(boolean hasCoral, boolean hasAlgae) {
-    if(hasCoral && hasAlgae){
-      // Default state with coral and algae //
-      m_coral.setWantedState(CoralSubsystem.WantedState.HOLD);
-      m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
-      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOLD);
-    } else if (hasCoral && !hasAlgae){
-      // Default state with coral //
-      m_coral.setWantedState(CoralSubsystem.WantedState.HOLD);
-      m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
-      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOME);
-    } else if (!hasCoral && hasAlgae){
-      // Default state with algae //
-      m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
-      m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
-      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOLD);
-    } else {
-      // Default state without coral or algae on robot //
-      m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
-      m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
-      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOME);
-    }
-  }
+  public Command ScoreAlgae() {
+    Command scoreAlgae = new InstantCommand(
+      () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.EJECT),
+      m_algae
+    );
 
-  private void intakeCoral(boolean left) {
-
-    // Set coral to intake //
-    m_coral.setWantedState(CoralSubsystem.WantedState.INTAKE);
-    // Set elevator to home //
-    m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
-
-    // If the algae is already in the robot, hold the algae, otherwise, set algae to home //
-    if (m_algae.hasAlgae()) {
-      // Set algae to hold //
-      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOLD);
-    } else {
-      // Set algae to home //
-      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOME);
-    }
-
-    // Set drivetrain to the left coral station angle for intake //
-    currentHeading = left ?
-        Optional.of(GeneralConstants.LEFT_CORAL_STATION_INTAKE_ANGLE) : // If left, set to left side angle
-        Optional.of(GeneralConstants.RIGHT_CORAL_STATION_INTAKE_ANGLE); // If right, set to right side angle
-  }
-
-  private void intakeAlgae() {
-
-    // If the coral is already in the robot, hold the coral, otherwise, set coral to home //
-    if (m_coral.hasCoral()) {
-      // Set coral to hold //
-      m_coral.setWantedState(CoralSubsystem.WantedState.HOLD);
-    } else {
-      // Set coral to idle //
-      m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
-    }
-
-    // Set elevator to home //
-    m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
-    // Set algae to intake //
-    m_algae.setWantedState(AlgaeSubsystem.WantedState.INTAKE);
-  }
-
-  private void alignToScoreCoral() {
-    // If the algae is already in the robot, hold the algae, otherwise, set algae to home //
-    if (m_algae.hasAlgae()) {
-      // Set algae to hold //
-      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOLD);
-    } else {
-      // Set algae to home //
-      m_algae.setWantedState(AlgaeSubsystem.WantedState.HOME);
-    }
-
-    // Set the coral to hold //
-    m_coral.setWantedState(CoralSubsystem.WantedState.HOLD);
-
-    // Set the elevator to the wanted state //
-    m_elevator.setWantedState(elevatorWantedState);
-  }
-
-  private void scoreAlgae() {
-    // If the coral is already in the robot, hold the coral, otherwise, set coral to idle //
-    if (m_coral.hasCoral()) {
-      // Set coral to hold //
-      m_coral.setWantedState(CoralSubsystem.WantedState.HOLD);
-    } else {
-      // Set coral to idle //
-      m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
-    }
-    // Set the elevator to home //
-    m_elevator.setWantedState(ElevatorSubsystem.WantedState.HOME);
-    // Set the algae to eject //
-    m_algae.setWantedState(AlgaeSubsystem.WantedState.EJECT);
-  }
-  
-  private void stopped() {
-    // Set the coral to idle //
-    m_coral.setWantedState(CoralSubsystem.WantedState.IDLE);
-    // Set the elevator to idle //
-    m_elevator.setWantedState(ElevatorSubsystem.WantedState.IDLE);
-    // Set the algae to idle //
-    m_algae.setWantedState(AlgaeSubsystem.WantedState.IDLE);
-    // Set the swerve drive to stop //
-    m_swerve.setControl(drive.withVelocityX(0).withVelocityY(0).withRotationalRate(0));
-  }
-
-  /** State pushers */
-  public void setWantedSuperState(WantedSuperState wantedSuperState) {
-    this.wantedSuperState = wantedSuperState;
-  }
-
-  public Command setWantedSuperStateCommand(WantedSuperState wantedSuperState) {
-    return new InstantCommand(() -> setWantedSuperState(wantedSuperState));
+    return scoreAlgae;
   }
 
   /** Robot state configurations - operator (2nd driver) sets up what the score button does */
-  public void setRobotState(WantedSuperState wantedSuperState) {
-    switch(wantedSuperState){
+  public void setReefAlignment(ReefAlignmentStates wantedReefAlignmentState) {
+    switch(wantedReefAlignmentState){
       case ALIGN_REEF_LEFT_L1:
-        elevatorWantedState = ElevatorSubsystem.WantedState.L1; // Set the elevator to L1
-        useLeftCamera = true;                                   // Use the left camera
+        elevatorWantedState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
+        useLeftCamera = true;                                     // Use the left camera
         break;
       case ALIGN_REEF_LEFT_L2:
-        elevatorWantedState = ElevatorSubsystem.WantedState.L2; // Set the elevator to L2
-        useLeftCamera = true;                                   // Use the left camera
+        elevatorWantedState = ElevatorSubsystem.ElevatorState.L2; // Set the elevator to L2
+        useLeftCamera = true;                                     // Use the left camera
         break;
       case ALIGN_REEF_LEFT_L3:
-        elevatorWantedState = ElevatorSubsystem.WantedState.L3; // Set the elevator to L1
-        useLeftCamera = true;                                   // Use the left camera
+        elevatorWantedState = ElevatorSubsystem.ElevatorState.L3; // Set the elevator to L1
+        useLeftCamera = true;                                     // Use the left camera
         break;
       case ALIGN_REEF_LEFT_L4:
-        elevatorWantedState = ElevatorSubsystem.WantedState.L4; // Set the elevator to L1
-        useLeftCamera = true;                                   // Use the left camera
+        elevatorWantedState = ElevatorSubsystem.ElevatorState.L4; // Set the elevator to L1
+        useLeftCamera = true;                                     // Use the left camera
         break;
       case ALIGN_REEF_RIGHT_L1:
-        elevatorWantedState = ElevatorSubsystem.WantedState.L1; // Set the elevator to L1
-        useLeftCamera = false;                                  // Use the right camera
+        elevatorWantedState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
+        useLeftCamera = false;                                    // Use the right camera
         break;
       case ALIGN_REEF_RIGHT_L2:
-        elevatorWantedState = ElevatorSubsystem.WantedState.L2; // Set the elevator to L1
-        useLeftCamera = false;                                  // Use the right camera
+        elevatorWantedState = ElevatorSubsystem.ElevatorState.L2; // Set the elevator to L1
+        useLeftCamera = false;                                    // Use the right camera
         break;
       case ALIGN_REEF_RIGHT_L3:
-        elevatorWantedState = ElevatorSubsystem.WantedState.L3; // Set the elevator to L3
-        useLeftCamera = false;                                  // Use the right camera
+        elevatorWantedState = ElevatorSubsystem.ElevatorState.L3; // Set the elevator to L3
+        useLeftCamera = false;                                    // Use the right camera
         break;
       case ALIGN_REEF_RIGHT_L4:
-        elevatorWantedState = ElevatorSubsystem.WantedState.L4; // Set the elevator to L4
-        useLeftCamera = false;                                  // Use the right camera
+        elevatorWantedState = ElevatorSubsystem.ElevatorState.L4; // Set the elevator to L4
+        useLeftCamera = false;                                    // Use the right camera
         break;
-      case ALIGN_INTAKE_CORAL_LEFT:
-        intakeCoralLeft = true;
-        break;
-      case ALIGN_INTAKE_CORAL_RIGHT:
-        intakeCoralLeft = false;
-        break;        
       default:
+        elevatorWantedState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
+        useLeftCamera = true;                                     // Use the left camera
         break;
     }
   }
 
-  public Command setRobotStateCommand(WantedSuperState wantedSuperState) {
-    return new InstantCommand(() -> setRobotState(wantedSuperState));
+  public Command setReefAlignmentCommand(ReefAlignmentStates wantedReefAlignmentState) {
+    return new InstantCommand(() -> setReefAlignment(wantedReefAlignmentState));
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    currentSuperState = handleStateTransitions();
-    applyStates();
   }
 }
