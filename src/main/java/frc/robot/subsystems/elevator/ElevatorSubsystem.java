@@ -43,61 +43,24 @@ public class ElevatorSubsystem extends SubsystemBase {
   // @TODO: Create Elastic Tabs for the Elevator Subsystem //
   
   // Algae Subsystem States //
-  public enum WantedState {
+  public enum ElevatorState {
     IDLE,
     HOME,
     L1,
     L2,
     L3,
     L4,
-    OFF
-  }
-
-  public enum SystemState {
-    IDLING,
-    AT_HOME,
-    AT_L1,
-    AT_L2,
-    AT_L3,
-    AT_L4,
-    OFF
   }
 
   private ElevatorIO m_elevatorIO;
-  private ElevatorIOInputs m_elevatorIOInputs = new ElevatorIOInputs();
-
-  private WantedState m_wantedState = WantedState.HOME;
-  private SystemState m_systemState = SystemState.AT_HOME;
-
-  // // Elevator Simulation //
-  // private final DCMotor m_elevatorGearbox = DCMotor.getNEO(1);
-  // private final SparkMaxSim m_elevatorLeftSim = new SparkMaxSim(m_elevatorLeft, m_elevatorGearbox);
-  // private final SparkMaxSim m_elevatorRightSim = new SparkMaxSim(m_elevatorRight, m_elevatorGearbox);
-
-  // // Simulation classes help us simulate what's going on, including gravity.
-  // private final ElevatorSim m_elevatorSim =
-  //     new ElevatorSim(
-  //         m_elevatorGearbox,
-  //         ElevatorConstants.kElevatorGearing,
-  //         ElevatorConstants.kCarriageMass,
-  //         ElevatorConstants.kElevatorDrumRadius,
-  //         ElevatorConstants.kMinElevatorHeightMeters,
-  //         ElevatorConstants.kMaxElevatorHeightMeters,
-  //         true,
-  //         0,
-  //         0.01,
-  //         0.0);
-
-  // // Create a Mechanism2d visualization of the elevator
-  // private final Mechanism2d         m_mech2d         = new Mechanism2d(20, 12);
-  // private final MechanismRoot2d     m_mech2dRoot     = m_mech2d.getRoot("Elevator Root", 10, 0);
-  // private final MechanismLigament2d m_elevatorMech2d =
-  //     m_mech2dRoot.append(
-  //         new MechanismLigament2d("Elevator", m_elevatorSim.getPositionMeters(), 90));
+  private ElevatorState m_elevatorState;
+  private ElevatorIOInputs m_elevatorIOInputs;
 
   /** Creates a new ClimberSubsystem. */
   public ElevatorSubsystem(ElevatorIO elevatorIO) {
     m_elevatorIO = elevatorIO;
+    m_elevatorState = ElevatorState.IDLE;
+    m_elevatorIOInputs = new ElevatorIOInputs();
   }
 
   /*
@@ -109,27 +72,35 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   /**
-   * Set the wanted state of the elevator
-   * @param wantedState
+   * Set the height of the elevator
+   * @param wantedElevatorState
    */
-  public void setWantedState(WantedState wantedState) {
-    m_wantedState = wantedState;
-  }
+  public void setHeight(ElevatorState wantedElevatorState) {
 
-  /**
-   * Handle the state transition
-   * @return the new state
-   */
-  private SystemState handleStateTransition() {
-    return switch (m_wantedState) {
-      case OFF -> SystemState.OFF;
-      case L1 -> SystemState.AT_L1;
-      case L2 -> SystemState.AT_L2;
-      case L3 -> SystemState.AT_L3;
-      case L4 -> SystemState.AT_L4;
-      case HOME -> SystemState.AT_HOME;
-      default -> SystemState.AT_HOME;
-    };
+    m_elevatorState = wantedElevatorState;
+
+    switch(m_elevatorState){
+      case L1:
+        m_elevatorIO.setElevatorMotorSetpoint(L1);
+        break;
+      case L2:
+        m_elevatorIO.setElevatorMotorSetpoint(L2);
+        break;
+      case L3:
+        m_elevatorIO.setElevatorMotorSetpoint(L3);
+        break;
+      case L4:
+        m_elevatorIO.setElevatorMotorSetpoint(L4);
+        break;
+      case HOME:
+        m_elevatorIO.setElevatorMotorSetpoint(HOME);
+        break;
+      case IDLE:
+        // Stop the motors if the wanted state is IDLE //
+        m_elevatorIO.setElevatorMotorPercentage(0);
+      default:
+        break;
+    }
   }
 
   @Override
@@ -138,51 +109,5 @@ public class ElevatorSubsystem extends SubsystemBase {
     
     // Update inputs
     m_elevatorIO.updateInputs(m_elevatorIOInputs);
-
-    // Get the new state //
-    SystemState newState = handleStateTransition();
-    if (newState != m_systemState) {
-      m_systemState = newState;
-    }
-
-    if (DriverStation.isDisabled()) {
-      m_systemState = SystemState.AT_HOME;
-    }
-
-    // If the current limit is tripped (e.g. the elevator is at the top or bottom), stop the motor
-    if (isCurrentLimitTripped()) {
-      // If the elevator is at the bottom, set the encoder to 0 //
-      if (m_elevatorIOInputs.elevatorLeadMotorPosition > HOME_GOAL) {
-        m_elevatorIO.seedElevatorMotorEncoderPosition(0);
-      }
-      // Stop the motor on the elevator //
-      m_systemState = SystemState.IDLING;
-    }
-
-    // Handle the state transition //
-    switch (m_systemState) {
-      case IDLING:
-        m_elevatorIO.setElevatorMotorPercentage(0);
-        break;
-      case AT_HOME:
-        m_elevatorIO.setElevatorMotorSetpoint(HOME_GOAL);
-        break;
-      case AT_L1:
-        m_elevatorIO.setElevatorMotorSetpoint(L1);
-        break;
-      case AT_L2:
-        m_elevatorIO.setElevatorMotorSetpoint(L2);
-        break;
-      case AT_L3:
-        m_elevatorIO.setElevatorMotorSetpoint(L3);
-        break;
-      case AT_L4:
-        m_elevatorIO.setElevatorMotorSetpoint(L4);
-        break;
-      case OFF:
-        break;
-      default:
-        break;
-    }
   }
 }

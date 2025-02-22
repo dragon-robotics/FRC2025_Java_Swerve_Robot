@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.coral;
 
+import com.ctre.phoenix.led.ColorFlowAnimation;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -27,45 +28,28 @@ public class CoralSubsystem extends SubsystemBase {
   // @TODO: Create Elastic Tabs for the Intake Subsystem //
 
   // Coral Subsystem States //
-  public enum WantedState {
+  public enum CoralState {
     IDLE,
     INTAKE,
     SLOW_INTAKE,
     HOLD,
     EJECT,
-    OFF
-  }
-
-  public enum SystemState {
-    IDLING,
-    INTAKING,
-    SLOW_INTAKING,
-    HOLDING,
-    EJECTING,
-    OFF
   }
 
   private CoralIO m_coralIO;
-  private CoralIOInputs m_coralIOInputs = new CoralIOInputs();
+  private CoralState m_coralState;
+  private CoralIOInputs m_coralIOInputs;
 
-  private WantedState m_wantedState = WantedState.IDLE;
-  private SystemState m_systemState = SystemState.IDLING;
-
-  public boolean m_hasCoral = false;
+  private boolean m_hasCoral;
 
   /**
    * Creates a new IntakeSubsystem.
    */
   public CoralSubsystem(CoralIO coralIO) {
     m_coralIO = coralIO;
-  }
-
-  /*
-   * Check if current limit is tripped
-   * @return true if current limit is tripped
-   */
-  public boolean isBeamBreakTripped() {
-    return m_coralIOInputs.beamBreakTripped;
+    m_coralIOInputs = new CoralIOInputs();
+    m_coralState = CoralState.IDLE;
+    m_hasCoral = false; // The robot initially has no coral
   }
 
   /**
@@ -76,49 +60,39 @@ public class CoralSubsystem extends SubsystemBase {
   }
 
   /**
-   * Set the wanted state of the coral intake
-   * @param wantedState
+   * Set whether the coral intake has a coral
+   * @param hasCoral
    */
-  public void setWantedState(WantedState wantedState) {
-    m_wantedState = wantedState;
+  public void setHasCoral(boolean hasCoral) {
+    m_hasCoral = hasCoral;
   }
 
   /**
-   * Get the current state of the coral intake
-   * @return m_systemState
+   * Set the state of the coral intake
+   * @param wantedCoralState
    */
-  public SystemState getSystemState() {
-    return m_systemState;
-  }
+  public void setCoralState(CoralState wantedCoralState){
 
-  /**
-   * Handle the state transition
-   * @return the new state
-   */
-  private SystemState handleStateTransition() {
-    return switch (m_wantedState) {
-      case OFF -> SystemState.OFF;
-      case EJECT -> SystemState.EJECTING;
-      case HOLD -> {
-        if (isBeamBreakTripped()) {
-          yield SystemState.HOLDING;
-        }
-        yield SystemState.IDLING;
-      }
-      case SLOW_INTAKE -> {
-        if (!isBeamBreakTripped()) {
-          yield SystemState.HOLDING;
-        }
-        yield SystemState.SLOW_INTAKING;
-      }
-      case INTAKE -> {
-        if (isBeamBreakTripped()) {
-          yield SystemState.SLOW_INTAKING;
-        }
-        yield SystemState.INTAKING;
-      }
-      default -> SystemState.IDLING;
-    };
+    m_coralState = wantedCoralState;
+
+    switch(m_coralState){
+      case INTAKE:
+        m_coralIO.setIntakeMotorPercentage(INTAKE_SPEED);
+        break;
+      case SLOW_INTAKE:
+        m_coralIO.setIntakeMotorPercentage(SLOW_INTAKE_SPEED);
+        break;
+      case HOLD:
+        m_coralIO.setIntakeMotorPercentage(0);
+        break;
+      case EJECT:
+        m_coralIO.setIntakeMotorPercentage(OUTTAKE_SPEED);
+        break;
+      case IDLE:
+      default:
+        m_coralIO.setIntakeMotorPercentage(0);
+        break;
+    }
   }
 
   @Override
@@ -127,44 +101,5 @@ public class CoralSubsystem extends SubsystemBase {
     
     // Update inputs
     m_coralIO.updateInputs(m_coralIOInputs);
-    
-    // Get the new state //
-    SystemState newState = handleStateTransition();
-    if(newState != m_systemState) {
-      m_systemState = newState;
-    }
-
-    // Stop moving when the robot is disabled //
-    if (DriverStation.isDisabled()) {
-      m_systemState = SystemState.IDLING;
-    }
-
-    // Handle the state transitions //
-    switch (m_systemState) {
-      case IDLING:
-        m_coralIO.setIntakeMotorPercentage(0);
-        break;
-      case INTAKING:
-        m_coralIO.setIntakeMotorPercentage(INTAKE_SPEED);
-        break;
-      case SLOW_INTAKING:
-        m_coralIO.setIntakeMotorPercentage(SLOW_INTAKE_SPEED);
-        setWantedState(WantedState.SLOW_INTAKE); // Slowly intake until the beam break is untripped again
-        break;
-      case HOLDING:
-        m_coralIO.setIntakeMotorPercentage(0);
-        m_hasCoral = true;
-        break;
-      case EJECTING:
-        m_coralIO.setIntakeMotorPercentage(OUTTAKE_SPEED);
-        m_hasCoral = false;
-        break;
-      case OFF:
-        m_coralIO.setIntakeMotorPercentage(0);
-        break;
-      default:
-        m_coralIO.setIntakeMotorPercentage(0);
-        break;
-    }
   }
 }
