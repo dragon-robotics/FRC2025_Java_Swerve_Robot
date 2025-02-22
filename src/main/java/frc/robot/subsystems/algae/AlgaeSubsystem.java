@@ -91,6 +91,14 @@ public class AlgaeSubsystem extends SubsystemBase {
     }
   }
 
+  public void setAlgaeIntakeMotorSpeed(double speed) {
+    m_algaeIO.setIntakeMotorPercentage(speed);
+  }
+
+  public void setAlgaeArmMotorSpeed(double speed) {
+    m_algaeIO.setArmMotorPercentage(speed);
+  }
+
   /**
    * Handles the action of the intake and the arm motors for each state
    */

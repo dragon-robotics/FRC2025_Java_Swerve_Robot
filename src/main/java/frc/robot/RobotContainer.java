@@ -7,6 +7,8 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.Teleop.MoveAlgaeManually;
+import frc.robot.commands.Teleop.MoveCoralManually;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.algae.AlgaeIOSparkMax;
@@ -19,11 +21,9 @@ import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -124,6 +124,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
 
+    // Swerve Drive Default Command //
     m_swerveDriveSubsystem.setDefaultCommand(
         m_superstructureSubsystem.DefaultDriveCommand(
           () -> -m_driverController.getLeftY(),
@@ -131,6 +132,34 @@ public class RobotContainer {
           () -> -m_driverController.getRightX(),
           () -> m_driverController.getHID().getXButton())
       );
+
+    // Coral Subsystem Default Command //
+    m_coralSubsystem.setDefaultCommand(
+        new InstantCommand(() -> m_coralSubsystem.setCoralState(CoralSubsystem.CoralState.IDLE))
+            .andThen(
+                new MoveCoralManually(
+                    m_coralSubsystem,
+                    () -> (m_operatorController.getLeftTriggerAxis() - m_operatorController.getRightTriggerAxis()))));
+
+    // Algae Subsystem Default Command //
+    m_algaeSubsystem.setDefaultCommand(
+        new InstantCommand(() -> m_algaeSubsystem.setAlgaeState(AlgaeSubsystem.AlgaeState.IDLE))
+            .andThen(
+                    new MoveAlgaeManually(
+                        m_algaeSubsystem,
+                        () -> m_operatorController.getLeftY(),
+                        () -> m_operatorController.getRightY())));
+
+    // Elevator Subsystem Default Commands //
+    m_operatorController.povUp().whileTrue(
+        new InstantCommand(() -> m_elevatorSubsystem.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE))
+            .andThen(new InstantCommand(() -> m_elevatorSubsystem.setElevatorMotorSpeed(-0.2))))
+            .onFalse(new InstantCommand(() -> m_elevatorSubsystem.setElevatorMotorSpeed(0)));
+
+    m_operatorController.povDown().whileTrue(
+        new InstantCommand(() -> m_elevatorSubsystem.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE))
+            .andThen(new InstantCommand(() -> m_elevatorSubsystem.setElevatorMotorSpeed(0.2))))
+            .onFalse(new InstantCommand(() -> m_elevatorSubsystem.setElevatorMotorSpeed(0)));
 
     // Use the "A" button to reset the Gyro orientation //
     m_driverController.a().onTrue(m_superstructureSubsystem.SeedFieldCentric());
@@ -140,23 +169,7 @@ public class RobotContainer {
 
     // Press the left bumper to trigger coral intake //
     m_driverController.leftBumper()
-        .onTrue(
-            m_superstructureSubsystem.setWantedSuperStateCommand(
-                Superstructure.WantedSuperState.INTAKE_CORAL));
-
-    // // Press the right bumper to align robot to tag + left/right offset + raise elevator
-    // // Release the right bumper to score the coral and reset to default state //
-    // m_driverController.rightBumper()
-    //     .whileTrue(
-    //         new ParallelCommandGroup(
-    //             m_superstructureSubsystem.AimAndRangeApriltag(),
-    //             m_superstructureSubsystem.setWantedSuperStateCommand(
-    //                 Superstructure.WantedSuperState.ALIGN_TO_SCORE_CORAL)))
-    //     .onFalse(
-    //         m_superstructureSubsystem.setWantedSuperStateCommand(Superstructure.WantedSuperState.SCORE_CORAL)
-    //         .andThen(new InstantCommand(() -> m_swerveDriveSubsystem.setOperatorPerspectiveForward(Rotation2d.kZero)));
-    //         .andThen(new WaitCommand(0.5)) // Wait for the coral to be scored
-    //         .andThen(m_superstructureSubsystem.setWantedSuperStateCommand(Superstructure.WantedSuperState.DEFAULT)));
+        .onTrue(m_superstructureSubsystem.IntakeCoral());
 
     m_driverController.rightBumper()
         .whileTrue(m_superstructureSubsystem.AimAndRangeApriltag());
@@ -168,38 +181,37 @@ public class RobotContainer {
     // Test the elevator //
     // L1 - Move to L1
     m_operatorButtonBoxController.button(1)
-        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L1)));
+        .onTrue(m_superstructureSubsystem.ElevatorHome());
 
     m_operatorButtonBoxController.button(2)
-        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L2)));
+        .onTrue(m_superstructureSubsystem.ElevatorL1());
 
     m_operatorButtonBoxController.button(3)
-        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L3)));
+        .onTrue(m_superstructureSubsystem.ElevatorL2());
 
     m_operatorButtonBoxController.button(4)
-        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.L4)));
+        .onTrue(m_superstructureSubsystem.ElevatorL3());
 
     m_operatorButtonBoxController.button(5)
-        .onTrue(new InstantCommand(() -> m_elevatorSubsystem.setWantedState(ElevatorSubsystem.WantedState.HOME)));
+        .onTrue(m_superstructureSubsystem.ElevatorL4());
 
     // Test the coral intake //
 
     // Test the algae arm and intake //
     m_operatorButtonBoxController.button(6)
-        .onTrue(new InstantCommand(() -> m_algaeSubsystem.setWantedState(AlgaeSubsystem.WantedState.HOME)));
+        .whileTrue(m_superstructureSubsystem.AlgaeArmHome());
 
     m_operatorButtonBoxController.button(7)
-        .onTrue(new InstantCommand(() -> m_algaeSubsystem.setWantedState(AlgaeSubsystem.WantedState.INTAKE)));
+        .whileTrue(m_superstructureSubsystem.AlgaeArmIntake());
 
     m_operatorButtonBoxController.button(8)
-        .onTrue(new InstantCommand(() -> m_algaeSubsystem.setWantedState(AlgaeSubsystem.WantedState.DEALGAE)));
+        .whileTrue(m_superstructureSubsystem.AlgaeArmDeAlgaeify());
 
     m_operatorButtonBoxController.button(9)
-        .onTrue(new InstantCommand(() -> m_algaeSubsystem.setWantedState(AlgaeSubsystem.WantedState.HOLD)));
+        .whileTrue(m_superstructureSubsystem.AlgaeArmHold());
 
     m_operatorButtonBoxController.button(10)
-        .onTrue(new InstantCommand(() -> m_algaeSubsystem.setWantedState(AlgaeSubsystem.WantedState.EJECT)));
-
+        .whileTrue(m_superstructureSubsystem.AlgaeArmEject());
   }
 
   /**

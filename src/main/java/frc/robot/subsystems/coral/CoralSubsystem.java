@@ -81,6 +81,13 @@ public class CoralSubsystem extends SubsystemBase {
     }
   }
 
+  /**
+   * Set the motor speeds manually
+   */
+  public void setCoralMotorSpeeds(double intakeSpeed){
+    m_coralIO.setIntakeMotorPercentage(intakeSpeed);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

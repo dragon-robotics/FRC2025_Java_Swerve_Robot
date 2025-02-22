@@ -167,6 +167,8 @@ public class Superstructure extends SubsystemBase {
     m_swerve.registerTelemetry(logger::telemeterize);
   }
 
+  // Swerve Drive Subsystem Commands //
+
   public Command DefaultDriveCommand(
       DoubleSupplier translationSup,
       DoubleSupplier strafeSup,
@@ -247,6 +249,14 @@ public class Superstructure extends SubsystemBase {
       }
 
     }, m_swerve);
+  }
+
+  public Command SwerveBrake() {
+    return m_swerve.applyRequest(() -> brake);
+  }
+
+  public Command SeedFieldCentric() {
+    return m_swerve.runOnce(() -> m_swerve.seedFieldCentric());
   }
 
   // Elevator Subsystem Commands //
@@ -457,6 +467,46 @@ public class Superstructure extends SubsystemBase {
     );
 
     return scoreAlgae;
+  }
+
+  public Command AlgaeArmHome() {
+    Command homeAlgaeArm = new InstantCommand(() -> {
+      m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOME);
+    }, m_algae);
+
+    return homeAlgaeArm;
+  }
+
+  public Command AlgaeArmIntake() {
+    Command setAlgaeArmIntake = new InstantCommand(() -> {
+      m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE);
+    }, m_algae);
+
+    return setAlgaeArmIntake;
+  }
+
+  public Command AlgaeArmDeAlgaeify() {
+    Command setAlgaeArmDeAlgaeify = new InstantCommand(() -> {
+      m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE);
+    }, m_algae);
+
+    return setAlgaeArmDeAlgaeify;
+  }
+
+  public Command AlgaeArmHold() {
+    Command setAlgaeArmHold = new InstantCommand(() -> {
+      m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD);
+    }, m_algae);
+
+    return setAlgaeArmHold;
+  }
+
+  public Command AlgaeArmEject() {
+    Command setAlgaeArmEject = new InstantCommand(() -> {
+      m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.EJECT);
+    }, m_algae);
+
+    return setAlgaeArmEject;
   }
 
   /** Robot state configurations - operator (2nd driver) sets up what the score button does */

@@ -86,6 +86,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
   }
 
+  public void setElevatorMotorSpeed(double speed) {
+    m_elevatorIO.setElevatorMotorPercentage(speed);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
