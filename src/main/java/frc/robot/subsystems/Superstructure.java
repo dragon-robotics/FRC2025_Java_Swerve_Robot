@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -263,11 +264,29 @@ public class Superstructure extends SubsystemBase {
   // Elevator Subsystem Commands //
 
   public Command ElevatorHome() {
-    Command homeElevator = new RunCommand(() -> {
+    Command setElevatorHome = new RunCommand(() -> {
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
     }, m_elevator);
 
-    return homeElevator;
+    Command resetEncoder = new InstantCommand(() -> {
+      m_elevator.seedElevatorMotorEncoderPosition(0);
+    });
+
+    Command setElevatorToIdle = new InstantCommand(() -> {
+      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE);
+    }, m_elevator);
+
+    ConditionalCommand resetElevatorEncoder = new ConditionalCommand(
+      resetEncoder.andThen(setElevatorToIdle),
+      setElevatorToIdle,
+      () -> m_elevator.isAtElevatorBottom()
+    );
+
+    // If the elevator is at the home position, check if there is a current spike //
+    // If there is a current spike, reset the elevator encoder, then set to idle //
+    // else set the motor to idle
+
+    return setElevatorHome.andThen(resetElevatorEncoder);
   }
 
   public Command ElevatorL1() {

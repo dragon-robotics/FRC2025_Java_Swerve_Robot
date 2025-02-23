@@ -6,6 +6,7 @@ package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ElevatorSubsystemConstants;
 import frc.robot.subsystems.elevator.ElevatorIO.ElevatorIOInputs;
 
 import static frc.robot.Constants.ElevatorSubsystemConstants.*;
@@ -52,6 +53,25 @@ public class ElevatorSubsystem extends SubsystemBase {
       case HOME -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), HOME, 0.01);
       default -> false;
     };
+  }
+
+  public boolean isAtElevatorBottom() {
+    // Get the current encoder position.
+    double encoderPosition = m_elevatorIOInputs.elevatorLeadMotorPosition;
+    // Get the output current from the elevator motor (you'd need an appropriate method).
+
+    // Define thresholds in your ElevatorConstants (tune these values).
+    // For example, HOME_POSITION is the known encoder value at the bottom.
+    // ENCODER_TOLERANCE indicates acceptable error range.
+    // BOTTOM_CURRENT_THRESHOLD is the current spike value expected when hitting a hard stop.
+    boolean encoderAtBottom = encoderPosition <= ElevatorSubsystemConstants.HOME + 0.01;
+    boolean currentSpiked = m_elevatorIOInputs.elevatorCurrentLimitTripped;
+    
+    return encoderAtBottom && currentSpiked;
+  }
+
+  public void seedElevatorMotorEncoderPosition(double position) {
+    m_elevatorIO.seedElevatorMotorEncoderPosition(position);
   }
 
   /**
