@@ -40,6 +40,7 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorState;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.RobotContainer;
 import frc.robot.Telemetry;
@@ -85,7 +86,7 @@ public class Superstructure extends SubsystemBase {
 
   private boolean useLeftCamera;
   private boolean intakeCoralLeft;
-  private ElevatorSubsystem.ElevatorState elevatorWantedState;
+  private ElevatorSubsystem.ElevatorState elevatorState;
 
   /** Creates a new Superstructure. */
   public Superstructure(
@@ -155,7 +156,7 @@ public class Superstructure extends SubsystemBase {
     rotationLastTriggered = 0.0;
 
     // Instantiate the elevator wanted state as home //
-    elevatorWantedState = ElevatorSubsystem.ElevatorState.HOME;
+    elevatorState = ElevatorSubsystem.ElevatorState.HOME;
 
     // Default we use the right camera //
     useLeftCamera = false;
@@ -262,7 +263,7 @@ public class Superstructure extends SubsystemBase {
   // Elevator Subsystem Commands //
 
   public Command ElevatorHome() {
-    Command homeElevator = new InstantCommand(() -> {
+    Command homeElevator = new RunCommand(() -> {
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
     }, m_elevator);
 
@@ -270,7 +271,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ElevatorL1() {
-    Command setElevatorL1 = new InstantCommand(() -> {
+    Command setElevatorL1 = new RunCommand(() -> {
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
     }, m_elevator);
 
@@ -278,7 +279,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ElevatorL2() {
-    Command setElevatorL2 = new InstantCommand(() -> {
+    Command setElevatorL2 = new RunCommand(() -> {
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L2);
     }, m_elevator);
 
@@ -286,7 +287,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ElevatorL3() {
-    Command setElevatorL3 = new InstantCommand(() -> {
+    Command setElevatorL3 = new RunCommand(() -> {
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L3);
     }, m_elevator);
 
@@ -294,7 +295,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ElevatorL4() {
-    Command setElevatorL4 = new InstantCommand(() -> {
+    Command setElevatorL4 = new RunCommand(() -> {
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L4);
     }, m_elevator);
 
@@ -302,10 +303,17 @@ public class Superstructure extends SubsystemBase {
   }
 
   // Coral Subsystem Commands //
+  public Command SetCoralStation(boolean left) {
+    Command setCoralStation = new InstantCommand(() -> {
+      intakeCoralLeft = left;
+    });
+
+    return setCoralStation;
+  }
 
   public Command IntakeCoral(){
 
-    Command setRobotheading = new InstantCommand(() -> {
+    Command setRobotHeading = new InstantCommand(() -> {
       // Set the robot heading to the coral station angle for intake //
       currentHeading = intakeCoralLeft ? 
         Optional.of(GeneralConstants.LEFT_CORAL_STATION_INTAKE_ANGLE) : // If left, set to left side angle
@@ -317,10 +325,21 @@ public class Superstructure extends SubsystemBase {
       m_coral
     );
 
-    Command runUntilCoralIsDetected = new WaitUntilCommand(() -> m_coral.hasCoral());
+    Command runUntilCoralIsDetected = new WaitUntilCommand(() -> m_coral.isBeamBreakTripped());
+
+    Command slowIntake = new InstantCommand(
+      () -> m_coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE),
+      m_coral
+    );
+
+    Command runUntilCoralIsNotDetected = new WaitUntilCommand(() -> !m_coral.isBeamBreakTripped());
 
     // Run until the beambreak or current limit is tripped // 
-    return setRobotheading.andThen(engageCoralIntake);
+    return setRobotHeading
+    .andThen(engageCoralIntake)
+    .andThen(runUntilCoralIsDetected)
+    .andThen(slowIntake)
+    .andThen(runUntilCoralIsNotDetected);
   }
 
   public Command AimAndRangeApriltag() {
@@ -423,7 +442,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ScoreCoral() {
-    Command scoreCoral = new InstantCommand(
+    Command scoreCoral = new RunCommand(
       () -> m_coral.setCoralState(CoralSubsystem.CoralState.EJECT),
       m_coral
     );
@@ -431,18 +450,27 @@ public class Superstructure extends SubsystemBase {
     return scoreCoral;
   }
 
+  public Command HoldCoral() {
+    Command holdCoral = new RunCommand(
+      () -> m_coral.setCoralState(CoralSubsystem.CoralState.HOLD),
+      m_coral
+    );
+
+    return holdCoral;
+  }
+
   // Algae Subsystem Commands //
 
   public Command IntakeAlgae(){
 
-    Command engageAlgaeIntake = new InstantCommand(
+    Command engageAlgaeIntake = new RunCommand(
       () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE),
       m_algae
     );
 
     Command runUntilAlgaeIsDetected = new WaitUntilCommand(() -> m_algae.hasAlgae());
 
-    Command holdAlgae = new InstantCommand(
+    Command holdAlgae = new RunCommand(
       () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD),
       m_algae
     );
@@ -452,7 +480,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command DeAlgaeify() {
-    Command engageAlgaeDeAlgaeify = new InstantCommand(
+    Command engageAlgaeDeAlgaeify = new RunCommand(
       () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE),
       m_algae
     );
@@ -461,7 +489,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ScoreAlgae() {
-    Command scoreAlgae = new InstantCommand(
+    Command scoreAlgae = new RunCommand(
       () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.EJECT),
       m_algae
     );
@@ -470,7 +498,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command AlgaeArmHome() {
-    Command homeAlgaeArm = new InstantCommand(() -> {
+    Command homeAlgaeArm = new RunCommand(() -> {
       m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOME);
     }, m_algae);
 
@@ -478,7 +506,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command AlgaeArmIntake() {
-    Command setAlgaeArmIntake = new InstantCommand(() -> {
+    Command setAlgaeArmIntake = new RunCommand(() -> {
       m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE);
     }, m_algae);
 
@@ -486,7 +514,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command AlgaeArmDeAlgaeify() {
-    Command setAlgaeArmDeAlgaeify = new InstantCommand(() -> {
+    Command setAlgaeArmDeAlgaeify = new RunCommand(() -> {
       m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE);
     }, m_algae);
 
@@ -494,7 +522,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command AlgaeArmHold() {
-    Command setAlgaeArmHold = new InstantCommand(() -> {
+    Command setAlgaeArmHold = new RunCommand(() -> {
       m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD);
     }, m_algae);
 
@@ -502,7 +530,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command AlgaeArmEject() {
-    Command setAlgaeArmEject = new InstantCommand(() -> {
+    Command setAlgaeArmEject = new RunCommand(() -> {
       m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.EJECT);
     }, m_algae);
 
@@ -513,39 +541,39 @@ public class Superstructure extends SubsystemBase {
   public void setReefAlignment(ReefAlignmentStates wantedReefAlignmentState) {
     switch(wantedReefAlignmentState){
       case ALIGN_REEF_LEFT_L1:
-        elevatorWantedState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
+        elevatorState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
         useLeftCamera = true;                                     // Use the left camera
         break;
       case ALIGN_REEF_LEFT_L2:
-        elevatorWantedState = ElevatorSubsystem.ElevatorState.L2; // Set the elevator to L2
+        elevatorState = ElevatorSubsystem.ElevatorState.L2; // Set the elevator to L2
         useLeftCamera = true;                                     // Use the left camera
         break;
       case ALIGN_REEF_LEFT_L3:
-        elevatorWantedState = ElevatorSubsystem.ElevatorState.L3; // Set the elevator to L1
+        elevatorState = ElevatorSubsystem.ElevatorState.L3; // Set the elevator to L1
         useLeftCamera = true;                                     // Use the left camera
         break;
       case ALIGN_REEF_LEFT_L4:
-        elevatorWantedState = ElevatorSubsystem.ElevatorState.L4; // Set the elevator to L1
+        elevatorState = ElevatorSubsystem.ElevatorState.L4; // Set the elevator to L1
         useLeftCamera = true;                                     // Use the left camera
         break;
       case ALIGN_REEF_RIGHT_L1:
-        elevatorWantedState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
+        elevatorState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
         useLeftCamera = false;                                    // Use the right camera
         break;
       case ALIGN_REEF_RIGHT_L2:
-        elevatorWantedState = ElevatorSubsystem.ElevatorState.L2; // Set the elevator to L1
+        elevatorState = ElevatorSubsystem.ElevatorState.L2; // Set the elevator to L1
         useLeftCamera = false;                                    // Use the right camera
         break;
       case ALIGN_REEF_RIGHT_L3:
-        elevatorWantedState = ElevatorSubsystem.ElevatorState.L3; // Set the elevator to L3
+        elevatorState = ElevatorSubsystem.ElevatorState.L3; // Set the elevator to L3
         useLeftCamera = false;                                    // Use the right camera
         break;
       case ALIGN_REEF_RIGHT_L4:
-        elevatorWantedState = ElevatorSubsystem.ElevatorState.L4; // Set the elevator to L4
+        elevatorState = ElevatorSubsystem.ElevatorState.L4; // Set the elevator to L4
         useLeftCamera = false;                                    // Use the right camera
         break;
       default:
-        elevatorWantedState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
+        elevatorState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
         useLeftCamera = true;                                     // Use the left camera
         break;
     }
@@ -553,6 +581,22 @@ public class Superstructure extends SubsystemBase {
 
   public Command setReefAlignmentCommand(ReefAlignmentStates wantedReefAlignmentState) {
     return new InstantCommand(() -> setReefAlignment(wantedReefAlignmentState));
+  }
+
+  public void setReefAlignment(boolean left){
+    useLeftCamera = left;
+  }
+
+  public Command SetReefAlignment(boolean left){
+    return new InstantCommand(() -> setReefAlignment(left)); 
+  }
+
+  public void setReefHeight(ElevatorState wantedElevatorState){
+    elevatorState = wantedElevatorState;
+  }
+
+  public Command SetReefHeight(ElevatorState wantedElevatorState){
+    return new InstantCommand(() -> setReefHeight(wantedElevatorState));
   }
 
   @Override

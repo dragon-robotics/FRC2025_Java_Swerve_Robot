@@ -70,7 +70,7 @@ public class AlgaeSubsystem extends SubsystemBase {
 
     switch(m_algaeState){
       case INTAKE:
-        handleMotors(ARM_HOME_GOAL, INTAKE_SPEED);
+        handleMotors(ARM_INTAKE_GOAL, INTAKE_SPEED);
         break;
       case DEALGAE:
         handleMotors(ARM_DEALGAE_GOAL, DEALGAE_SPEED);

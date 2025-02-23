@@ -77,37 +77,37 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .secondaryCurrentLimit(INTAKE_STALL_CURRENT_LIMIT)
       .idleMode(IdleMode.kBrake);
 
-    // Intake Motor Signals Configuration //
-    m_intakeMotorConfig.signals
-      .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
-      .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
-      .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
-      .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
-      .analogPositionAlwaysOn(false)               // Turn off analog position
-      .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
-      .analogVelocityAlwaysOn(false)               // Turn off analog velocity
-      .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
-      .analogVoltageAlwaysOn(false)                // Turn off analog voltage
-      .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
-      .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
-      .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
-      .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
-      .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
-      .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
-      .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
-      .faultsAlwaysOn(false)                       // Turn off faults
-      .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
-      .iAccumulationAlwaysOn(false)                // Turn off i accumulation
-      .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
-      .limitsPeriodMs(500000)                     // Set limits period to 500000 ms
-      .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
-      .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
-      .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
-      .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
-      .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
-      .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
-      .warningsAlwaysOn(false)                     // Turn off warnings
-      .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
+    // // Intake Motor Signals Configuration //
+    // m_intakeMotorConfig.signals
+    //   .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
+    //   .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
+    //   .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
+    //   .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
+    //   .analogPositionAlwaysOn(false)               // Turn off analog position
+    //   .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
+    //   .analogVelocityAlwaysOn(false)               // Turn off analog velocity
+    //   .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
+    //   .analogVoltageAlwaysOn(false)                // Turn off analog voltage
+    //   .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
+    //   .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
+    //   .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
+    //   .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
+    //   .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
+    //   .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
+    //   .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
+    //   .faultsAlwaysOn(false)                       // Turn off faults
+    //   .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
+    //   .iAccumulationAlwaysOn(false)                // Turn off i accumulation
+    //   .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
+    //   .limitsPeriodMs(500000)                     // Set limits period to 500000 ms
+    //   .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
+    //   .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
+    //   .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
+    //   .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
+    //   .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
+    //   .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
+    //   .warningsAlwaysOn(false)                     // Turn off warnings
+    //   .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
 
     // Apply motor configurations //
     m_intakeMotor.configure(
@@ -128,16 +128,17 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .idleMode(IdleMode.kBrake);
 
     // Left Motor Soft Limits //
-    m_armLeadMotorConfig.softLimit
-      .forwardSoftLimitEnabled(true)
-      .forwardSoftLimit(0.5)
-      .reverseSoftLimitEnabled(true)
-      .reverseSoftLimit(-0.5);
+    // m_armLeadMotorConfig.softLimit
+    //   .forwardSoftLimitEnabled(true)
+    //   .forwardSoftLimit(0.5)
+    //   .reverseSoftLimitEnabled(true)
+    //   .reverseSoftLimit(-0.5);
 
     // Left Motor Absolute Encoder Configuration //
     m_armLeadMotorConfig.absoluteEncoder
-      .zeroCentered(true)
-      .zeroOffset(ABS_ENC_OFFSET_VAL);
+      // .zeroCentered(true)
+      .zeroOffset(ABS_ENC_OFFSET_VAL)
+      .inverted(true);
 
     // Left Motor Closed Loop Configuration //
     m_armLeadMotorConfig.closedLoop
@@ -145,10 +146,10 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .pidf(ARM_P, ARM_I, ARM_D, ARM_F, PID_SLOT)
       .minOutput(-0.5, PID_SLOT)
       .maxOutput(0.5, PID_SLOT)
-      .positionWrappingEnabled(true)
-      .positionWrappingInputRange(0.5, -0.5)
-      .positionWrappingMinInput(-0.5)
-      .positionWrappingMaxInput(0.5)
+      // .positionWrappingEnabled(true)
+      // .positionWrappingInputRange(0.5, -0.5)
+      // .positionWrappingMinInput(-0.5)
+      // .positionWrappingMaxInput(0.5)
       .outputRange(-1, 1)
       .maxMotion
         .maxVelocity(ARM_MAX_MAXMOTION_VELOCITY)
@@ -156,37 +157,37 @@ public class AlgaeIOSparkMax implements AlgaeIO {
         .allowedClosedLoopError(ARM_MAXMOTION_ALLOWED_ERROR, PID_SLOT)
         .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal, PID_SLOT);
 
-    // Left Motor Signals Configuration //
-    m_armLeadMotorConfig.signals
-      .absoluteEncoderPositionAlwaysOn(true)       // Turn on absolute encoder position
-      .absoluteEncoderPositionPeriodMs(5)         // Set absolute encoder position period to 5 ms
-      .absoluteEncoderVelocityAlwaysOn(true)       // Turn on absolute encoder velocity
-      .absoluteEncoderVelocityPeriodMs(5)         // Set absolute encoder velocity period to 5 ms
-      .analogPositionAlwaysOn(false)               // Turn off analog position
-      .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
-      .analogVelocityAlwaysOn(false)               // Turn off analog velocity
-      .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
-      .analogVoltageAlwaysOn(false)                // Turn off analog voltage
-      .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
-      .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
-      .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
-      .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
-      .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
-      .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
-      .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
-      .faultsAlwaysOn(false)                       // Turn off faults
-      .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
-      .iAccumulationAlwaysOn(false)                // Turn off i accumulation
-      .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
-      .limitsPeriodMs(20)                         // Set limits period to 20 ms
-      .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
-      .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
-      .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
-      .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
-      .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
-      .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
-      .warningsAlwaysOn(false)                     // Turn off warnings
-      .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
+    // // Left Motor Signals Configuration //
+    // m_armLeadMotorConfig.signals
+    //   .absoluteEncoderPositionAlwaysOn(true)       // Turn on absolute encoder position
+    //   .absoluteEncoderPositionPeriodMs(5)         // Set absolute encoder position period to 5 ms
+    //   .absoluteEncoderVelocityAlwaysOn(true)       // Turn on absolute encoder velocity
+    //   .absoluteEncoderVelocityPeriodMs(5)         // Set absolute encoder velocity period to 5 ms
+    //   .analogPositionAlwaysOn(false)               // Turn off analog position
+    //   .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
+    //   .analogVelocityAlwaysOn(false)               // Turn off analog velocity
+    //   .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
+    //   .analogVoltageAlwaysOn(false)                // Turn off analog voltage
+    //   .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
+    //   .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
+    //   .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
+    //   .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
+    //   .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
+    //   .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
+    //   .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
+    //   .faultsAlwaysOn(false)                       // Turn off faults
+    //   .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
+    //   .iAccumulationAlwaysOn(false)                // Turn off i accumulation
+    //   .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
+    //   .limitsPeriodMs(20)                         // Set limits period to 20 ms
+    //   .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
+    //   .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
+    //   .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
+    //   .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
+    //   .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
+    //   .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
+    //   .warningsAlwaysOn(false)                     // Turn off warnings
+    //   .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
 
     // Right Motor Configuration //
     m_armFollowMotorConfig
@@ -195,39 +196,39 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
       .openLoopRampRate(ARM_RAMP_RATE_IN_SEC)
       .idleMode(IdleMode.kBrake)
-      .follow(ARM_LEAD_MOTOR_ID);
+      .follow(ARM_LEAD_MOTOR_ID, true);
 
-    // Right Motor Signals Configuration //
-    m_armFollowMotorConfig.signals
-      .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
-      .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
-      .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
-      .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
-      .analogPositionAlwaysOn(false)               // Turn off analog position
-      .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
-      .analogVelocityAlwaysOn(false)               // Turn off analog velocity
-      .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
-      .analogVoltageAlwaysOn(false)                // Turn off analog voltage
-      .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
-      .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
-      .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
-      .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
-      .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
-      .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
-      .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
-      .faultsAlwaysOn(false)                       // Turn off faults
-      .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
-      .iAccumulationAlwaysOn(false)                // Turn off i accumulation
-      .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
-      .limitsPeriodMs(20)                         // Set limits period to 20 ms
-      .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
-      .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
-      .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
-      .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
-      .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
-      .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
-      .warningsAlwaysOn(false)                     // Turn off warnings
-      .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
+    // // Right Motor Signals Configuration //
+    // m_armFollowMotorConfig.signals
+    //   .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
+    //   .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
+    //   .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
+    //   .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
+    //   .analogPositionAlwaysOn(false)               // Turn off analog position
+    //   .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
+    //   .analogVelocityAlwaysOn(false)               // Turn off analog velocity
+    //   .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
+    //   .analogVoltageAlwaysOn(false)                // Turn off analog voltage
+    //   .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
+    //   .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
+    //   .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
+    //   .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
+    //   .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
+    //   .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
+    //   .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
+    //   .faultsAlwaysOn(false)                       // Turn off faults
+    //   .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
+    //   .iAccumulationAlwaysOn(false)                // Turn off i accumulation
+    //   .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
+    //   .limitsPeriodMs(20)                         // Set limits period to 20 ms
+    //   .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
+    //   .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
+    //   .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
+    //   .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
+    //   .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
+    //   .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
+    //   .warningsAlwaysOn(false)                     // Turn off warnings
+    //   .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
 
     m_armLeadMotor.configure(
         m_armLeadMotorConfig,
@@ -273,7 +274,7 @@ public class AlgaeIOSparkMax implements AlgaeIO {
   public void setArmSetpoint(double setpoint) {
     m_armLeadController.setReference(
       setpoint,
-      ControlType.kMAXMotionPositionControl,
+      ControlType.kPosition,
       PID_SLOT);
   }
 

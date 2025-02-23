@@ -53,6 +53,10 @@ public class CoralSubsystem extends SubsystemBase {
     m_hasCoral = hasCoral;
   }
 
+  public boolean isBeamBreakTripped() {
+    return m_coralIOInputs.beamBreakTripped;
+  }
+
   /**
    * Set the state of the coral intake
    * @param wantedCoralState

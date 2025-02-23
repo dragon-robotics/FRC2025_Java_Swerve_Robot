@@ -17,6 +17,7 @@ import frc.robot.subsystems.coral.CoralIOSparkMax;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSparkMax;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorState;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 
@@ -127,39 +128,15 @@ public class RobotContainer {
     // Swerve Drive Default Command //
     m_swerveDriveSubsystem.setDefaultCommand(
         m_superstructureSubsystem.DefaultDriveCommand(
-          () -> -m_driverController.getLeftY(),
-          () -> -m_driverController.getLeftX(),
-          () -> -m_driverController.getRightX(),
+          () -> -m_driverController.getLeftY() * 0.80,
+          () -> -m_driverController.getLeftX() * 0.80,
+          () -> -m_driverController.getRightX() * 0.80,
           () -> m_driverController.getHID().getXButton())
       );
 
-    // Coral Subsystem Default Command //
-    m_coralSubsystem.setDefaultCommand(
-        new InstantCommand(() -> m_coralSubsystem.setCoralState(CoralSubsystem.CoralState.IDLE))
-            .andThen(
-                new MoveCoralManually(
-                    m_coralSubsystem,
-                    () -> (m_operatorController.getLeftTriggerAxis() - m_operatorController.getRightTriggerAxis()))));
-
-    // Algae Subsystem Default Command //
-    m_algaeSubsystem.setDefaultCommand(
-        new InstantCommand(() -> m_algaeSubsystem.setAlgaeState(AlgaeSubsystem.AlgaeState.IDLE))
-            .andThen(
-                    new MoveAlgaeManually(
-                        m_algaeSubsystem,
-                        () -> m_operatorController.getLeftY(),
-                        () -> m_operatorController.getRightY())));
-
-    // Elevator Subsystem Default Commands //
-    m_operatorController.povUp().whileTrue(
-        new InstantCommand(() -> m_elevatorSubsystem.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE))
-            .andThen(new InstantCommand(() -> m_elevatorSubsystem.setElevatorMotorSpeed(-0.2))))
-            .onFalse(new InstantCommand(() -> m_elevatorSubsystem.setElevatorMotorSpeed(0)));
-
-    m_operatorController.povDown().whileTrue(
-        new InstantCommand(() -> m_elevatorSubsystem.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE))
-            .andThen(new InstantCommand(() -> m_elevatorSubsystem.setElevatorMotorSpeed(0.2))))
-            .onFalse(new InstantCommand(() -> m_elevatorSubsystem.setElevatorMotorSpeed(0)));
+    m_coralSubsystem.setDefaultCommand(m_superstructureSubsystem.HoldCoral());    
+    m_algaeSubsystem.setDefaultCommand(m_superstructureSubsystem.AlgaeArmHome());
+    m_elevatorSubsystem.setDefaultCommand(m_superstructureSubsystem.ElevatorHome());
 
     // Use the "A" button to reset the Gyro orientation //
     m_driverController.a().onTrue(m_superstructureSubsystem.SeedFieldCentric());
@@ -172,46 +149,60 @@ public class RobotContainer {
         .onTrue(m_superstructureSubsystem.IntakeCoral());
 
     m_driverController.rightBumper()
-        .whileTrue(m_superstructureSubsystem.AimAndRangeApriltag());
+        .whileTrue(m_superstructureSubsystem.AimAndRangeApriltag())
+        .onFalse(m_superstructureSubsystem.ScoreCoral());
 
     // Operator button box controls //
+    // Set to intake left or right
+    m_operatorButtonBoxController.button(5)
+        .onTrue(m_superstructureSubsystem.SetCoralStation(true));
+
+    m_operatorButtonBoxController.button(6)
+        .onTrue(m_superstructureSubsystem.SetCoralStation(false));
     
     // Test Controls //
 
     // Test the elevator //
     // L1 - Move to L1
-    m_operatorButtonBoxController.button(1)
+    m_operatorButtonBoxController.button(10)
         .onTrue(m_superstructureSubsystem.ElevatorHome());
 
-    m_operatorButtonBoxController.button(2)
+    m_operatorButtonBoxController.button(4)
         .onTrue(m_superstructureSubsystem.ElevatorL1());
 
     m_operatorButtonBoxController.button(3)
         .onTrue(m_superstructureSubsystem.ElevatorL2());
 
-    m_operatorButtonBoxController.button(4)
+    m_operatorButtonBoxController.button(2)
         .onTrue(m_superstructureSubsystem.ElevatorL3());
 
-    m_operatorButtonBoxController.button(5)
+    m_operatorButtonBoxController.button(1)
         .onTrue(m_superstructureSubsystem.ElevatorL4());
+
+    m_operatorButtonBoxController.button(11)
+        .onTrue(m_superstructureSubsystem.SetReefAlignment(true));
+
+    m_operatorButtonBoxController.button(12)
+        .onTrue(m_superstructureSubsystem.SetReefAlignment(false));
+
 
     // Test the coral intake //
 
-    // Test the algae arm and intake //
-    m_operatorButtonBoxController.button(6)
-        .whileTrue(m_superstructureSubsystem.AlgaeArmHome());
+    // // Test the algae arm and intake //
+    m_operatorButtonBoxController.button(10)
+        .onTrue(m_superstructureSubsystem.AlgaeArmHome());
 
-    m_operatorButtonBoxController.button(7)
-        .whileTrue(m_superstructureSubsystem.AlgaeArmIntake());
+    // m_operatorButtonBoxController.button(7)
+    //     .onTrue(m_superstructureSubsystem.AlgaeArmIntake());
 
     m_operatorButtonBoxController.button(8)
-        .whileTrue(m_superstructureSubsystem.AlgaeArmDeAlgaeify());
+        .onTrue(m_superstructureSubsystem.AlgaeArmDeAlgaeify());
 
-    m_operatorButtonBoxController.button(9)
-        .whileTrue(m_superstructureSubsystem.AlgaeArmHold());
+    // m_operatorButtonBoxController.button(9)
+    //     .onTrue(m_superstructureSubsystem.AlgaeArmHold());
 
-    m_operatorButtonBoxController.button(10)
-        .whileTrue(m_superstructureSubsystem.AlgaeArmEject());
+    // m_operatorButtonBoxController.button(9)
+    //     .onTrue(m_superstructureSubsystem.AlgaeArmEject());
   }
 
   /**

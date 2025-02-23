@@ -33,10 +33,6 @@ public class CoralIOSparkMax implements CoralIO {
 
     // Configure the CANdi Beam Break Sensor //
     m_canDiConfigs = new CANdiConfiguration();
-    m_canDiConfigs.DigitalInputs.S1CloseState = S1CloseStateValue.CloseWhenHigh;
-    m_canDiConfigs.DigitalInputs.S2CloseState = S2CloseStateValue.CloseWhenHigh;
-    m_canDiConfigs.DigitalInputs.S1FloatState = S1FloatStateValue.FloatDetect;
-    m_canDiConfigs.DigitalInputs.S2FloatState = S2FloatStateValue.FloatDetect;
     m_canDi.getConfigurator().apply(m_canDiConfigs);
 
     // Intake Motor Configuration //
@@ -48,37 +44,37 @@ public class CoralIOSparkMax implements CoralIO {
       .openLoopRampRate(RAMP_RATE_IN_SEC)
       .idleMode(IdleMode.kBrake);
 
-    // Intake Motor Signals Configuration //
-    m_intakeMotorConfig.signals
-      .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
-      .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
-      .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
-      .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
-      .analogPositionAlwaysOn(false)               // Turn off analog position
-      .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
-      .analogVelocityAlwaysOn(false)               // Turn off analog velocity
-      .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
-      .analogVoltageAlwaysOn(false)                // Turn off analog voltage
-      .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
-      .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
-      .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
-      .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
-      .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
-      .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
-      .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
-      .faultsAlwaysOn(false)                       // Turn off faults
-      .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
-      .iAccumulationAlwaysOn(false)                // Turn off i accumulation
-      .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
-      .limitsPeriodMs(500000)                     // Set limits period to 500000 ms
-      .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
-      .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
-      .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
-      .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
-      .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
-      .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
-      .warningsAlwaysOn(false)                     // Turn off warnings
-      .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
+    // // Intake Motor Signals Configuration //
+    // m_intakeMotorConfig.signals
+    //   .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
+    //   .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
+    //   .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
+    //   .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
+    //   .analogPositionAlwaysOn(false)               // Turn off analog position
+    //   .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
+    //   .analogVelocityAlwaysOn(false)               // Turn off analog velocity
+    //   .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
+    //   .analogVoltageAlwaysOn(false)                // Turn off analog voltage
+    //   .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
+    //   .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
+    //   .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
+    //   .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
+    //   .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
+    //   .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
+    //   .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
+    //   .faultsAlwaysOn(false)                       // Turn off faults
+    //   .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
+    //   .iAccumulationAlwaysOn(false)                // Turn off i accumulation
+    //   .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
+    //   .limitsPeriodMs(500000)                     // Set limits period to 500000 ms
+    //   .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
+    //   .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
+    //   .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
+    //   .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
+    //   .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
+    //   .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
+    //   .warningsAlwaysOn(false)                     // Turn off warnings
+    //   .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
 
     // Apply motor configurations //
     m_intakeMotor.configure(
@@ -108,7 +104,7 @@ public class CoralIOSparkMax implements CoralIO {
     inputs.intakeMotorTemperature = m_intakeMotor.getMotorTemperature();
 
     // Check if the beam break is tripped //
-    inputs.beamBreakTripped = !m_canDi.getS1Closed().getValue();
+    inputs.beamBreakTripped = m_canDi.getS1Closed().getValue();
 
     // Check if the current limit is tripped //
     inputs.intakeCurrentLimitTripped = m_intakeMotor.getOutputCurrent() > CORAL_DETECT_CURRENT_THRESHOLD;

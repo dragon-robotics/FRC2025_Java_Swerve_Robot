@@ -201,9 +201,9 @@ public final class Constants {
     public static final double CORAL_DETECT_CURRENT_THRESHOLD = 30.0;
 
     /* Desired intake speed for intake and outtake */
-    public static final double INTAKE_SPEED = 0.8;
-    public static final double SLOW_INTAKE_SPEED = 0.3;
-    public static final double OUTTAKE_SPEED = 0.8;
+    public static final double INTAKE_SPEED = -0.9;
+    public static final double SLOW_INTAKE_SPEED = -0.2;
+    public static final double OUTTAKE_SPEED = -1;
   }
 
   public static class AlgaeSubsystemConstants {
@@ -223,12 +223,12 @@ public final class Constants {
 
     public static final double ALGAE_DETECT_CURRENT_THRESHOLD = 40.0;
 
-    public static final double ABS_ENC_OFFSET_VAL = 0.7346013; // @TODO: To be tuned later
+    public static final double ABS_ENC_OFFSET_VAL = 0.8810048; // @TODO: To be tuned later
 
     public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot0;
 
     // Arm PID Constants //
-    public static final double ARM_P = 3.0;
+    public static final double ARM_P = 1.0;
     public static final double ARM_I = 0.0;
     public static final double ARM_D = 0.0;
     public static final double ARM_F = 0.0;
@@ -256,16 +256,16 @@ public final class Constants {
      * Desired absolute encoder setpoint for moving shooter and amp mechanism (to be
      * tuned later using absolute encoder)
      */
-    public static final double ARM_HOME_GOAL = 0.03;
-    public static final double ARM_INTAKE_GOAL = 0.13;
-    public static final double ARM_DEALGAE_GOAL = 0.2;
-    public static final double ARM_HOLD_GOAL = 0.2;
+    public static final double ARM_HOME_GOAL = 0.24;
+    public static final double ARM_INTAKE_GOAL = 0.05;
+    public static final double ARM_DEALGAE_GOAL = 0.1;
+    public static final double ARM_HOLD_GOAL = 0.13;
     public static final double ARM_PROCESSOR_OUTTAKE_GOAL = 0.13;
 
     /* Desired intake speed for intake and outtake */
-    public static final double INTAKE_SPEED = 0.5;
-    public static final double DEALGAE_SPEED = -0.8;
-    public static final double OUTTAKE_SPEED = -0.5;
+    public static final double INTAKE_SPEED = -0.5;
+    public static final double DEALGAE_SPEED = 0.8;
+    public static final double OUTTAKE_SPEED = 0.5;
   }
 
   /** Elevator Subsystem Constants */
@@ -284,7 +284,7 @@ public final class Constants {
 
     public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot1;
 
-    public static final double P = 1.0; // TODO: To be tuned later
+    public static final double P = 0.525; // TODO: To be tuned later
     public static final double I = 0.0; // TODO: To be tuned later
     public static final double D = 0.0; // TODO: To be tuned later
     public static final double F = 0.0; // TODO: To be tuned later
@@ -315,11 +315,11 @@ public final class Constants {
      * Desired absolute encoder setpoint for moving elevator (to be tuned later
      * using relative encoder)
      */
-    public static final double HOME = -0.5; // TODO: To be tuned later
+    public static final double HOME = -0.05; // TODO: To be tuned later
     public static final double L1 = -1; // TODO: To be tuned later
     public static final double L2 = -3; // TODO: To be tuned later
-    public static final double L3 = -5; // TODO: To be tuned later
-    public static final double L4 = -9; // TODO: To be tuned later
+    public static final double L3 = -6; // TODO: To be tuned later
+    public static final double L4 = -10.5; // TODO: To be tuned later
   }
 
   public static class LEDConstants {
