@@ -30,9 +30,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.GeneralConstants;
@@ -85,9 +87,12 @@ public class Superstructure extends SubsystemBase {
   private double rotationLastTriggered; // Keeps track of the last time the rotation was triggered
   private Optional<Rotation2d> currentHeading; // Keeps track of current heading
 
-  private boolean useLeftCamera;
-  private boolean intakeCoralLeft;
-  private ElevatorSubsystem.ElevatorState elevatorState;
+  private boolean useLeftCamera;                          // Keeps track of the camera to use
+  private boolean intakeCoralLeft;                        // Keeps track of the coral intake side
+  private ElevatorSubsystem.ElevatorState elevatorState;  // Keeps track of the current elevator state
+  private double elevatorHeightTranslationFactor;         // Keeps track of the elevator translation speed factor
+  private double elevatorHeightStrafeFactor;              // Keeps track of the elevator strafe speed factor
+  private double elevatorHeightRotationFactor;            // Keeps track of the elevator rotation speed factor
 
   /** Creates a new Superstructure. */
   public Superstructure(
@@ -162,6 +167,14 @@ public class Superstructure extends SubsystemBase {
     // Default we use the right camera //
     useLeftCamera = false;
 
+    // Initialize the elevator height speed factor //
+    elevatorHeightTranslationFactor = 1.0;
+    elevatorHeightStrafeFactor = 1.0;
+    elevatorHeightRotationFactor = 1.0;
+
+    // We intake coral from the left side by default //
+    intakeCoralLeft = true;
+
     // Instantiate the logger for telemetry //
     logger = new Telemetry(maxSpeed);
 
@@ -183,28 +196,30 @@ public class Superstructure extends SubsystemBase {
       double rawRotation = rotationSup.getAsDouble();
 
       // Apply deadband to joystick inputs //
+      MathUtil.applyDeadband(rawTranslation, SwerveConstants.SWERVE_DEADBAND, 0.1);
       double translation = MathUtil.applyDeadband(
           rawTranslation,
-          SwerveConstants.SWERVE_DEADBAND); // Forward/Backward
+          SwerveConstants.SWERVE_DEADBAND,
+          1); // Forward/Backward
       double strafe = MathUtil.applyDeadband(
           rawStrafe,
-          SwerveConstants.SWERVE_DEADBAND); // Left/Right
+          SwerveConstants.SWERVE_DEADBAND,
+          1); // Left/Right
       double rotation = MathUtil.applyDeadband(
           rawRotation,
-          SwerveConstants.SWERVE_DEADBAND); // Rotation
+          SwerveConstants.SWERVE_DEADBAND,
+          1); // Rotation
 
-      double magnitude = Math.hypot(translation, strafe);
+      // Square the inputs (while preserving the sign) to increase fine control while
+      // permitting full power //
+      translation = Math.copySign(translation * translation, translation);
+      strafe = Math.copySign(strafe * strafe, strafe);
+      rotation = Math.copySign(rotation * rotation, rotation);
 
-      if (magnitude < SwerveConstants.SWERVE_DEADBAND) {
-        translation = 0;
-        strafe = 0;
-      } else {
-        // Square the inputs (while preserving the sign) to increase fine control while
-        // permitting full power //
-        translation = Math.copySign(translation * translation, translation);
-        strafe = Math.copySign(strafe * strafe, strafe);
-        rotation = Math.copySign(rotation * rotation, rotation);
-      }
+      // Multiply the translation, strafe, and rotation by the elevator height speed factor //
+      translation *= elevatorHeightTranslationFactor;
+      strafe *= elevatorHeightStrafeFactor;
+      rotation *= elevatorHeightRotationFactor;
 
       // Scale the output by half if half speed is enabled //
       if (halfSpeedSup.getAsBoolean()) {
@@ -263,11 +278,7 @@ public class Superstructure extends SubsystemBase {
 
   // Elevator Subsystem Commands //
 
-  public Command ElevatorHome() {
-    Command setElevatorHome = new RunCommand(() -> {
-      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
-    }, m_elevator);
-
+  public Command ElevatorIdle() {
     Command resetEncoder = new InstantCommand(() -> {
       m_elevator.seedElevatorMotorEncoderPosition(0);
     });
@@ -276,21 +287,37 @@ public class Superstructure extends SubsystemBase {
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE);
     }, m_elevator);
 
-    ConditionalCommand resetElevatorEncoder = new ConditionalCommand(
+    Command resetElevatorEncoder = new ConditionalCommand(
       resetEncoder.andThen(setElevatorToIdle),
       setElevatorToIdle,
-      () -> m_elevator.isAtElevatorBottom()
+      m_elevator::isAtElevatorBottom
     );
+
+    return resetElevatorEncoder;
+  }
+
+  public Command ElevatorHome() {
+    
+    Command setElevatorHome = new RunCommand(() -> {
+      elevatorHeightTranslationFactor = 1.0;
+      elevatorHeightStrafeFactor = 1.0;
+      elevatorHeightRotationFactor = 1.0;
+      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
+    }, m_elevator);
 
     // If the elevator is at the home position, check if there is a current spike //
     // If there is a current spike, reset the elevator encoder, then set to idle //
     // else set the motor to idle
 
-    return setElevatorHome.andThen(resetElevatorEncoder);
+    return setElevatorHome;
   }
 
   public Command ElevatorL1() {
+
     Command setElevatorL1 = new RunCommand(() -> {
+      elevatorHeightTranslationFactor = 1.0;
+      elevatorHeightStrafeFactor = 1.0;
+      elevatorHeightRotationFactor = 1.0;
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
     }, m_elevator);
 
@@ -298,7 +325,11 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ElevatorL2() {
+    
     Command setElevatorL2 = new RunCommand(() -> {
+      elevatorHeightTranslationFactor = 0.75;
+      elevatorHeightStrafeFactor = 0.75;
+      elevatorHeightRotationFactor = 1;
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L2);
     }, m_elevator);
 
@@ -306,7 +337,11 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ElevatorL3() {
+
     Command setElevatorL3 = new RunCommand(() -> {
+      elevatorHeightTranslationFactor = 0.65;
+      elevatorHeightStrafeFactor = 0.65;
+      elevatorHeightRotationFactor = 1;
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L3);
     }, m_elevator);
 
@@ -314,7 +349,11 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ElevatorL4() {
+    
     Command setElevatorL4 = new RunCommand(() -> {
+      elevatorHeightTranslationFactor = 0.5;
+      elevatorHeightStrafeFactor = 0.5;
+      elevatorHeightRotationFactor = 1;
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L4);
     }, m_elevator);
 

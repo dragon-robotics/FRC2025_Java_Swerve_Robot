@@ -128,9 +128,9 @@ public class RobotContainer {
     // Swerve Drive Default Command //
     m_swerveDriveSubsystem.setDefaultCommand(
         m_superstructureSubsystem.DefaultDriveCommand(
-          () -> -m_driverController.getLeftY() * 0.80,
-          () -> -m_driverController.getLeftX() * 0.80,
-          () -> -m_driverController.getRightX() * 0.80,
+          () -> -m_driverController.getLeftY() * 0.8,
+          () -> -m_driverController.getLeftX() * 0.8,
+          () -> -m_driverController.getRightX() * 0.8,
           () -> m_driverController.getHID().getXButton())
       );
 
