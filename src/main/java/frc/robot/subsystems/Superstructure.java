@@ -297,19 +297,27 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ElevatorHome() {
-    
-    Command setElevatorHome = new RunCommand(() -> {
+        
+    Command setElevatorHome = new InstantCommand(() -> {
       elevatorHeightTranslationFactor = 1.0;
       elevatorHeightStrafeFactor = 1.0;
       elevatorHeightRotationFactor = 1.0;
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
     }, m_elevator);
 
+    Command waitUntilElevatorIsAtBottom = new WaitUntilCommand(() -> m_elevator.isAtElevatorBottom());
+
+    Command reZeroElevatorEncoder = new InstantCommand(() -> {
+      m_elevator.seedElevatorMotorEncoderPosition(0);
+    });
+
+    return setElevatorHome
+          .andThen(waitUntilElevatorIsAtBottom)
+          .andThen(reZeroElevatorEncoder);
+
     // If the elevator is at the home position, check if there is a current spike //
     // If there is a current spike, reset the elevator encoder, then set to idle //
     // else set the motor to idle
-
-    return setElevatorHome;
   }
 
   public Command ElevatorL1() {

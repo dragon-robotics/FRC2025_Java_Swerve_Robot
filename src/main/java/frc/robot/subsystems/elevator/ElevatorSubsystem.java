@@ -67,7 +67,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     boolean encoderAtBottom = encoderPosition <= ElevatorSubsystemConstants.HOME + 0.01;
     boolean currentSpiked = m_elevatorIOInputs.elevatorCurrentLimitTripped;
     
-    return encoderAtBottom && currentSpiked;
+    return encoderAtBottom || currentSpiked;
   }
 
   public void seedElevatorMotorEncoderPosition(double position) {
