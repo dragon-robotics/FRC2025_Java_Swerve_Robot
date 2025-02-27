@@ -7,15 +7,18 @@
     "LC2",
     "LC3",
     "LC4",
-    "S7",
+    "LeavePath",
     "S1",
     "S2",
     "S3",
     "S4",
     "S5",
-    "S6"
+    "S6",
+    "S7"
   ],
-  "autoFolders": [],
+  "autoFolders": [
+    "LeaveAuto"
+  ],
   "defaultMaxVel": 5.0,
   "defaultMaxAccel": 5.0,
   "defaultMaxAngVel": 540.0,
