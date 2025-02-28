@@ -408,7 +408,7 @@ public class Superstructure extends SubsystemBase {
     .andThen(runUntilCoralIsNotDetected);
   }
 
-  public Command AimAndRangeApriltag() {
+  public Command AimAndRangeReefApriltag() {
     return new RunCommand(() -> {
       // Read in relevant data from the Camera
       boolean targetVisible = false;
@@ -494,7 +494,7 @@ public class Superstructure extends SubsystemBase {
 
   public Command AlignToScoreCoral(){
 
-    Command autoDriveToReefStation = AimAndRangeApriltag();
+    Command autoDriveToReefStation = AimAndRangeReefApriltag();
 
     Command setElevatorLevel = new InstantCommand(() -> {
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
@@ -593,14 +593,6 @@ public class Superstructure extends SubsystemBase {
     }, m_algae);
 
     return setAlgaeArmHold;
-  }
-
-  public Command AlgaeArmEject() {
-    Command setAlgaeArmEject = new RunCommand(() -> {
-      m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.EJECT);
-    }, m_algae);
-
-    return setAlgaeArmEject;
   }
 
   /** Robot state configurations - operator (2nd driver) sets up what the score button does */
