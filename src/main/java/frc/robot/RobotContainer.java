@@ -77,13 +77,13 @@ public class RobotContainer {
   private Command m_holdCoralCommand;
   private Command m_alignToLeftReefBranchCommand;
   private Command m_alignToRightReefBranchCommand;
-  private Command m_ejectCoralCommand;
+  private Command m_scoreCoralCommand;
 
   // Algae Commands //
   private Command m_algaeHomeCommand;
   private Command m_intakeAlgaeCommand;
   private Command m_holdAlgaeCommand;
-  private Command m_ejectAlgaeCommand;
+  private Command m_scoreAlgaeCommand;
   private Command m_deAlgaeCommand;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -140,13 +140,13 @@ public class RobotContainer {
     m_holdCoralCommand = m_superstructureSubsystem.HoldCoral();
     m_alignToLeftReefBranchCommand = m_superstructureSubsystem.SetReefAlignment(true);
     m_alignToRightReefBranchCommand = m_superstructureSubsystem.SetReefAlignment(false);
-    m_ejectCoralCommand = m_superstructureSubsystem.ScoreCoral();
+    m_scoreCoralCommand = m_superstructureSubsystem.ScoreCoral();
 
     // Instantiate Algae Commands //
     m_algaeHomeCommand = m_superstructureSubsystem.AlgaeArmHome();
     m_intakeAlgaeCommand = m_superstructureSubsystem.AlgaeArmHome();
     m_holdAlgaeCommand = m_superstructureSubsystem.AlgaeArmHold();
-    m_ejectAlgaeCommand = m_superstructureSubsystem.ScoreAlgae();
+    m_scoreAlgaeCommand = m_superstructureSubsystem.ScoreAlgae();
     m_deAlgaeCommand = m_superstructureSubsystem.AlgaeArmDeAlgaeify();
 
     // Register Named Commands //
@@ -170,13 +170,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("HoldCoral", m_holdCoralCommand);
     NamedCommands.registerCommand("AlignToLeftReefBranch", m_alignToLeftReefBranchCommand);
     NamedCommands.registerCommand("AlignToRightReefBranch", m_alignToRightReefBranchCommand);
-    NamedCommands.registerCommand("ScoreCoral", m_ejectCoralCommand);
+    NamedCommands.registerCommand("ScoreCoral", m_scoreCoralCommand);
 
     // Register Algae Commands //
     NamedCommands.registerCommand("AlgaeHome", m_algaeHomeCommand);
     NamedCommands.registerCommand("IntakeAlgae", m_intakeAlgaeCommand);
     NamedCommands.registerCommand("HoldAlgae", m_holdAlgaeCommand);
-    NamedCommands.registerCommand("ScoreAlgae", m_ejectAlgaeCommand);
+    NamedCommands.registerCommand("ScoreAlgae", m_scoreAlgaeCommand);
     NamedCommands.registerCommand("DeAlgae", m_deAlgaeCommand);
 
     // Init Auto Chooser //
@@ -217,7 +217,7 @@ public class RobotContainer {
 
     m_driverController.rightBumper()
         .whileTrue(m_aimAndAlignToReefApriltagCommand)
-        .onFalse(m_ejectCoralCommand);
+        .onFalse(m_scoreCoralCommand);
 
     // Operator button box controls //
     // Set to intake left or right
@@ -269,7 +269,7 @@ public class RobotContainer {
         
     m_operatorButtonBoxController
         .button(OperatorControlNameConstants.SCORE_ALGAE_BTN)
-        .onTrue(m_ejectAlgaeCommand);
+        .onTrue(m_scoreAlgaeCommand);
 
     m_operatorButtonBoxController
         .button(OperatorControlNameConstants.DEALGAE_BTN)

@@ -509,7 +509,7 @@ public class Superstructure extends SubsystemBase {
 
   public Command ScoreCoral() {
     Command scoreCoral = new RunCommand(
-      () -> m_coral.setCoralState(CoralSubsystem.CoralState.EJECT),
+      () -> m_coral.setCoralState(CoralSubsystem.CoralState.SCORE),
       m_coral
     );
 
@@ -556,7 +556,7 @@ public class Superstructure extends SubsystemBase {
 
   public Command ScoreAlgae() {
     Command scoreAlgae = new RunCommand(
-      () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.EJECT),
+      () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.SCORE),
       m_algae
     );
 
@@ -564,33 +564,37 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command AlgaeArmHome() {
-    Command homeAlgaeArm = new RunCommand(() -> {
-      m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOME);
-    }, m_algae);
+    Command homeAlgaeArm = new RunCommand(
+      () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOME),
+      m_algae
+    );
 
     return homeAlgaeArm;
   }
 
   public Command AlgaeArmIntake() {
-    Command setAlgaeArmIntake = new RunCommand(() -> {
-      m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE);
-    }, m_algae);
+    Command setAlgaeArmIntake = new RunCommand(
+      () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE),
+      m_algae
+    );
 
     return setAlgaeArmIntake;
   }
 
   public Command AlgaeArmDeAlgaeify() {
-    Command setAlgaeArmDeAlgaeify = new RunCommand(() -> {
-      m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE);
-    }, m_algae);
+    Command setAlgaeArmDeAlgaeify = new RunCommand(
+      () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE),
+      m_algae
+    );
 
     return setAlgaeArmDeAlgaeify;
   }
 
   public Command AlgaeArmHold() {
-    Command setAlgaeArmHold = new RunCommand(() -> {
-      m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD);
-    }, m_algae);
+    Command setAlgaeArmHold = new RunCommand(
+      () -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD),
+      m_algae
+    );
 
     return setAlgaeArmHold;
   }

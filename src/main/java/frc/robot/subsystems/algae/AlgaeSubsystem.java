@@ -21,7 +21,7 @@ public class AlgaeSubsystem extends SubsystemBase {
     INTAKE,
     DEALGAE,
     HOLD,
-    EJECT,
+    SCORE,
   }
 
   private AlgaeIO m_algaeIO;
@@ -78,7 +78,7 @@ public class AlgaeSubsystem extends SubsystemBase {
       case HOLD:
         handleMotors(ARM_HOLD_GOAL, 0);
         break;
-      case EJECT:
+      case SCORE:
         handleMotors(ARM_PROCESSOR_OUTTAKE_GOAL, OUTTAKE_SPEED);
         break;
       case HOME:

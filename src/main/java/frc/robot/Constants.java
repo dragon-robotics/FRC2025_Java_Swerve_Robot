@@ -204,6 +204,7 @@ public final class Constants {
     public static final double INTAKE_SPEED = -0.9;
     public static final double SLOW_INTAKE_SPEED = -0.2;
     public static final double OUTTAKE_SPEED = -1;
+    public static final double REVERSE_SPEED = 0.5;
   }
 
   public static class AlgaeSubsystemConstants {
