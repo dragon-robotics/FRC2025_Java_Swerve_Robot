@@ -299,17 +299,19 @@ public class Superstructure extends SubsystemBase {
   public Command ElevatorHome() {
         
     Command setElevatorHome = new InstantCommand(() -> {
-      elevatorHeightTranslationFactor = 1.0;
-      elevatorHeightStrafeFactor = 1.0;
-      elevatorHeightRotationFactor = 1.0;
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
     }, m_elevator);
 
     Command waitUntilElevatorIsAtBottom = new WaitUntilCommand(() -> m_elevator.isAtElevatorBottom());
 
     Command reZeroElevatorEncoder = new InstantCommand(() -> {
+      // Set the robot back to full speed //
+      elevatorHeightTranslationFactor = 1.0;
+      elevatorHeightStrafeFactor = 1.0;
+      elevatorHeightRotationFactor = 1.0;
+
       m_elevator.seedElevatorMotorEncoderPosition(0);
-    });
+    }, m_elevator);
 
     return setElevatorHome
           .andThen(waitUntilElevatorIsAtBottom)
