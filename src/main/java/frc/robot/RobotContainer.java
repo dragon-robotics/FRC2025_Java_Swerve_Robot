@@ -22,6 +22,8 @@ import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -54,6 +56,25 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser;
 
+  // Swerve Commands //
+
+  // Elevator Commands //
+  private Command elevatorHomeCommand;
+  private Command elevatorL1Command;
+  private Command elevatorL2Command;
+  private Command elevatorL3Command;
+  private Command elevatorL4Command;
+
+  // Coral Commands //
+  private Command intakeCoralCommand;
+  private Command holdCoralCommand;
+  private Command ejectCoralCommand;
+
+  // Algae Commands //
+  private Command intakeAlgaeCommand;
+  private Command deAlgaeCommand;
+  private Command algaeHomeCommand;
+
   // // Create all the shuffleboard tab for testing //
   // public ShuffleboardTab m_testShuffleboardTab = null;
   // public ShuffleboardTab m_intakeShuffleboardTab = null;
@@ -70,16 +91,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // // Register Named Commands //
-    // NamedCommands.registerCommand("IntakeAlgaeUntilAlgaeDetected", new IntakeAlgaeUntilAlgaeDetected(m_algaeSubsystem));
-    // NamedCommands.registerCommand("ScoreAlgae", new ScoreAlgae(m_algaeSubsystem));
-    // NamedCommands.registerCommand("IntakeCoralUntilCoralDetected", new IntakeCoralUntilCoralDetected(m_coralSubsystem));
-    // NamedCommands.registerCommand("ScoreCoral", new ScoreCoral(m_coralSubsystem));
-
-    // NamedCommands.registerCommand("MoveToL1", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_1));
-    // NamedCommands.registerCommand("MoveToL2", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_2));
-    // NamedCommands.registerCommand("MoveToL3", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_3));
-    // NamedCommands.registerCommand("MoveToL4", new MoveElevator(m_elevatorSubsystem, ElevatorSubsystemConstants.LVL_4));
 
     // Instantiate the joysticks //
     m_driverController = new CommandXboxController(OperatorConstants.DRIVER_PORT);
@@ -105,6 +116,12 @@ public class RobotContainer {
         m_algaeSubsystem,
         m_visionSubsystem,
         this);
+
+    // Instantiate all commands used //
+    deAlgaeCommand = m_superstructureSubsystem.AlgaeArmDeAlgaeify();
+
+    // Register Named Commands //
+    NamedCommands.registerCommand("DeAlgae", deAlgaeCommand);
 
     // Init Auto Chooser //
     autoChooser = AutoBuilder.buildAutoChooser("TestAuto");
