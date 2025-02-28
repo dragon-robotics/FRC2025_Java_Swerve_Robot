@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.OperatorControlNameConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.Teleop.MoveAlgaeManually;
@@ -225,50 +226,54 @@ public class RobotContainer {
 
     m_operatorButtonBoxController.button(6)
         .onTrue(m_intakeFromRightCoralStationCommand);
-    
-    // Test Controls //
 
-    // Test the elevator //
-    // L1 - Move to L1
-    m_operatorButtonBoxController.button(10)
+    // Elevator Triggers //
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.ELEVATOR_HOME_BTN)
         .onTrue(m_elevatorHomeCommand);
 
-    m_operatorButtonBoxController.button(4)
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.ELEVATOR_L1_BTN)
         .onTrue(m_elevatorL1Command);
 
-    m_operatorButtonBoxController.button(3)
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.ELEVATOR_L2_BTN)
         .onTrue(m_elevatorL2Command);
 
-    m_operatorButtonBoxController.button(2)
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.ELEVATOR_L3_BTN)
         .onTrue(m_elevatorL3Command);
 
-    m_operatorButtonBoxController.button(1)
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.ELEVATOR_L4_BTN)
         .onTrue(m_elevatorL4Command);
 
-    m_operatorButtonBoxController.button(11)
+    // Coral Triggers //
+
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.ALIGN_LEFT_REEF_BRANCH_BTN)
         .onTrue(m_alignToLeftReefBranchCommand);
 
-    m_operatorButtonBoxController.button(12)
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.ALIGN_RIGHT_REEF_BRANCH_BTN)
         .onTrue(m_alignToRightReefBranchCommand);
 
-
-    // Test the coral intake //
-
-    // // Test the algae arm and intake //
-    m_operatorButtonBoxController.button(10)
+    // Algae Triggers //
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.ALGAE_HOME_BTN)
         .onTrue(m_algaeHomeCommand);
 
-    m_operatorButtonBoxController.button(7)
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.INTAKE_ALGAE_BTN)
         .onTrue(m_intakeAlgaeCommand);
-
-    m_operatorButtonBoxController.button(8)
-        .onTrue(m_deAlgaeCommand);
-
-    m_operatorButtonBoxController.button(9)
-        .onTrue(m_holdAlgaeCommand);
-
-    m_operatorButtonBoxController.button(9)
+        
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.SCORE_ALGAE_BTN)
         .onTrue(m_ejectAlgaeCommand);
+
+    m_operatorButtonBoxController
+        .button(OperatorControlNameConstants.DEALGAE_BTN)
+        .onTrue(m_deAlgaeCommand);
   }
 
   /**

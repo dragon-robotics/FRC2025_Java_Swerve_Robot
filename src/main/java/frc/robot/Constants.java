@@ -470,6 +470,25 @@ public final class Constants {
     public static final Matrix<N3, N1> ODOMETRY_STD = VecBuilder.fill(0.1, 0.1, 0.1);
   }
 
+  public static class OperatorControlNameConstants {
+    public static final int ELEVATOR_L1_BTN = CustomButtonBoxConstants.BTN_4;
+    public static final int ELEVATOR_L2_BTN = CustomButtonBoxConstants.BTN_3;
+    public static final int ELEVATOR_L3_BTN = CustomButtonBoxConstants.BTN_2;
+    public static final int ELEVATOR_L4_BTN = CustomButtonBoxConstants.BTN_1;
+    public static final int ELEVATOR_HOME_BTN = CustomButtonBoxConstants.BTN_10;
+
+    public static final int ALIGN_LEFT_CORAL_STATION_BTN = CustomButtonBoxConstants.BTN_5;
+    public static final int ALIGN_RIGHT_CORAL_STATION_BTN = CustomButtonBoxConstants.BTN_6;
+
+    public static final int ALIGN_LEFT_REEF_BRANCH_BTN = CustomButtonBoxConstants.BTN_11;
+    public static final int ALIGN_RIGHT_REEF_BRANCH_BTN = CustomButtonBoxConstants.BTN_12;
+
+    public static final int ALGAE_HOME_BTN = CustomButtonBoxConstants.BTN_10;
+    public static final int INTAKE_ALGAE_BTN = CustomButtonBoxConstants.BTN_7;
+    public static final int SCORE_ALGAE_BTN = CustomButtonBoxConstants.BTN_8;
+    public static final int DEALGAE_BTN = CustomButtonBoxConstants.BTN_9;
+  }
+
   public static class OperatorConstants {
     public static final int DRIVER_PORT = 0;
     public static final int OPERATOR_PORT = 1;
