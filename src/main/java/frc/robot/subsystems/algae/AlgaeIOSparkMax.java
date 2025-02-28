@@ -34,7 +34,6 @@ import static frc.robot.Constants.AlgaeSubsystemConstants.*;
 public class AlgaeIOSparkMax implements AlgaeIO {
   private final SparkMax m_intakeMotor;
   private final SparkMax m_armLeadMotor;
-  private final SparkMax m_armFollowMotor;
 
   private final SparkClosedLoopController m_armLeadController;
   private final AbsoluteEncoder m_armLeadAbsEncoder;
@@ -52,7 +51,6 @@ public class AlgaeIOSparkMax implements AlgaeIO {
     // Instantiate the motors //
     m_intakeMotor = new SparkMax(INTAKE_MOTOR_ID, MotorType.kBrushless);
     m_armLeadMotor = new SparkMax(ARM_LEAD_MOTOR_ID, MotorType.kBrushless);
-    m_armFollowMotor = new SparkMax(ARM_FOLLOW_MOTOR_ID, MotorType.kBrushless);
 
     // Instatiate the Sparkmax closed loop controller and the encoder //
     m_armLeadController = m_armLeadMotor.getClosedLoopController();
@@ -235,15 +233,9 @@ public class AlgaeIOSparkMax implements AlgaeIO {
         ResetMode.kNoResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    m_armFollowMotor.configure(
-        m_armFollowMotorConfig,
-        ResetMode.kNoResetSafeParameters,
-        PersistMode.kPersistParameters);
-
     // Set the motors to start at 0 //
     m_intakeMotor.set(0);
     m_armLeadMotor.set(0);
-    m_armFollowMotor.set(0);
   }
 
   private double convertAngleToAbsEncoder(double angle) {
@@ -303,7 +295,7 @@ public class AlgaeIOSparkMax implements AlgaeIO {
 
     // Check if motors are connected //
     inputs.armLeadMotorConnected = m_armLeadMotor.getDeviceId() == ARM_LEAD_MOTOR_ID;
-    inputs.armLeadMotorConnected = m_armFollowMotor.getDeviceId() == ARM_FOLLOW_MOTOR_ID;
+    // inputs.armLeadMotorConnected = m_armFollowMotor.getDeviceId() == ARM_FOLLOW_MOTOR_ID;
     inputs.armLeadMotorConnected = m_intakeMotor.getDeviceId() == INTAKE_MOTOR_ID;
 
     // Get left arm motor data //
@@ -314,11 +306,11 @@ public class AlgaeIOSparkMax implements AlgaeIO {
     inputs.armLeadMotorPosition = m_armLeadAbsEncoder.getPosition();
     inputs.armLeadMotorVelocity = m_armLeadAbsEncoder.getVelocity();
 
-    // Get right arm motor data //
-    inputs.armFollowMotorVoltage = m_armFollowMotor.getBusVoltage();
-    inputs.armFollowMotorDutyCycle = m_armLeadMotor.getAppliedOutput();
-    inputs.armFollowMotorCurrent = m_armFollowMotor.getOutputCurrent();
-    inputs.armFollowMotorTemperature = m_armFollowMotor.getMotorTemperature();
+    // // Get right arm motor data //
+    // inputs.armFollowMotorVoltage = m_armFollowMotor.getBusVoltage();
+    // inputs.armFollowMotorDutyCycle = m_armLeadMotor.getAppliedOutput();
+    // inputs.armFollowMotorCurrent = m_armFollowMotor.getOutputCurrent();
+    // inputs.armFollowMotorTemperature = m_armFollowMotor.getMotorTemperature();
 
     // Get intake motor data //
     inputs.intakeMotorVoltage = m_intakeMotor.getBusVoltage();
