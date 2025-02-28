@@ -3,16 +3,16 @@
   "grid_size": 128,
   "tabs": [
     {
-      "name": "Teleoperated",
+      "name": "Dashboard",
       "grid_layout": {
         "layouts": [],
         "containers": [
           {
             "title": "AprilTagAlignLeftCamera-processed",
             "x": 0.0,
-            "y": 0.0,
+            "y": 256.0,
             "width": 640.0,
-            "height": 640.0,
+            "height": 768.0,
             "type": "Camera Stream",
             "properties": {
               "topic": "/CameraPublisher/AprilTagAlignLeftCamera-processed",
@@ -23,9 +23,9 @@
           {
             "title": "AprilTagAlignRightCamera-processed",
             "x": 1152.0,
-            "y": 0.0,
+            "y": 256.0,
             "width": 640.0,
-            "height": 640.0,
+            "height": 768.0,
             "type": "Camera Stream",
             "properties": {
               "topic": "/CameraPublisher/AprilTagAlignRightCamera-processed",
@@ -36,7 +36,7 @@
           {
             "title": "Auto Chooser",
             "x": 768.0,
-            "y": 0.0,
+            "y": 256.0,
             "width": 256.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
@@ -49,109 +49,109 @@
           {
             "title": "hasTarget",
             "x": 640.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "hasTarget",
-            "x": 896.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "hasTarget",
-            "x": 896.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "hasTarget",
-            "x": 640.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "hasTarget",
-            "x": 640.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "hasTarget",
-            "x": 896.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "hasTarget",
-            "x": 640.0,
             "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "hasTarget",
+            "x": 896.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "hasTarget",
+            "x": 896.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "hasTarget",
+            "x": 640.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "hasTarget",
+            "x": 640.0,
+            "y": 640.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "hasTarget",
+            "x": 896.0,
+            "y": 640.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "hasTarget",
+            "x": 640.0,
+            "y": 768.0,
             "width": 512.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -168,9 +168,9 @@
           {
             "title": "hasTarget",
             "x": 640.0,
-            "y": 768.0,
+            "y": 896.0,
             "width": 128.0,
-            "height": 512.0,
+            "height": 128.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
@@ -185,9 +185,9 @@
           {
             "title": "hasTarget",
             "x": 1024.0,
-            "y": 768.0,
+            "y": 896.0,
             "width": 128.0,
-            "height": 512.0,
+            "height": 128.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
@@ -202,9 +202,9 @@
           {
             "title": "hasTarget",
             "x": 768.0,
-            "y": 768.0,
+            "y": 896.0,
             "width": 256.0,
-            "height": 512.0,
+            "height": 128.0,
             "type": "Large Text Display",
             "properties": {
               "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
@@ -215,24 +215,7 @@
           {
             "title": "hasTarget",
             "x": 1024.0,
-            "y": 0.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "Checkmark",
-              "false_icon": "X"
-            }
-          },
-          {
-            "title": "hasTarget",
-            "x": 640.0,
-            "y": 0.0,
+            "y": 256.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -249,9 +232,9 @@
           {
             "title": "hasTarget",
             "x": 0.0,
-            "y": 896.0,
-            "width": 640.0,
-            "height": 384.0,
+            "y": 0.0,
+            "width": 1792.0,
+            "height": 256.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
@@ -264,30 +247,23 @@
             }
           },
           {
-            "title": "hasTarget",
-            "x": 1152.0,
-            "y": 896.0,
-            "width": 640.0,
-            "height": 384.0,
+            "title": "Left Camera Active",
+            "x": 640.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/photonvision/AprilTagAlignLeftCamera/hasTarget",
+              "topic": "/Shuffleboard/Dashboard/Left Camera Active",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
               "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
+              "true_icon": "Checkmark",
+              "false_icon": "X"
             }
           }
         ]
-      }
-    },
-    {
-      "name": "Autonomous",
-      "grid_layout": {
-        "layouts": [],
-        "containers": []
       }
     }
   ]

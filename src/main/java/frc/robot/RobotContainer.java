@@ -21,6 +21,7 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorState;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
+import frc.robot.util.OperatorDashboard;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -86,8 +87,13 @@ public class RobotContainer {
   private Command m_scoreAlgaeCommand;
   private Command m_deAlgaeCommand;
 
+  // Operator Dashboard //
+  private OperatorDashboard m_operatorDashboard;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    m_operatorDashboard = new OperatorDashboard();
 
     // Instantiate the joysticks //
     m_driverController = new CommandXboxController(OperatorConstants.DRIVER_PORT);
@@ -136,7 +142,7 @@ public class RobotContainer {
     // Instantiate Coral Commands //
     m_intakeCoralCommand = m_superstructureSubsystem.IntakeCoral();
     m_intakeFromLeftCoralStationCommand = m_superstructureSubsystem.SetCoralStation(true);
-    m_intakeFromLeftCoralStationCommand = m_superstructureSubsystem.SetCoralStation(false);
+    m_intakeFromRightCoralStationCommand = m_superstructureSubsystem.SetCoralStation(false);
     m_holdCoralCommand = m_superstructureSubsystem.HoldCoral();
     m_alignToLeftReefBranchCommand = m_superstructureSubsystem.SetReefAlignment(true);
     m_alignToRightReefBranchCommand = m_superstructureSubsystem.SetReefAlignment(false);
