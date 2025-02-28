@@ -74,30 +74,16 @@ public class RobotContainer {
   private Command m_intakeFromLeftCoralStationCommand;
   private Command m_intakeFromRightCoralStationCommand;
   private Command m_holdCoralCommand;
-  private Command m_ejectCoralCommand;
   private Command m_alignToLeftReefBranchCommand;
   private Command m_alignToRightReefBranchCommand;
+  private Command m_ejectCoralCommand;
 
   // Algae Commands //
-  private Command m_intakeAlgaeCommand;
-  private Command m_deAlgaeCommand;
   private Command m_algaeHomeCommand;
-  private Command m_ejectAlgaeCommand;
+  private Command m_intakeAlgaeCommand;
   private Command m_holdAlgaeCommand;
-
-  // // Create all the shuffleboard tab for testing //
-  // public ShuffleboardTab m_testShuffleboardTab = null;
-  // public ShuffleboardTab m_intakeShuffleboardTab = null;
-  // public ShuffleboardTab m_uptakeShuffleboardTab = null;
-  // public ShuffleboardTab m_shooterShuffleboardTab = null;
-  // public ShuffleboardTab m_ampShuffleboardTab = null;
-  // public ShuffleboardTab m_climberShuffleboardTab = null;
-
-  // GenericEntry noteIsInIntakeEntry = Shuffleboard.getTab("SmartDashboard")
-  //     .add("NoteIsInIntake", false)
-  //     .withWidget("Boolean Box")
-  //     .withProperties(Map.of("colorWhenTrue", "green", "colorWhenFalse", "maroon"))
-  //     .getEntry();
+  private Command m_ejectAlgaeCommand;
+  private Command m_deAlgaeCommand;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -148,25 +134,52 @@ public class RobotContainer {
 
     // Instantiate Coral Commands //
     m_intakeCoralCommand = m_superstructureSubsystem.IntakeCoral();
-    m_holdCoralCommand = m_superstructureSubsystem.HoldCoral();
-    m_ejectCoralCommand = m_superstructureSubsystem.ScoreCoral();
     m_intakeFromLeftCoralStationCommand = m_superstructureSubsystem.SetCoralStation(true);
     m_intakeFromLeftCoralStationCommand = m_superstructureSubsystem.SetCoralStation(false);
+    m_holdCoralCommand = m_superstructureSubsystem.HoldCoral();
     m_alignToLeftReefBranchCommand = m_superstructureSubsystem.SetReefAlignment(true);
     m_alignToRightReefBranchCommand = m_superstructureSubsystem.SetReefAlignment(false);
+    m_ejectCoralCommand = m_superstructureSubsystem.ScoreCoral();
 
     // Instantiate Algae Commands //
     m_algaeHomeCommand = m_superstructureSubsystem.AlgaeArmHome();
-    m_deAlgaeCommand = m_superstructureSubsystem.AlgaeArmDeAlgaeify();
     m_intakeAlgaeCommand = m_superstructureSubsystem.AlgaeArmHome();
-    m_ejectAlgaeCommand = m_superstructureSubsystem.ScoreAlgae();
     m_holdAlgaeCommand = m_superstructureSubsystem.AlgaeArmHold();
+    m_ejectAlgaeCommand = m_superstructureSubsystem.ScoreAlgae();
+    m_deAlgaeCommand = m_superstructureSubsystem.AlgaeArmDeAlgaeify();
 
     // Register Named Commands //
+    // Register Swerve Commands //
+    NamedCommands.registerCommand("DefaultDrive", m_defaultDriveCommand);
+    NamedCommands.registerCommand("AimAndAlignToReefAprilTag", m_aimAndAlignToReefApriltagCommand);
+    NamedCommands.registerCommand("SwerveBrake", m_swerveBrakeCommand);
+    NamedCommands.registerCommand("SeedFieldCentric", m_seedFieldCentricCommand);
+
+    // Register Elevator Commands //
+    NamedCommands.registerCommand("ElevatorHome", m_elevatorHomeCommand);
+    NamedCommands.registerCommand("ElevatorL1", m_elevatorL1Command);
+    NamedCommands.registerCommand("ElevatorL2", m_elevatorL2Command);
+    NamedCommands.registerCommand("ElevatorL3", m_elevatorL3Command);
+    NamedCommands.registerCommand("ElevatorL4", m_elevatorL4Command);
+
+    // Register Coral Commands //
+    NamedCommands.registerCommand("IntakeCoral", m_intakeCoralCommand);
+    NamedCommands.registerCommand("IntakeFromLeftCoralStation", m_intakeFromLeftCoralStationCommand);
+    NamedCommands.registerCommand("IntakeFromRightCoralStation", m_intakeFromRightCoralStationCommand);
+    NamedCommands.registerCommand("HoldCoral", m_holdCoralCommand);
+    NamedCommands.registerCommand("AlignToLeftReefBranch", m_alignToLeftReefBranchCommand);
+    NamedCommands.registerCommand("AlignToRightReefBranch", m_alignToRightReefBranchCommand);
+    NamedCommands.registerCommand("ScoreCoral", m_ejectCoralCommand);
+
+    // Register Algae Commands //
+    NamedCommands.registerCommand("AlgaeHome", m_algaeHomeCommand);
+    NamedCommands.registerCommand("IntakeAlgae", m_intakeAlgaeCommand);
+    NamedCommands.registerCommand("HoldAlgae", m_holdAlgaeCommand);
+    NamedCommands.registerCommand("ScoreAlgae", m_ejectAlgaeCommand);
     NamedCommands.registerCommand("DeAlgae", m_deAlgaeCommand);
 
     // Init Auto Chooser //
-    autoChooser = AutoBuilder.buildAutoChooser("TestAuto");
+    autoChooser = AutoBuilder.buildAutoChooser("LeaveAuto-S3");
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     // Configure the trigger bindings
