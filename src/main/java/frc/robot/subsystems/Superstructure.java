@@ -179,7 +179,7 @@ public class Superstructure extends SubsystemBase {
     logger = new Telemetry(maxSpeed);
 
     // Register the telemetry for the swerve drive //
-    // m_swerve.registerTelemetry(logger::telemeterize);
+    m_swerve.registerTelemetry(logger::telemeterize);
   }
 
   // Swerve Drive Subsystem Commands //

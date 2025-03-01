@@ -30,6 +30,7 @@ public class CoralIOSparkMax implements CoralIO {
     // Configure the CANrange Flight-of-Time Sensor //
     m_canRangeConfigs = new CANrangeConfiguration();
     m_canRangeConfigs.ToFParams.UpdateMode = UpdateModeValue.ShortRange100Hz;
+    m_canRangeConfigs.ProximityParams.ProximityHysteresis = Units.Meters.of(0.05).in(Units.Meters);
     m_canRangeConfigs.ProximityParams.ProximityThreshold = Units.Meters.of(0.2).in(Units.Meters);
     m_canRange.getConfigurator().apply(m_canRangeConfigs);
 
