@@ -3,14 +3,8 @@ package frc.robot.subsystems.coral;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.CANrange;
-import com.ctre.phoenix6.signals.S1CloseStateValue;
-import com.ctre.phoenix6.signals.S1FloatStateValue;
-import com.ctre.phoenix6.signals.S2CloseStateValue;
-import com.ctre.phoenix6.signals.S2FloatStateValue;
 import com.ctre.phoenix6.signals.UpdateModeValue;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -18,9 +12,6 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.DigitalInput;
-
 import static frc.robot.Constants.CoralSubsystemConstants.*;
 
 public class CoralIOSparkMax implements CoralIO {
@@ -33,10 +24,10 @@ public class CoralIOSparkMax implements CoralIO {
     // Instantiate the intake motor //
     m_intakeMotor = new SparkMax(MOTOR_ID, MotorType.kBrushless);
 
-    // Instantiate the CANdi Beam Break Sensor //
+    // Instantiate the CANrange Flight-of-Time Sensor //
     m_canRange = new CANrange(0);
 
-    // Configure the CANdi Beam Break Sensor //
+    // Configure the CANrange Flight-of-Time Sensor //
     m_canRangeConfigs = new CANrangeConfiguration();
     m_canRangeConfigs.ToFParams.UpdateMode = UpdateModeValue.ShortRange100Hz;
     m_canRangeConfigs.ProximityParams.ProximityThreshold = Units.Meters.of(0.2).in(Units.Meters);
@@ -50,38 +41,6 @@ public class CoralIOSparkMax implements CoralIO {
       .secondaryCurrentLimit(SECONDARY_CURRENT_LIMIT)
       .openLoopRampRate(RAMP_RATE_IN_SEC)
       .idleMode(IdleMode.kBrake);
-
-    // // Intake Motor Signals Configuration //
-    // m_intakeMotorConfig.signals
-    //   .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
-    //   .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
-    //   .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
-    //   .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
-    //   .analogPositionAlwaysOn(false)               // Turn off analog position
-    //   .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
-    //   .analogVelocityAlwaysOn(false)               // Turn off analog velocity
-    //   .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
-    //   .analogVoltageAlwaysOn(false)                // Turn off analog voltage
-    //   .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
-    //   .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
-    //   .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
-    //   .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
-    //   .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
-    //   .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
-    //   .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
-    //   .faultsAlwaysOn(false)                       // Turn off faults
-    //   .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
-    //   .iAccumulationAlwaysOn(false)                // Turn off i accumulation
-    //   .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
-    //   .limitsPeriodMs(500000)                     // Set limits period to 500000 ms
-    //   .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
-    //   .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
-    //   .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
-    //   .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
-    //   .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
-    //   .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
-    //   .warningsAlwaysOn(false)                     // Turn off warnings
-    //   .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
 
     // Apply motor configurations //
     m_intakeMotor.configure(

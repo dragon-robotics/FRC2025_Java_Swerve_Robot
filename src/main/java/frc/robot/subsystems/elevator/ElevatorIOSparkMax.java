@@ -72,38 +72,6 @@ public class ElevatorIOSparkMax implements ElevatorIO {
         .allowedClosedLoopError(MAXMOTION_ALLOWED_ERROR, PID_SLOT)
         .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal, PID_SLOT);
 
-    // // Lead Motor Signals Configuration //
-    // m_elevatorLeadMotorConfig.signals
-    //   .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
-    //   .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
-    //   .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
-    //   .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
-    //   .analogPositionAlwaysOn(false)               // Turn off analog position
-    //   .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
-    //   .analogVelocityAlwaysOn(false)               // Turn off analog velocity
-    //   .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
-    //   .analogVoltageAlwaysOn(false)                // Turn off analog voltage
-    //   .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
-    //   .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
-    //   .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
-    //   .externalOrAltEncoderPositionAlwaysOn(true)  // Turn on external or alt encoder position
-    //   .externalOrAltEncoderPosition(5)            // Set external or alt encoder position period to 5 ms
-    //   .externalOrAltEncoderVelocityAlwaysOn(true)  // Turn on external or alt encoder velocity
-    //   .externalOrAltEncoderVelocity(5)            // Set external or alt encoder velocity period to 5 ms
-    //   .faultsAlwaysOn(false)                       // Turn off faults
-    //   .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
-    //   .iAccumulationAlwaysOn(false)                // Turn off i accumulation
-    //   .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
-    //   .limitsPeriodMs(20)                         // Set limits period to 20 ms
-    //   .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
-    //   .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
-    //   .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
-    //   .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
-    //   .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
-    //   .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
-    //   .warningsAlwaysOn(false)                     // Turn off warnings
-    //   .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms                 // Set warnings period to 500000 ms
-
     // Follow Motor Configuration //
     m_elevatorFollowMotorConfig
       .voltageCompensation(NOMINAL_VOLTAGE)
@@ -112,38 +80,6 @@ public class ElevatorIOSparkMax implements ElevatorIO {
       .openLoopRampRate(RAMP_RATE_IN_SEC)
       .idleMode(IdleMode.kBrake)
       .follow(LEAD_MOTOR_ID, true);
-
-    // // Follow Motor Signal Conifguration //
-    // m_elevatorFollowMotorConfig.signals
-    //   .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
-    //   .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
-    //   .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
-    //   .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
-    //   .analogPositionAlwaysOn(false)               // Turn off analog position
-    //   .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
-    //   .analogVelocityAlwaysOn(false)               // Turn off analog velocity
-    //   .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
-    //   .analogVoltageAlwaysOn(false)                // Turn off analog voltage
-    //   .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
-    //   .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
-    //   .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
-    //   .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
-    //   .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
-    //   .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
-    //   .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
-    //   .faultsAlwaysOn(false)                       // Turn off faults
-    //   .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
-    //   .iAccumulationAlwaysOn(false)                // Turn off i accumulation
-    //   .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
-    //   .limitsPeriodMs(20)                         // Set limits period to 20 ms
-    //   .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
-    //   .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
-    //   .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
-    //   .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
-    //   .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
-    //   .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
-    //   .warningsAlwaysOn(false)                     // Turn off warnings
-    //   .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
 
     m_elevatorLeadMotor.configure(
         m_elevatorLeadMotorConfig,
