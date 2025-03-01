@@ -21,6 +21,7 @@ public class CoralSubsystem extends SubsystemBase {
     HOLD,
     SCORE,
     REVERSE,
+    SLOW_REVERSE
   }
 
   private CoralIO m_coralIO;
@@ -82,6 +83,9 @@ public class CoralSubsystem extends SubsystemBase {
       case REVERSE:
         m_coralIO.setIntakeMotorPercentage(REVERSE_SPEED);
         break;
+      case SLOW_REVERSE:
+        m_coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
+        break;      
       case IDLE:
       default:
         m_coralIO.setIntakeMotorPercentage(0);

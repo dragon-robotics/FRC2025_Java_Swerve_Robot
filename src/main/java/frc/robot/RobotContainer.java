@@ -182,7 +182,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("DeAlgae", m_deAlgaeCommand);
 
     // Init Auto Chooser //
-    autoChooser = AutoBuilder.buildAutoChooser("LeaveAuto-S3");
+    autoChooser = AutoBuilder.buildAutoChooser("LeaveAutoS3");
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     // Configure the trigger bindings
@@ -275,7 +275,7 @@ public class RobotContainer {
 
     m_operatorButtonBoxController
         .button(OperatorControlNameConstants.DEALGAE_BTN)
-        .onTrue(m_deAlgaeCommand);
+        .whileTrue(m_deAlgaeCommand);
   }
 
   /**
