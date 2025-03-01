@@ -4,24 +4,29 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.ctre.phoenix6.configs.CANdiConfiguration;
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANdi;
+import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.signals.S1CloseStateValue;
 import com.ctre.phoenix6.signals.S1FloatStateValue;
 import com.ctre.phoenix6.signals.S2CloseStateValue;
 import com.ctre.phoenix6.signals.S2FloatStateValue;
+import com.ctre.phoenix6.signals.UpdateModeValue;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 import static frc.robot.Constants.CoralSubsystemConstants.*;
 
 public class CoralIOSparkMax implements CoralIO {
   private final SparkMax m_intakeMotor;
-  private final CANdi m_canDi;
-  private final CANdiConfiguration m_canDiConfigs;
+  private final CANrange m_canRange;
+  private final CANrangeConfiguration m_canRangeConfigs;
 
   public CoralIOSparkMax() {
 
@@ -29,11 +34,13 @@ public class CoralIOSparkMax implements CoralIO {
     m_intakeMotor = new SparkMax(MOTOR_ID, MotorType.kBrushless);
 
     // Instantiate the CANdi Beam Break Sensor //
-    m_canDi = new CANdi(0);
+    m_canRange = new CANrange(0);
 
     // Configure the CANdi Beam Break Sensor //
-    m_canDiConfigs = new CANdiConfiguration();
-    m_canDi.getConfigurator().apply(m_canDiConfigs);
+    m_canRangeConfigs = new CANrangeConfiguration();
+    m_canRangeConfigs.ToFParams.UpdateMode = UpdateModeValue.ShortRange100Hz;
+    m_canRangeConfigs.ProximityParams.ProximityThreshold = Units.Meters.of(0.1).in(Units.Meters);
+    m_canRange.getConfigurator().apply(m_canRangeConfigs);
 
     // Intake Motor Configuration //
     SparkMaxConfig m_intakeMotorConfig = new SparkMaxConfig();
@@ -104,7 +111,7 @@ public class CoralIOSparkMax implements CoralIO {
     inputs.intakeMotorTemperature = m_intakeMotor.getMotorTemperature();
 
     // Check if the beam break is tripped //
-    inputs.beamBreakTripped = m_canDi.getS1Closed().getValue();
+    inputs.beamBreakTripped = m_canRange.getIsDetected().getValue();
 
     // Check if the current limit is tripped //
     inputs.intakeCurrentLimitTripped = m_intakeMotor.getOutputCurrent() > CORAL_DETECT_CURRENT_THRESHOLD;

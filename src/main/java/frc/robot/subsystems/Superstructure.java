@@ -179,7 +179,7 @@ public class Superstructure extends SubsystemBase {
     logger = new Telemetry(maxSpeed);
 
     // Register the telemetry for the swerve drive //
-    m_swerve.registerTelemetry(logger::telemeterize);
+    // m_swerve.registerTelemetry(logger::telemeterize);
   }
 
   // Swerve Drive Subsystem Commands //
@@ -381,12 +381,12 @@ public class Superstructure extends SubsystemBase {
 
   public Command IntakeCoral(){
 
-    Command setRobotHeading = new InstantCommand(() -> {
-      // Set the robot heading to the coral station angle for intake //
-      currentHeading = intakeCoralLeft ? 
-        Optional.of(GeneralConstants.LEFT_CORAL_STATION_INTAKE_ANGLE) : // If left, set to left side angle
-        Optional.of(GeneralConstants.RIGHT_CORAL_STATION_INTAKE_ANGLE); // If right, set to right side angle
-    });
+    // Command setRobotHeading = new InstantCommand(() -> {
+    //   // Set the robot heading to the coral station angle for intake //
+    //   currentHeading = intakeCoralLeft ? 
+    //     Optional.of(GeneralConstants.LEFT_CORAL_STATION_INTAKE_ANGLE) : // If left, set to left side angle
+    //     Optional.of(GeneralConstants.RIGHT_CORAL_STATION_INTAKE_ANGLE); // If right, set to right side angle
+    // });
 
     Command engageCoralIntake = new InstantCommand(
       () -> m_coral.setCoralState(CoralSubsystem.CoralState.INTAKE),
@@ -403,8 +403,7 @@ public class Superstructure extends SubsystemBase {
     Command runUntilCoralIsNotDetected = new WaitUntilCommand(() -> !m_coral.isBeamBreakTripped());
 
     // Run until the beambreak or current limit is tripped // 
-    return setRobotHeading
-    .andThen(engageCoralIntake)
+    return engageCoralIntake
     .andThen(runUntilCoralIsDetected)
     .andThen(slowIntake)
     .andThen(runUntilCoralIsNotDetected);
