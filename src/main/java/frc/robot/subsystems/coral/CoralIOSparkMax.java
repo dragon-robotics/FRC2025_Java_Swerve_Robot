@@ -39,7 +39,7 @@ public class CoralIOSparkMax implements CoralIO {
     // Configure the CANdi Beam Break Sensor //
     m_canRangeConfigs = new CANrangeConfiguration();
     m_canRangeConfigs.ToFParams.UpdateMode = UpdateModeValue.ShortRange100Hz;
-    m_canRangeConfigs.ProximityParams.ProximityThreshold = Units.Meters.of(0.1).in(Units.Meters);
+    m_canRangeConfigs.ProximityParams.ProximityThreshold = Units.Meters.of(0.2).in(Units.Meters);
     m_canRange.getConfigurator().apply(m_canRangeConfigs);
 
     // Intake Motor Configuration //
