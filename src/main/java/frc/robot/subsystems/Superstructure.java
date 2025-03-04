@@ -259,14 +259,25 @@ public class Superstructure extends SubsystemBase {
           currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
         }
 
-        m_swerve.setControl(
-            driveMaintainHeading
-                .withVelocityX(translation)
-                .withVelocityY(strafe)
-                .withTargetDirection(currentHeading.get()));
+        Optional<Alliance> alliance = DriverStation.getAlliance();
+
+        if (alliance.isPresent()) {
+            m_swerve.setControl(
+                driveMaintainHeading
+                    .withVelocityX(translation)
+                    .withVelocityY(strafe)
+                    .withTargetDirection(
+                      alliance.get() == Alliance.Blue ?
+                        currentHeading.get() :
+                        currentHeading.get().rotateBy(Rotation2d.fromDegrees(180))));
+        }
       }
 
     }, m_swerve);
+  }
+
+  public void initCurrentHeading() {
+    currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
   }
 
   public Command SwerveBrake() {

@@ -132,11 +132,15 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    // m_robotContainer.m_superstructureSubsystem.initCurrentHeading();
   }
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    // m_robotContainer.m_superstructureSubsystem.initCurrentHeading();
+  }
 
   @Override
   public void teleopInit() {
@@ -147,6 +151,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    // Initialize current heading after auto
+    m_robotContainer.m_superstructureSubsystem.initCurrentHeading();
   }
 
   /** This function is called periodically during operator control. */
