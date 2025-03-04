@@ -76,7 +76,7 @@ public class AlgaeSubsystem extends SubsystemBase {
         handleMotors(ARM_DEALGAE_GOAL, DEALGAE_SPEED);
         break;
       case HOLD:
-        handleMotors(ARM_HOLD_GOAL, 0);
+        handleMotors(ARM_HOLD_GOAL, -0.1);
         break;
       case SCORE:
         handleMotors(ARM_PROCESSOR_OUTTAKE_GOAL, OUTTAKE_SPEED);

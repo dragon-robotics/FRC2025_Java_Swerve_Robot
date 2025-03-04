@@ -56,6 +56,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public boolean isAtElevatorBottom() {
+
+
+
     // Get the current encoder position.
     double encoderPosition = m_elevatorIOInputs.elevatorLeadMotorPosition;
     // Get the output current from the elevator motor (you'd need an appropriate method).
@@ -64,10 +67,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     // For example, HOME_POSITION is the known encoder value at the bottom.
     // ENCODER_TOLERANCE indicates acceptable error range.
     // BOTTOM_CURRENT_THRESHOLD is the current spike value expected when hitting a hard stop.
-    boolean encoderAtBottom = encoderPosition >= ElevatorSubsystemConstants.HOME + 0.001;
+    // boolean encoderAtBottom = encoderPosition >= ElevatorSubsystemConstants.HOME + 0.001;
+
+    boolean encoderAtBottom = MathUtil.isNear(HOME, encoderPosition, 0.001);
+
     boolean currentSpiked = m_elevatorIOInputs.elevatorCurrentLimitTripped;
     
-    return encoderAtBottom || currentSpiked;
+    return encoderAtBottom && currentSpiked;
   }
 
   public void seedElevatorMotorEncoderPosition(double position) {

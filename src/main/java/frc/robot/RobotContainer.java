@@ -146,7 +146,7 @@ public class RobotContainer {
 
     // Instantiate Algae Commands //
     m_algaeHomeCommand = m_superstructureSubsystem.AlgaeArmHome();
-    m_intakeAlgaeCommand = m_superstructureSubsystem.AlgaeArmHome();
+    m_intakeAlgaeCommand = m_superstructureSubsystem.IntakeAlgae();
     m_holdAlgaeCommand = m_superstructureSubsystem.AlgaeArmHold();
     m_scoreAlgaeCommand = m_superstructureSubsystem.ScoreAlgae();
     m_deAlgaeCommand = m_superstructureSubsystem.AlgaeArmDeAlgaeify();
@@ -267,7 +267,8 @@ public class RobotContainer {
 
     m_operatorButtonBoxController
         .button(OperatorControlNameConstants.INTAKE_ALGAE_BTN)
-        .onTrue(m_intakeAlgaeCommand);
+        .whileTrue(m_intakeAlgaeCommand)
+        .onFalse(m_holdAlgaeCommand);
         
     m_operatorButtonBoxController
         .button(OperatorControlNameConstants.SCORE_ALGAE_BTN)
@@ -276,6 +277,11 @@ public class RobotContainer {
     m_operatorButtonBoxController
         .button(OperatorControlNameConstants.DEALGAE_BTN)
         .whileTrue(m_deAlgaeCommand);
+
+    m_driverController
+        .y()
+        .whileTrue(m_deAlgaeCommand);
+
   }
 
   /**

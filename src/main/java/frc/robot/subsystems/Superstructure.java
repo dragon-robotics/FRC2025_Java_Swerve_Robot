@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.SwerveConstants;
@@ -402,11 +403,28 @@ public class Superstructure extends SubsystemBase {
 
     Command runUntilCoralIsNotDetected = new WaitUntilCommand(() -> !m_coral.isBeamBreakTripped());
 
+    Command slowReverseIntake = new InstantCommand(
+      () -> m_coral.setCoralState(CoralSubsystem.CoralState.SLOW_REVERSE),
+      m_coral
+    );
+
+    Command runUntilCoralIsDetectedAgain = new WaitUntilCommand(() -> m_coral.isBeamBreakTripped());
+
+    Command slowIntakeAgain = new InstantCommand(
+      () -> m_coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE),
+      m_coral
+    );
+
     // Run until the beambreak or current limit is tripped // 
     return engageCoralIntake
     .andThen(runUntilCoralIsDetected)
     .andThen(slowIntake)
-    .andThen(runUntilCoralIsNotDetected);
+    .andThen(runUntilCoralIsNotDetected)
+    .andThen(slowReverseIntake)
+    // .andThen(new WaitCommand(0.1));
+    .andThen(runUntilCoralIsDetectedAgain)
+    .andThen(slowIntakeAgain)
+    .andThen(new WaitCommand(0.05));
   }
 
   public Command AimAndRangeReefApriltag() {
@@ -475,7 +493,7 @@ public class Superstructure extends SubsystemBase {
             " YawError: " + Double.toString(yawError) +
             " YawCorrection: " + Double.toString(strafeCorrection));
 
-        m_swerve.setOperatorPerspectiveForward(GeneralConstants.REEF_STATION_ID_ANGLE_MAP.get(bestTagId));
+        m_swerve.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
         m_swerve.setControl(
             driveMaintainHeading
                 .withVelocityX(forward)
