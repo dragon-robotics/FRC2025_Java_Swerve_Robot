@@ -75,7 +75,7 @@ public class TunerConstants {
             .withVoltageOpenLoopRampPeriod(Seconds.of(0.25)))
     .withMotorOutput(
         new MotorOutputConfigs()
-            .withNeutralMode(NeutralModeValue.Brake));
+            .withNeutralMode(NeutralModeValue.Coast));
 
     private static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()
     .withCurrentLimits(
