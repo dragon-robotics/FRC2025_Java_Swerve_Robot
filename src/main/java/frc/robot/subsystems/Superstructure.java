@@ -285,7 +285,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command SeedFieldCentric() {
-    return m_swerve.runOnce(() -> m_swerve.seedFieldCentric());
+    return m_swerve.runOnce(() -> m_swerve.resetRotation(m_swerve.getState().Pose.getRotation()));
   }
 
   // Elevator Subsystem Commands //
