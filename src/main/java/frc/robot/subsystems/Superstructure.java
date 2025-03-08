@@ -224,9 +224,9 @@ public class Superstructure extends SubsystemBase {
 
       // Scale the output by half if half speed is enabled //
       if (halfSpeedSup.getAsBoolean()) {
-        translation *= 0.5;
-        strafe *= 0.5;
-        rotation *= 0.5;
+        translation *= 0.35;
+        strafe *= 0.35;
+        rotation *= 0.35;
       }
 
       // Translate input into velocities for the swerve drive //
@@ -285,7 +285,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command SeedFieldCentric() {
-    return m_swerve.runOnce(() -> m_swerve.resetRotation(m_swerve.getState().Pose.getRotation()));
+    return m_swerve.runOnce(() -> m_swerve.seedFieldCentric());
   }
 
   // Elevator Subsystem Commands //
