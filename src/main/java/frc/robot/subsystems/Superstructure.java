@@ -305,7 +305,7 @@ public class Superstructure extends SubsystemBase {
     Command resetElevatorEncoder = new ConditionalCommand(
       resetEncoder.andThen(setElevatorToIdle),
       setElevatorToIdle,
-      m_elevator::isAtElevatorBottom
+      m_elevator::isAtElevatorState
     );
 
     return resetElevatorEncoder;
@@ -317,7 +317,7 @@ public class Superstructure extends SubsystemBase {
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
     }, m_elevator);
 
-    Command waitUntilElevatorIsAtBottom = new WaitUntilCommand(() -> m_elevator.isAtElevatorBottom());
+    Command waitUntilElevatorIsAtBottom = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
 
     Command reZeroElevatorEncoder = new InstantCommand(() -> {
       // Set the robot back to full speed //
@@ -339,50 +339,63 @@ public class Superstructure extends SubsystemBase {
 
   public Command ElevatorL1() {
 
-    Command setElevatorL1 = new RunCommand(() -> {
+    Command setElevatorL1 = new InstantCommand(() -> {
       elevatorHeightTranslationFactor = 1.0;
       elevatorHeightStrafeFactor = 1.0;
       elevatorHeightRotationFactor = 1.0;
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
     }, m_elevator);
 
-    return setElevatorL1;
+    Command waitUntilElevatorIsAtL1 = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+
+    return setElevatorL1
+          .andThen(waitUntilElevatorIsAtL1);
   }
 
   public Command ElevatorL2() {
     
-    Command setElevatorL2 = new RunCommand(() -> {
+    Command setElevatorL2 = new InstantCommand(() -> {
       elevatorHeightTranslationFactor = 0.75;
       elevatorHeightStrafeFactor = 0.75;
       elevatorHeightRotationFactor = 1;
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L2);
     }, m_elevator);
 
-    return setElevatorL2;
+    Command waitUntilElevatorIsAtL2 = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+
+    return setElevatorL2
+          .andThen(waitUntilElevatorIsAtL2);
   }
 
   public Command ElevatorL3() {
 
-    Command setElevatorL3 = new RunCommand(() -> {
+    Command setElevatorL3 = new InstantCommand(() -> {
       elevatorHeightTranslationFactor = 0.65;
       elevatorHeightStrafeFactor = 0.65;
       elevatorHeightRotationFactor = 1;
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L3);
     }, m_elevator);
 
-    return setElevatorL3;
+    Command waitUntilElevatorIsAtL3 = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+
+    return setElevatorL3
+          .andThen(waitUntilElevatorIsAtL3);
   }
 
   public Command ElevatorL4() {
     
-    Command setElevatorL4 = new RunCommand(() -> {
+    Command setElevatorL4 = new InstantCommand(() -> {
       elevatorHeightTranslationFactor = 0.5;
       elevatorHeightStrafeFactor = 0.5;
       elevatorHeightRotationFactor = 1;
       m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L4);
     }, m_elevator);
 
-    return setElevatorL4;
+    Command waitUntilElevatorIsAtL4 = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+
+    return setElevatorL4
+          .andThen(waitUntilElevatorIsAtL4);
+
   }
 
   // Coral Subsystem Commands //
@@ -444,7 +457,6 @@ public class Superstructure extends SubsystemBase {
   public Command AimAndRangeReefApriltag() {
     return new RunCommand(() -> {
       // Read in relevant data from the Camera
-
       boolean targetVisible = false;
       double tagYaw = 0.0;
       double tagRange = 0.0;
@@ -497,21 +509,19 @@ public class Superstructure extends SubsystemBase {
         strafe  = MathUtil.clamp(strafe, -maxSpeed, maxSpeed);
 
         System.out.println(
-          " Forward: " + Double.toString(forward) +
-          " At Range Setpoint: " + Boolean.toString(visionRangePID.atSetpoint()) +
-          " TagRange: " + Double.toString(tagRange) +
-          " RangeError: " + Double.toString(rangeError) +
-          " RangeCorrection: " + Double.toString(forwardCorrection) +
-          " Strafe: " + Double.toString(strafe) +
-          " At Yaw Setpoint: " + Boolean.toString(visionAimPID.atSetpoint()) +
-          " TagYaw: " + Double.toString(tagYaw) +
-          " YawError: " + Double.toString(yawError) +
-          " YawCorrection: " + Double.toString(strafeCorrection)
-        );
+            "Strafe: " + Double.toString(strafe) +
+            " Forward: " + Double.toString(forward) +
+            " At Range Setpoint: " + Boolean.toString(visionRangePID.atSetpoint()) +
+            " TagRange: " + Double.toString(tagRange) +
+            " RangeError: " + Double.toString(rangeError) +
+            " RangeCorrection: " + Double.toString(forwardCorrection) +
+            " At Yaw Setpoint: " + Boolean.toString(visionAimPID.atSetpoint()) +
+            " TagYaw: " + Double.toString(tagYaw) +
+            " YawError: " + Double.toString(yawError) +
+            " YawCorrection: " + Double.toString(strafeCorrection));
 
-        // m_swerve.setOperatorPerspectiveForward(GeneralConstants.REEF_STATION_ID_ANGLE_MAP.get(bestTagId));
-        m_swerve.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
-
+        m_swerve.setOperatorPerspectiveForward(GeneralConstants.REEF_STATION_ID_ANGLE_MAP.get(bestTagId));
+            // m_swerve.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
         m_swerve.setControl(
             driveMaintainHeading
                 .withVelocityX(forward)
