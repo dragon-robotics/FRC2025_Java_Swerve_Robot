@@ -26,6 +26,9 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -166,7 +169,7 @@ public class Superstructure extends SubsystemBase {
     elevatorState = ElevatorSubsystem.ElevatorState.HOME;
 
     // Default we use the right camera //
-    useLeftCamera = false;
+    useLeftCamera = true;
 
     // Initialize the elevator height speed factor //
     elevatorHeightTranslationFactor = 1.0;
@@ -441,6 +444,7 @@ public class Superstructure extends SubsystemBase {
   public Command AimAndRangeReefApriltag() {
     return new RunCommand(() -> {
       // Read in relevant data from the Camera
+
       boolean targetVisible = false;
       double tagYaw = 0.0;
       double tagRange = 0.0;
@@ -456,18 +460,20 @@ public class Superstructure extends SubsystemBase {
           var bestTag = result.getBestTarget();
           bestTagId = bestTag.getFiducialId();
 
-          if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
-            // Found a red station tag, record its information
-            tagYaw = bestTag.getYaw();
-            bestTag.getSkew();
-            tagRange =
-                PhotonUtils.calculateDistanceToTargetMeters(
-                    useLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
-                    0.308, // From 2025 game manual for red station tags
-                    Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
-                    Units.degreesToRadians(bestTag.getPitch()));
-
-            targetVisible = true;
+          if (bestTagId == 18) {
+            if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
+              // Found a red station tag, record its information
+              tagYaw = bestTag.getYaw();
+              bestTag.getSkew();
+              tagRange =
+                  PhotonUtils.calculateDistanceToTargetMeters(
+                      useLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
+                      0.308, // From 2025 game manual for red station tags
+                      Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
+                      Units.degreesToRadians(bestTag.getPitch()));
+  
+              targetVisible = true;
+            }
           }
         }
       }
@@ -485,7 +491,7 @@ public class Superstructure extends SubsystemBase {
         double yawError = tagYaw - DESIRED_YAW;
         double strafeCorrection = visionAimPID.calculate(tagYaw, DESIRED_YAW);
 
-        double forward = -forwardCorrection;
+        double forward = forwardCorrection;
         double strafe = strafeCorrection;
 
         // Optionally clamp outputs to your robot’s maximum speed.
@@ -493,22 +499,25 @@ public class Superstructure extends SubsystemBase {
         strafe  = MathUtil.clamp(strafe, -maxSpeed, maxSpeed);
 
         System.out.println(
-            "Strafe: " + Double.toString(strafe) +
-            " Forward: " + Double.toString(forward) +
-            " At Range Setpoint: " + Boolean.toString(visionRangePID.atSetpoint()) +
-            " TagRange: " + Double.toString(tagRange) +
-            " RangeError: " + Double.toString(rangeError) +
-            " RangeCorrection: " + Double.toString(forwardCorrection) +
-            " At Yaw Setpoint: " + Boolean.toString(visionAimPID.atSetpoint()) +
-            " TagYaw: " + Double.toString(tagYaw) +
-            " YawError: " + Double.toString(yawError) +
-            " YawCorrection: " + Double.toString(strafeCorrection));
+          " Forward: " + Double.toString(forward) +
+          " At Range Setpoint: " + Boolean.toString(visionRangePID.atSetpoint()) +
+          " TagRange: " + Double.toString(tagRange) +
+          " RangeError: " + Double.toString(rangeError) +
+          " RangeCorrection: " + Double.toString(forwardCorrection)
+          // " Strafe: " + Double.toString(strafe) +
+          // " At Yaw Setpoint: " + Boolean.toString(visionAimPID.atSetpoint()) +
+          // " TagYaw: " + Double.toString(tagYaw) +
+          // " YawError: " + Double.toString(yawError) +
+          // " YawCorrection: " + Double.toString(strafeCorrection)
+        );
 
+        // m_swerve.setOperatorPerspectiveForward(GeneralConstants.REEF_STATION_ID_ANGLE_MAP.get(bestTagId));
         m_swerve.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
+
         m_swerve.setControl(
             driveMaintainHeading
                 .withVelocityX(forward)
-                .withVelocityY(strafe)
+                .withVelocityY(0)
                 .withTargetDirection(Rotation2d.kZero));
       }
     }, m_vision, m_swerve) {
@@ -694,5 +703,35 @@ public class Superstructure extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    var results = m_vision.getCamera(useLeftCamera).getAllUnreadResults();
+    double tagYaw = 0.0;
+    double tagRange = 0.0;
+    int bestTagId = 0;
+    if (!results.isEmpty()) {
+      var result = results.get(results.size() - 1);
+      if (result.hasTargets()) {
+        // Get the best target
+        var bestTag = result.getBestTarget();
+        bestTagId = bestTag.getFiducialId();
+
+        if (bestTagId == 18) {
+          if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
+            // Found a red station tag, record its information
+            tagYaw = bestTag.getYaw();
+            bestTag.getSkew();
+            tagRange =
+                PhotonUtils.calculateDistanceToTargetMeters(
+                    useLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
+                    0.305, // From 2025 game manual for red station tags
+                    Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
+                    Units.degreesToRadians(bestTag.getPitch()));
+
+            NetworkTableInstance.getDefault().getTable("AlignValues").putValue("tagYaw", NetworkTableValue.makeDouble(tagYaw));
+            NetworkTableInstance.getDefault().getTable("AlignValues").putValue("tagRange", NetworkTableValue.makeDouble(tagRange));
+
+          }
+        }
+      }
+    }
   }
 }

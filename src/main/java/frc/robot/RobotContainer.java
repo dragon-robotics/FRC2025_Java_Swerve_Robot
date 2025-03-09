@@ -218,8 +218,9 @@ public class RobotContainer {
         .onTrue(m_intakeCoralCommand);
 
     m_driverController.rightBumper()
-        // .whileTrue(m_aimAndAlignToReefApriltagCommand)
         .whileTrue(m_scoreCoralCommand);
+    
+    m_driverController.pov(0).whileTrue(m_aimAndAlignToReefApriltagCommand);
 
     // Operator button box controls //
     // Set to intake left or right
@@ -281,7 +282,6 @@ public class RobotContainer {
     m_driverController
         .y()
         .whileTrue(m_deAlgaeCommand);
-
   }
 
   /**

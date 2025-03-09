@@ -11,19 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "S2-R10-Path"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorL4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorHome"
+                  "pathName": "S3-R10-Path"
                 }
               }
             ]
@@ -38,12 +26,6 @@
                 "data": {
                   "pathName": "R10-LC1-Path"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeCoral"
-                }
               }
             ]
           }
@@ -56,18 +38,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "LC1-R09-Path"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorL4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorHome"
                 }
               }
             ]
@@ -82,12 +52,6 @@
                 "data": {
                   "pathName": "R09-LC1-Path"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeCoral"
-                }
               }
             ]
           }
@@ -100,18 +64,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "LC1-R08-Path"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorL4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorHome"
                 }
               }
             ]
@@ -126,12 +78,6 @@
                 "data": {
                   "pathName": "R08-LC1-Path"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeCoral"
-                }
               }
             ]
           }
@@ -144,18 +90,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "LC1-R07-Path"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorL4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorHome"
                 }
               }
             ]
