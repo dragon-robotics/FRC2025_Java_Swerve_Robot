@@ -710,36 +710,36 @@ public class Superstructure extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    var results = m_vision.getCamera(useLeftCamera).getAllUnreadResults();
-    double tagYaw = 0.0;
-    double tagRange = 0.0;
-    int bestTagId = 0;
-    if (!results.isEmpty()) {
-      var result = results.get(results.size() - 1);
-      if (result.hasTargets()) {
-        // Get the best target
-        var bestTag = result.getBestTarget();
-        bestTagId = bestTag.getFiducialId();
+    // // This method will be called once per scheduler run
+    // var results = m_vision.getCamera(useLeftCamera).getAllUnreadResults();
+    // double tagYaw = 0.0;
+    // double tagRange = 0.0;
+    // int bestTagId = 0;
+    // if (!results.isEmpty()) {
+    //   var result = results.get(results.size() - 1);
+    //   if (result.hasTargets()) {
+    //     // Get the best target
+    //     var bestTag = result.getBestTarget();
+    //     bestTagId = bestTag.getFiducialId();
 
-        if (bestTagId == 18) {
-          if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
-            // Found a red station tag, record its information
-            tagYaw = bestTag.getYaw();
-            bestTag.getSkew();
-            tagRange =
-                PhotonUtils.calculateDistanceToTargetMeters(
-                    useLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
-                    0.308, // From 2025 game manual for red station tags
-                    Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
-                    Units.degreesToRadians(bestTag.getPitch()));
+    //     if (bestTagId == 18) {
+    //       if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
+    //         // Found a red station tag, record its information
+    //         tagYaw = bestTag.getYaw();
+    //         bestTag.getSkew();
+    //         tagRange =
+    //             PhotonUtils.calculateDistanceToTargetMeters(
+    //                 useLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
+    //                 0.308, // From 2025 game manual for red station tags
+    //                 Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
+    //                 Units.degreesToRadians(bestTag.getPitch()));
 
-            NetworkTableInstance.getDefault().getTable("AlignValues").putValue("tagYaw", NetworkTableValue.makeDouble(tagYaw));
-            NetworkTableInstance.getDefault().getTable("AlignValues").putValue("tagRange", NetworkTableValue.makeDouble(tagRange));
+    //         NetworkTableInstance.getDefault().getTable("AlignValues").putValue("tagYaw", NetworkTableValue.makeDouble(tagYaw));
+    //         NetworkTableInstance.getDefault().getTable("AlignValues").putValue("tagRange", NetworkTableValue.makeDouble(tagRange));
 
-          }
-        }
-      }
-    }
+    //       }
+    //     }
+    //   }
+    // }
   }
 }
