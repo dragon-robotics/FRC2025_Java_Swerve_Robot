@@ -544,7 +544,6 @@ public class Superstructure extends SubsystemBase {
         m_swerve.setOperatorPerspectiveForward(Rotation2d.kZero);
         currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
       }
-      @Override
     }
     .until(() -> visionRangePID.atSetpoint() && visionAimPID.atSetpoint());
   }
