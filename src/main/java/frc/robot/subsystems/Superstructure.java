@@ -25,6 +25,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -455,6 +457,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command AimAndRangeReefApriltag() {
+    
     return new RunCommand(() -> {
       // Read in relevant data from the Camera
       boolean targetVisible = false;
@@ -474,14 +477,20 @@ public class Superstructure extends SubsystemBase {
 
           if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
             // Found a red station tag, record its information
-            tagYaw = bestTag.getYaw();
-            bestTag.getSkew();
-            tagRange =
-                PhotonUtils.calculateDistanceToTargetMeters(
-                    useLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
-                    0.308, // From 2025 game manual for red station tags
-                    Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
-                    Units.degreesToRadians(bestTag.getPitch()));
+            Transform3d cameraToTag = bestTag.getBestCameraToTarget();
+            Translation3d tagTranslation = cameraToTag.getTranslation();
+
+            // tagYaw = bestTag.getYaw();
+            // bestTag.getSkew();
+            // tagRange =
+            //     PhotonUtils.calculateDistanceToTargetMeters(
+            //         useLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
+            //         0.308, // From 2025 game manual for red station tags
+            //         Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
+            //         Units.degreesToRadians(bestTag.getPitch()));
+
+            tagRange = tagTranslation.getX();
+            tagYaw = tagTranslation.getY();
 
             targetVisible = true;
           }
@@ -502,19 +511,19 @@ public class Superstructure extends SubsystemBase {
         double strafeCorrection = visionAimPID.calculate(tagYaw, DESIRED_YAW);
 
         double forward = -forwardCorrection;
-        double strafe = strafeCorrection;
+        double strafe = -strafeCorrection;
 
         // Optionally clamp outputs to your robot’s maximum speed.
         forward = MathUtil.clamp(forward, -maxSpeed, maxSpeed);
         strafe  = MathUtil.clamp(strafe, -maxSpeed, maxSpeed);
 
         System.out.println(
-            "Strafe: " + Double.toString(strafe) +
-            " Forward: " + Double.toString(forward) +
-            " At Range Setpoint: " + Boolean.toString(visionRangePID.atSetpoint()) +
-            " TagRange: " + Double.toString(tagRange) +
-            " RangeError: " + Double.toString(rangeError) +
-            " RangeCorrection: " + Double.toString(forwardCorrection) +
+            " Strafe: " + Double.toString(strafe) +
+            // " Forward: " + Double.toString(forward) +
+            // " At Range Setpoint: " + Boolean.toString(visionRangePID.atSetpoint()) +
+            // " TagRange: " + Double.toString(tagRange) +
+            // " RangeError: " + Double.toString(rangeError) +
+            // " RangeCorrection: " + Double.toString(forwardCorrection) +
             " At Yaw Setpoint: " + Boolean.toString(visionAimPID.atSetpoint()) +
             " TagYaw: " + Double.toString(tagYaw) +
             " YawError: " + Double.toString(yawError) +
@@ -535,6 +544,7 @@ public class Superstructure extends SubsystemBase {
         m_swerve.setOperatorPerspectiveForward(Rotation2d.kZero);
         currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
       }
+      @Override
     }
     .until(() -> visionRangePID.atSetpoint() && visionAimPID.atSetpoint());
   }
