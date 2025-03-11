@@ -46,6 +46,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.Teleop.AutoAlignToReefTag;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -458,94 +459,20 @@ public class Superstructure extends SubsystemBase {
 
   public Command AimAndRangeReefApriltag() {
     
-    return new RunCommand(() -> {
-      // Read in relevant data from the Camera
-      boolean targetVisible = false;
-      double tagYaw = 0.0;
-      double tagRange = 0.0;
-      int bestTagId = 0;
+    Command autoAlignToReefTag = new AutoAlignToReefTag(
+      useLeftCamera,
+      visionAimPID,
+      visionRangePID,
+      driveMaintainHeading,
+      m_vision,
+      m_swerve);
 
-      var results = m_vision.getCamera(useLeftCamera).getAllUnreadResults();
-      if (!results.isEmpty()) {
-        // Camera processed a new frame since last
-        // Get the last one in the list.
-        var result = results.get(results.size() - 1);
-        if (result.hasTargets()) {
-          // Get the best target
-          var bestTag = result.getBestTarget();
-          bestTagId = bestTag.getFiducialId();
+    Command setCurrentHeading = new InstantCommand(() -> {
+      currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
+    });
 
-          if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
-            // Found a red station tag, record its information
-            Transform3d cameraToTag = bestTag.getBestCameraToTarget();
-            Translation3d tagTranslation = cameraToTag.getTranslation();
-
-            // tagYaw = bestTag.getYaw();
-            // bestTag.getSkew();
-            // tagRange =
-            //     PhotonUtils.calculateDistanceToTargetMeters(
-            //         useLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
-            //         0.308, // From 2025 game manual for red station tags
-            //         Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
-            //         Units.degreesToRadians(bestTag.getPitch()));
-
-            tagRange = tagTranslation.getX();
-            tagYaw = tagTranslation.getY();
-
-            targetVisible = true;
-          }
-        }
-      }
-
-      // If the target is visible, aim and range to it
-      if (targetVisible) {
-        // Override the driver's turn and fwd/rev command with an automatic one
-        // That turns strafe towards the tag, and gets the range right.
-
-        // Calculate range error
-        double rangeError = tagRange - DESIRED_RANGE; // 8.364 inches is the distance to the wall of the reef
-        double forwardCorrection = visionRangePID.calculate(tagRange, DESIRED_RANGE);
-
-        // Calculate yaw error
-        double yawError = tagYaw - DESIRED_YAW;
-        double strafeCorrection = visionAimPID.calculate(tagYaw, DESIRED_YAW);
-
-        double forward = -forwardCorrection;
-        double strafe = -strafeCorrection;
-
-        // Optionally clamp outputs to your robot’s maximum speed.
-        forward = MathUtil.clamp(forward, -maxSpeed, maxSpeed);
-        strafe  = MathUtil.clamp(strafe, -maxSpeed, maxSpeed);
-
-        System.out.println(
-            " Strafe: " + Double.toString(strafe) +
-            // " Forward: " + Double.toString(forward) +
-            // " At Range Setpoint: " + Boolean.toString(visionRangePID.atSetpoint()) +
-            // " TagRange: " + Double.toString(tagRange) +
-            // " RangeError: " + Double.toString(rangeError) +
-            // " RangeCorrection: " + Double.toString(forwardCorrection) +
-            " At Yaw Setpoint: " + Boolean.toString(visionAimPID.atSetpoint()) +
-            " TagYaw: " + Double.toString(tagYaw) +
-            " YawError: " + Double.toString(yawError) +
-            " YawCorrection: " + Double.toString(strafeCorrection));
-
-        m_swerve.setOperatorPerspectiveForward(GeneralConstants.REEF_STATION_ID_ANGLE_MAP.get(bestTagId));
-            // m_swerve.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
-        m_swerve.setControl(
-            driveMaintainHeading
-                .withVelocityX(forward)
-                .withVelocityY(strafe)
-                .withTargetDirection(Rotation2d.kZero));
-      }
-    }, m_vision, m_swerve) {
-      @Override
-      public void end(boolean interrupted) {
-        // This runs whether the command finishes normally or is interrupted.
-        m_swerve.setOperatorPerspectiveForward(Rotation2d.kZero);
-        currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
-      }
-    }
-    .until(() -> visionRangePID.atSetpoint() && visionAimPID.atSetpoint());
+    return autoAlignToReefTag
+          .andThen(setCurrentHeading);
   }
 
   public Command AlignToScoreCoral(){
