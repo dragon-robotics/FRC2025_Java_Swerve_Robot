@@ -66,8 +66,8 @@ public class TunerConstants {
             .withSupplyCurrentLimit(Amps.of(60)))
     .withVoltage(
         new VoltageConfigs()
-            .withPeakForwardVoltage(Volts.of(10))
-            .withPeakReverseVoltage(Volts.of(-10)))
+            .withPeakForwardVoltage(Volts.of(12))
+            .withPeakReverseVoltage(Volts.of(-12)))
     .withOpenLoopRamps(
         new OpenLoopRampsConfigs()
             .withDutyCycleOpenLoopRampPeriod(Seconds.of(0.25))
@@ -89,8 +89,8 @@ public class TunerConstants {
     )
     .withVoltage(
         new VoltageConfigs()
-            .withPeakForwardVoltage(Volts.of(10))
-            .withPeakReverseVoltage(Volts.of(-10)))
+            .withPeakForwardVoltage(Volts.of(12))
+            .withPeakReverseVoltage(Volts.of(-12)))
     .withOpenLoopRamps(
         new OpenLoopRampsConfigs()
             .withDutyCycleOpenLoopRampPeriod(Seconds.of(0.25))
