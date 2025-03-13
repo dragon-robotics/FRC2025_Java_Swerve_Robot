@@ -67,10 +67,10 @@ public class VisionSubsystem extends SubsystemBase {
       // Create simulated camera properties. These can be set to mimic your actual
       // camera.
       var cameraProp = new SimCameraProperties();
-      cameraProp.setCalibration(640, 480, Rotation2d.fromDegrees(70));
+      cameraProp.setCalibration(640, 480, Rotation2d.fromDegrees(72));
       cameraProp.setCalibError(0.35, 0.10);
       cameraProp.setFPS(50);
-      cameraProp.setAvgLatencyMs(28);
+      cameraProp.setAvgLatencyMs(25);
       cameraProp.setLatencyStdDevMs(5);
       
       // Create a PhotonCameraSim which will update the linked PhotonCamera's values
