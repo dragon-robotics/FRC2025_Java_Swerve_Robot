@@ -175,9 +175,9 @@ public final class Constants {
     public static final double RANGE_P = 2;
     public static final double RANGE_I = 0;
     public static final double RANGE_D = 0;
-    public static final double RANGE_TOLERANCE = 0.1;
+    public static final double RANGE_TOLERANCE = 0.01;
 
-    public static final double AIM_P = 1;
+    public static final double AIM_P = 0.5;
     public static final double AIM_I = 0;
     public static final double AIM_D = 0;
     public static final double AIM_TOLERANCE = 0.01;
