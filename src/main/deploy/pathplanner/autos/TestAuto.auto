@@ -9,18 +9,6 @@
           "data": {
             "pathName": "S2-R11-Path"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "R11-LC1-Path"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LC1-R11-Path"
-          }
         }
       ]
     }
