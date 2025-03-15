@@ -116,19 +116,19 @@ public final class Constants {
     // center, half a meter up from center.
     public static final Transform3d APTAG_ALIGN_LEFT_CAM_POS = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(10.608),
-            Units.inchesToMeters(7.0785),
-            Units.inchesToMeters(12.9575)),
-        new Rotation3d(0, 0, 0));
+            Units.inchesToMeters(9.249),
+            Units.inchesToMeters(4.910),
+            Units.inchesToMeters(7.6385)),
+        new Rotation3d(0, Units.degreesToRadians(-15), 0));
 
     // Main Apriltag alignment cam mounted facing forward, half a meter forward of
     // center, half a meter up from center.
     public static final Transform3d APTAG_ALIGN_RIGHT_CAM_POS = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(10.608),
-            Units.inchesToMeters(-7.0785),
-            Units.inchesToMeters(12.9575)),
-        new Rotation3d(0, 0, 0));
+            Units.inchesToMeters(9.249),
+            Units.inchesToMeters(-4.910),
+            Units.inchesToMeters(7.6385)),
+        new Rotation3d(0, Units.degreesToRadians(-15), 0));
 
     // Front-Left Camera: Mounted at front-left corner, pointing outward at 45
     // degrees
