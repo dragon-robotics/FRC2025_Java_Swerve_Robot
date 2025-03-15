@@ -7,6 +7,7 @@ package frc.robot.subsystems.coral;
 import frc.robot.subsystems.coral.CoralIO.CoralIOInputs;
 import static frc.robot.Constants.CoralSubsystemConstants.*;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralSubsystem extends SubsystemBase {
@@ -23,6 +24,13 @@ public class CoralSubsystem extends SubsystemBase {
     REVERSE,
     SLOW_REVERSE
   }
+
+  private enum HoldState {
+    REVERSE, FORWARD
+  }
+
+  private HoldState m_holdState = HoldState.REVERSE;
+  private double m_forwardEndTime = 0.0;
 
   private CoralIO m_coralIO;
   private CoralState m_coralState;
@@ -49,6 +57,7 @@ public class CoralSubsystem extends SubsystemBase {
 
   /**
    * Set whether the coral intake has a coral
+   * 
    * @param hasCoral
    */
   public void setHasCoral(boolean hasCoral) {
@@ -61,13 +70,14 @@ public class CoralSubsystem extends SubsystemBase {
 
   /**
    * Set the state of the coral intake
+   * 
    * @param wantedCoralState
    */
-  public void setCoralState(CoralState wantedCoralState){
+  public void setCoralState(CoralState wantedCoralState) {
 
     m_coralState = wantedCoralState;
 
-    switch(m_coralState){
+    switch (m_coralState) {
       case INTAKE:
         m_coralIO.setIntakeMotorPercentage(INTAKE_SPEED);
         break;
@@ -75,7 +85,26 @@ public class CoralSubsystem extends SubsystemBase {
         m_coralIO.setIntakeMotorPercentage(SLOW_INTAKE_SPEED);
         break;
       case HOLD:
-        m_coralIO.setIntakeMotorPercentage(0);
+        switch (m_holdState) {
+          case REVERSE:
+            // Reverse the intake until beam break detected
+            m_coralIO.setIntakeMotorPercentage(-SLOW_REVERSE_SPEED);
+            if (m_coralIOInputs.beamBreakTripped) {
+              // Coral hit the beam break, switch to forward for 0.1 seconds
+              m_holdState = HoldState.FORWARD;
+              m_forwardEndTime = Timer.getFPGATimestamp() + 0.1;
+            }
+            break;
+
+          case FORWARD:
+            // Run intake forward for a short time
+            m_coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
+            if (Timer.getFPGATimestamp() >= m_forwardEndTime) {
+              // 0.1 seconds elapsed, switch back to reverse
+              m_holdState = HoldState.REVERSE;
+            }
+            break;
+        }
         break;
       case SCORE:
         m_coralIO.setIntakeMotorPercentage(OUTTAKE_SPEED);
@@ -85,7 +114,7 @@ public class CoralSubsystem extends SubsystemBase {
         break;
       case SLOW_REVERSE:
         m_coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
-        break;      
+        break;
       case IDLE:
       default:
         m_coralIO.setIntakeMotorPercentage(0);
@@ -96,14 +125,14 @@ public class CoralSubsystem extends SubsystemBase {
   /**
    * Set the motor speeds manually
    */
-  public void setCoralMotorSpeeds(double intakeSpeed){
+  public void setCoralMotorSpeeds(double intakeSpeed) {
     m_coralIO.setIntakeMotorPercentage(intakeSpeed);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    
+
     // Update inputs
     m_coralIO.updateInputs(m_coralIOInputs);
   }
