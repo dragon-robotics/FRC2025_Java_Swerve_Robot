@@ -15,7 +15,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "S2-R09-Path"
+                        "pathName": "S6-R02-Path"
                       }
                     },
                     {
@@ -62,7 +62,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "R09-LC1-Path"
+                  "pathName": "R02-LC3-Path"
                 }
               },
               {
@@ -85,7 +85,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LC1-R08-Path"
+                        "pathName": "LC3-R03-Path"
                       }
                     },
                     {
@@ -132,7 +132,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "R08-LC1-Path"
+                  "pathName": "R03-LC3-Path"
                 }
               },
               {
@@ -155,7 +155,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "LC1-R07-Path"
+                        "pathName": "LC3-R04-Path"
                       }
                     },
                     {
@@ -202,7 +202,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "R07-LC1-Path"
+                  "pathName": "R04-LC3-Path"
                 }
               },
               {
