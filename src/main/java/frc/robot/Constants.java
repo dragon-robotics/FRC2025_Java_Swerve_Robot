@@ -275,10 +275,10 @@ public final class Constants {
     public static final int LEAD_MOTOR_ID = 6;
     public static final int FOLLOW_MOTOR_ID = 5;
 
-    public static final double NOMINAL_VOLTAGE = 10.0;
-    public static final int FREE_CURRENT_LIMIT = 30;
-    public static final int STALL_CURRENT_LIMIT = 40;
-    public static final double SECONDARY_CURRENT_LIMIT = 60.0;
+    public static final double NOMINAL_VOLTAGE = 12.0;
+    public static final int FREE_CURRENT_LIMIT = 40;
+    public static final int STALL_CURRENT_LIMIT = 60;
+    public static final double SECONDARY_CURRENT_LIMIT = 80.0;
     public static final double RAMP_RATE_IN_SEC = 0.1; // Ramp rate in seconds
 
     public static final double STARTING_LIMIT = -0.2;
@@ -286,13 +286,13 @@ public final class Constants {
 
     public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot1;
 
-    public static final double P = 0.525; // TODO: To be tuned later
-    public static final double I = 0.0; // TODO: To be tuned later
-    public static final double D = 0.0; // TODO: To be tuned later
-    public static final double F = 0.0; // TODO: To be tuned later
-    public static final double IZ = 0.0; // TODO: To be tuned later
-    public static final double MIN_OUTPUT = -1; // TODO: To be tuned later
-    public static final double MAX_OUTPUT = 1; // TODO: To be tuned later
+    public static final double P = 0.4;
+    public static final double I = 0.0;
+    public static final double D = 0.1;
+    public static final double F = 0.0;
+    public static final double IZ = 0.0;
+    public static final double MIN_OUTPUT = -1;
+    public static final double MAX_OUTPUT = 1;
 
     // MaxMotion Constants //
     public static final double MAX_MAXMOTION_VELOCITY = 4000;
@@ -308,20 +308,20 @@ public final class Constants {
     public static final double ELEVATOR_MASS_KG = Units.lbsToKilograms(20);
 
     // Elevator Feedforward Constants
-    public static final double ELEVATOR_KS = 0.0; // TODO: To be tuned later
-    public static final double ELEVATOR_KV = 0.0; // TODO: To be tuned later
-    public static final double ELEVATOR_KA = 0.0; // TODO: To be tuned later
-    public static final double ELEVATOR_KG = 0.0; // TODO: To be tuned later
+    public static final double ELEVATOR_KS = 0.0;
+    public static final double ELEVATOR_KV = 0.0;
+    public static final double ELEVATOR_KA = 0.0;
+    public static final double ELEVATOR_KG = 0.0;
 
     /*
      * Desired absolute encoder setpoint for moving elevator (to be tuned later
      * using relative encoder)
      */
-    public static final double HOME = -0.05; // TODO: To be tuned later
-    public static final double L1 = -1; // TODO: To be tuned later
-    public static final double L2 = -3; // TODO: To be tuned later
-    public static final double L3 = -6; // TODO: To be tuned later
-    public static final double L4 = -10.5; // TODO: To be tuned later
+    public static final double HOME = -0.05;
+    public static final double L1 = -1;
+    public static final double L2 = -3;
+    public static final double L3 = -6;
+    public static final double L4 = -10.3;
   }
 
   public static class LEDConstants {
