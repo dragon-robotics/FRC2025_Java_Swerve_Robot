@@ -88,7 +88,7 @@ public class CoralSubsystem extends SubsystemBase {
         switch (m_holdState) {
           case REVERSE:
             // Reverse the intake until beam break detected
-            m_coralIO.setIntakeMotorPercentage(-SLOW_REVERSE_SPEED);
+            m_coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
             if (m_coralIOInputs.beamBreakTripped) {
               // Coral hit the beam break, switch to forward for 0.1 seconds
               m_holdState = HoldState.FORWARD;
@@ -98,7 +98,7 @@ public class CoralSubsystem extends SubsystemBase {
 
           case FORWARD:
             // Run intake forward for a short time
-            m_coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
+            m_coralIO.setIntakeMotorPercentage(-SLOW_REVERSE_SPEED);
             if (Timer.getFPGATimestamp() >= m_forwardEndTime) {
               // 0.1 seconds elapsed, switch back to reverse
               m_holdState = HoldState.REVERSE;
