@@ -74,17 +74,17 @@ public class AutoAlignToReefTag extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    List<PhotonPipelineResult> results = m_vision.getCamera(m_useLeftCamera).getAllUnreadResults();
-    if (!results.isEmpty()) {
-      PhotonPipelineResult result = results.get(results.size() - 1);
-      if (result.hasTargets()) {
-        int currentTagId = result.getBestTarget().getFiducialId();
-        if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == currentTagId)) {
-          // Get the best reef target and lock it in //
-          m_lockedTagId = currentTagId;
-        }
-      }
-    }
+    // List<PhotonPipelineResult> results = m_vision.getCamera(m_useLeftCamera).getAllUnreadResults();
+    // if (!results.isEmpty()) {
+    //   PhotonPipelineResult result = results.get(results.size() - 1);
+    //   if (result.hasTargets()) {
+    //     int currentTagId = result.getBestTarget().getFiducialId();
+    //     if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == currentTagId)) {
+    //       // Get the best reef target and lock it in //
+    //       m_lockedTagId = currentTagId;
+    //     }
+    //   }
+    // }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -99,9 +99,11 @@ public class AutoAlignToReefTag extends Command {
         // Get the current target
         PhotonTrackedTarget currentTag = result.getBestTarget();
         int currentTagId = result.getBestTarget().getFiducialId();
+        
+        if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == currentTagId)) {
+          m_lockedTagId = currentTagId;
 
-        if (m_lockedTagId == currentTagId) {
-          // Found a red station tag, record its information
+          // Found a reef station tag, record its information
           Transform3d cameraToTag = currentTag.getBestCameraToTarget();
           Translation3d tagTranslation = cameraToTag.getTranslation();
 
@@ -134,6 +136,7 @@ public class AutoAlignToReefTag extends Command {
       strafe  = MathUtil.clamp(strafe, -m_maxSpeed, m_maxSpeed);
 
       System.out.println(
+          " Tag ID: " + m_lockedTagId +    
           " Strafe: " + Double.toString(strafe) +
           " Forward: " + Double.toString(forward) +
           " At Range Setpoint: " + Boolean.toString(m_rangeController.atSetpoint()) +
