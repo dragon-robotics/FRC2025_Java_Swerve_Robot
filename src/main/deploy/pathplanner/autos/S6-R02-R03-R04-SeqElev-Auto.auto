@@ -139,6 +139,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "MatchAutos",
   "choreoAuto": false
 }

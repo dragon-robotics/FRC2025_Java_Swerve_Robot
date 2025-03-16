@@ -18,7 +18,9 @@
     "S7"
   ],
   "autoFolders": [
-    "LeaveAuto"
+    "LeaveAutos",
+    "MatchAutos",
+    "TestAutos"
   ],
   "defaultMaxVel": 5.1,
   "defaultMaxAccel": 5.1,
