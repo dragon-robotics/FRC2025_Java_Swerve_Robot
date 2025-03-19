@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 // import org.littletonrobotics.junction.LogFileUtil;
 // import org.littletonrobotics.junction.LoggedRobot;
 // import org.littletonrobotics.junction.Logger;
@@ -126,6 +128,10 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+
+    // The swerve drive should be in brake mode during auto to improve accuracy //
+    m_robotContainer.m_swerveDriveSubsystem.configNeutralMode(NeutralModeValue.Brake);
+
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
    
     // schedule the autonomous command (example)
@@ -144,6 +150,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+
+    // The swerve drive should be in coast mode during teleop for speed //
+    m_robotContainer.m_swerveDriveSubsystem.configNeutralMode(NeutralModeValue.Coast);
+
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

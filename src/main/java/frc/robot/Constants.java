@@ -100,6 +100,8 @@ public final class Constants {
     public static final int[] REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
     public static final int[] BLUE_REEF_STATION_TAG_IDS = {17, 18, 19, 20, 21, 22};
     public static final int[] RED_REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11};
+
+    public static boolean disableHAL = false;
   }
 
   public static class VisionConstants {
@@ -119,7 +121,7 @@ public final class Constants {
             Units.inchesToMeters(9.249),
             Units.inchesToMeters(4.910),
             Units.inchesToMeters(7.6385)),
-        new Rotation3d(0, Units.degreesToRadians(-15), 0));
+        new Rotation3d(0, Units.degreesToRadians(-20), 0));
 
     // Main Apriltag alignment cam mounted facing forward, half a meter forward of
     // center, half a meter up from center.
@@ -128,7 +130,7 @@ public final class Constants {
             Units.inchesToMeters(9.249),
             Units.inchesToMeters(-4.910),
             Units.inchesToMeters(7.6385)),
-        new Rotation3d(0, Units.degreesToRadians(-15), 0));
+        new Rotation3d(0, Units.degreesToRadians(-20), 0));
 
     // Front-Left Camera: Mounted at front-left corner, pointing outward at 45
     // degrees
