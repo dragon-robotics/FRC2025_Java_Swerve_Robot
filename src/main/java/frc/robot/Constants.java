@@ -120,7 +120,7 @@ public final class Constants {
         new Translation3d(
             Units.inchesToMeters(9.249),
             Units.inchesToMeters(4.910),
-            Units.inchesToMeters(7.6385)),
+            Units.inchesToMeters(8.3885)),
         new Rotation3d(0, Units.degreesToRadians(-20), 0));
 
     // Main Apriltag alignment cam mounted facing forward, half a meter forward of
@@ -129,7 +129,7 @@ public final class Constants {
         new Translation3d(
             Units.inchesToMeters(9.249),
             Units.inchesToMeters(-4.910),
-            Units.inchesToMeters(7.6385)),
+            Units.inchesToMeters(8.3885)),
         new Rotation3d(0, Units.degreesToRadians(-20), 0));
 
     // Front-Left Camera: Mounted at front-left corner, pointing outward at 45
@@ -179,13 +179,14 @@ public final class Constants {
     public static final double RANGE_D = 0;
     public static final double RANGE_TOLERANCE = 0.01;
 
-    public static final double AIM_P = 1;
+    public static final double AIM_P = 2;
     public static final double AIM_I = 0;
     public static final double AIM_D = 0;
     public static final double AIM_TOLERANCE = 0.01;
 
-    public static final double DESIRED_RANGE = Units.inchesToMeters(12); // 5.364 inches to the frame perimeter + 3 inch for bumpers
-    public static final double DESIRED_YAW = 0.01;
+    public static final double DESIRED_RANGE = 0.25;
+    public static final double DESIRED_YAW_RIGHT = 0.05;
+    public static final double DESIRED_YAW_LEFT = -0.05;
   }
 
   /** Intake Subsystem Constants */
@@ -323,7 +324,7 @@ public final class Constants {
     public static final double L1 = -1;
     public static final double L2 = -3;
     public static final double L3 = -6;
-    public static final double L4 = -10.3;
+    public static final double L4 = -10.4;
   }
 
   public static class LEDConstants {

@@ -6,7 +6,8 @@ package frc.robot.commands.Teleop;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static frc.robot.Constants.VisionConstants.DESIRED_RANGE;
-import static frc.robot.Constants.VisionConstants.DESIRED_YAW;
+import static frc.robot.Constants.VisionConstants.DESIRED_YAW_LEFT;
+import static frc.robot.Constants.VisionConstants.DESIRED_YAW_RIGHT;
 
 import java.util.Arrays;
 import java.util.List;
@@ -123,8 +124,9 @@ public class AutoAlignToReefTag extends Command {
       double forwardCorrection = m_rangeController.calculate(m_tagRange, DESIRED_RANGE);
 
       // Calculate yaw error
-      double yawError = m_tagYaw - DESIRED_YAW;
-      double strafeCorrection = m_aimController.calculate(m_tagYaw, DESIRED_YAW);
+      double desiredYaw = m_useLeftCamera ? DESIRED_YAW_LEFT : DESIRED_YAW_RIGHT;
+      double yawError = m_tagYaw - desiredYaw;
+      double strafeCorrection = m_aimController.calculate(m_tagYaw, desiredYaw);
 
       double forward = -forwardCorrection;
       double strafe = -strafeCorrection;

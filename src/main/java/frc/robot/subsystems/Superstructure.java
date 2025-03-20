@@ -9,7 +9,8 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.Constants.VisionConstants.APTAG_ALIGN_LEFT_CAM_POS;
 import static frc.robot.Constants.VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS;
 import static frc.robot.Constants.VisionConstants.DESIRED_RANGE;
-import static frc.robot.Constants.VisionConstants.DESIRED_YAW;
+import static frc.robot.Constants.VisionConstants.DESIRED_YAW_LEFT;
+import static frc.robot.Constants.VisionConstants.DESIRED_YAW_RIGHT;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import java.util.Arrays;
@@ -441,7 +442,7 @@ public class Superstructure extends SubsystemBase {
     Command runUntilCoralIsDetectedAgain = new WaitUntilCommand(() -> m_coral.isBeamBreakTripped());
 
     Command slowIntakeAgain = new InstantCommand(
-      () -> m_coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE),
+      () -> m_coral.setCoralState(CoralSubsystem.CoralState.SLOWER_INTAKE),
       m_coral
     );
 
@@ -454,7 +455,7 @@ public class Superstructure extends SubsystemBase {
     // .andThen(new WaitCommand(0.1));
     .andThen(runUntilCoralIsDetectedAgain)
     .andThen(slowIntakeAgain)
-    .andThen(new WaitCommand(0.05));
+    .andThen(new WaitCommand(0.02));
   }
 
   public Command AimAndRangeReefApriltag() {

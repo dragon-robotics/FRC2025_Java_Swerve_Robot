@@ -205,7 +205,7 @@ public class RobotContainer {
 
     m_coralSubsystem.setDefaultCommand(m_holdCoralCommand);    
     m_algaeSubsystem.setDefaultCommand(m_algaeHomeCommand);
-    m_elevatorSubsystem.setDefaultCommand(m_elevatorHomeCommand);
+    // m_elevatorSubsystem.setDefaultCommand(m_elevatorHomeCommand);
 
     // Use the "A" button to reset the Gyro orientation //
     m_driverController.a().onTrue(m_seedFieldCentricCommand);

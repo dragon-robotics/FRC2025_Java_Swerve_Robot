@@ -55,7 +55,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         double encoderPosition = m_elevatorIOInputs.elevatorLeadMotorPosition;        
 
         // Check if the encoder is at the bottom
-        boolean encoderAtBottom = MathUtil.isNear(HOME, encoderPosition, 0.001);
+        boolean encoderAtBottom = MathUtil.isNear(HOME, encoderPosition, 0.01);
 
         // Check if the current limit is tripped
         boolean currentSpiked = m_elevatorIOInputs.elevatorCurrentLimitTripped;
