@@ -262,7 +262,7 @@ public final class Constants {
      * tuned later using absolute encoder)
      */
     public static final double ARM_HOME_GOAL = 0.24;
-    public static final double ARM_INTAKE_GOAL = 0.05;
+    public static final double ARM_INTAKE_GOAL = 0.08;
     public static final double ARM_DEALGAE_GOAL = 0.1;
     public static final double ARM_HOLD_GOAL = 0.13;
     public static final double ARM_PROCESSOR_OUTTAKE_GOAL = 0.13;
