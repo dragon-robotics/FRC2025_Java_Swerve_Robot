@@ -223,12 +223,12 @@ public class RobotContainer {
     m_driverController.pov(0).whileTrue(m_aimAndAlignToReefApriltagCommand);
 
     // Operator button box controls //
-    // Set to intake left or right
-    m_operatorButtonBoxController.button(5)
-        .onTrue(m_intakeFromLeftCoralStationCommand);
+    // // Set to intake left or right
+    // m_operatorButtonBoxController.button(5)
+    //     .onTrue(m_intakeFromLeftCoralStationCommand);
 
-    m_operatorButtonBoxController.button(6)
-        .onTrue(m_intakeFromRightCoralStationCommand);
+    // m_operatorButtonBoxController.button(6)
+    //     .onTrue(m_intakeFromRightCoralStationCommand);
 
     // Elevator Triggers //
     m_operatorButtonBoxController
