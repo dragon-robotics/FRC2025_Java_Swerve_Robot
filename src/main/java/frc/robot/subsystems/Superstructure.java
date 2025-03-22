@@ -24,10 +24,13 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -86,6 +89,16 @@ public class Superstructure extends SubsystemBase {
   private final SwerveRequest.PointWheelsAt point;
   private final SwerveRequest.RobotCentric driveRobotCentric;
   private final SwerveRequest.FieldCentricFacingAngle driveMaintainHeading;
+
+  /* Used for path following */
+  private final SwerveRequest.ApplyFieldSpeeds applyFieldSpeeds;
+  private final SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds;
+
+  /* Holonomic Drive Controller for pathfollowing */
+  private HolonomicDriveController holonomicDriveController;
+  private PIDController xController;
+  private PIDController yController;
+  private ProfiledPIDController thetaController;
 
   private final double maxSpeed;
   private final double maxAngularRate;
@@ -159,6 +172,23 @@ public class Superstructure extends SubsystemBase {
         SwerveConstants.HEADING_KD);
     driveMaintainHeading.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     driveMaintainHeading.HeadingController.setTolerance(SwerveConstants.HEADING_TOLERANCE);
+
+    // Instantiate the Field and Robot Speeds Swerve Requests //
+    applyFieldSpeeds
+      = new SwerveRequest.ApplyFieldSpeeds()
+        .withDesaturateWheelSpeeds(true)
+        .withDriveRequestType(DriveRequestType.Velocity);
+    applyRobotSpeeds
+      = new SwerveRequest.ApplyRobotSpeeds()
+        .withDesaturateWheelSpeeds(true)
+        .withDriveRequestType(DriveRequestType.Velocity);
+    
+    // Instantiate the holonomic drive controller for path following //
+    xController = new PIDController(10, 0, 0);
+    yController = new PIDController(10, 0, 0);
+    thetaController = new ProfiledPIDController(7, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI / 2));
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    holonomicDriveController = new HolonomicDriveController(xController, yController, thetaController);
 
     // Instantiate current and wanted super states as stopped //
     m_reefAlignmentState = ReefAlignmentStates.ALIGN_REEF_LEFT_L1;
@@ -646,36 +676,8 @@ public class Superstructure extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // // This method will be called once per scheduler run
-    // var results = m_vision.getCamera(useLeftCamera).getAllUnreadResults();
-    // double tagYaw = 0.0;
-    // double tagRange = 0.0;
-    // int bestTagId = 0;
-    // if (!results.isEmpty()) {
-    //   var result = results.get(results.size() - 1);
-    //   if (result.hasTargets()) {
-    //     // Get the best target
-    //     var bestTag = result.getBestTarget();
-    //     bestTagId = bestTag.getFiducialId();
+    // This method will be called once per scheduler run
 
-    //     if (bestTagId == 18) {
-    //       if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == bestTag.getFiducialId())) {
-    //         // Found a red station tag, record its information
-    //         tagYaw = bestTag.getYaw();
-    //         bestTag.getSkew();
-    //         tagRange =
-    //             PhotonUtils.calculateDistanceToTargetMeters(
-    //                 useLeftCamera ? APTAG_ALIGN_LEFT_CAM_POS.getZ() : APTAG_ALIGN_RIGHT_CAM_POS.getZ(), // Measured with a tape measure, or in CAD.
-    //                 0.308, // From 2025 game manual for red station tags
-    //                 Units.degreesToRadians(0), // Measured with a protractor, or in CAD.
-    //                 Units.degreesToRadians(bestTag.getPitch()));
-
-    //         NetworkTableInstance.getDefault().getTable("AlignValues").putValue("tagYaw", NetworkTableValue.makeDouble(tagYaw));
-    //         NetworkTableInstance.getDefault().getTable("AlignValues").putValue("tagRange", NetworkTableValue.makeDouble(tagRange));
-
-    //       }
-    //     }
-    //   }
-    // }
+    // Update the robot pose using Photonvision's Pose Estimates //
   }
 }
