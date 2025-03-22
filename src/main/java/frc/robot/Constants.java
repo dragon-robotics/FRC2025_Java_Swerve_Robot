@@ -177,16 +177,16 @@ public final class Constants {
     public static final double RANGE_P = 2;
     public static final double RANGE_I = 0;
     public static final double RANGE_D = 0;
-    public static final double RANGE_TOLERANCE = 0.01;
+    public static final double RANGE_TOLERANCE = 0.02;
 
     public static final double AIM_P = 2;
     public static final double AIM_I = 0;
     public static final double AIM_D = 0;
-    public static final double AIM_TOLERANCE = 0.01;
+    public static final double AIM_TOLERANCE = 0.02;
 
     public static final double DESIRED_RANGE = 0.25;
-    public static final double DESIRED_YAW_RIGHT = 0.05;
-    public static final double DESIRED_YAW_LEFT = -0.05;
+    public static final double DESIRED_YAW_RIGHT = 0.03;
+    public static final double DESIRED_YAW_LEFT = -0.03;
   }
 
   /** Intake Subsystem Constants */
@@ -202,6 +202,8 @@ public final class Constants {
     public static final int BEAM_BREAK_1_DIGITAL_CHANNEL = 0;
     public static final int BEAM_BREAK_2_DIGITAL_CHANNEL = 1;
     public static final double CORAL_DETECT_CURRENT_THRESHOLD = 30.0;
+    public static final double CORAL_DETECT_CANRANGE_THRESHOLD = 0.18;
+    public static final double CORAL_DETECT_CANRANGE_HYSTERESIS = 0.01;
 
     /* Desired intake speed for intake and outtake */
     public static final double INTAKE_SPEED = 0.7;
@@ -210,6 +212,51 @@ public final class Constants {
     public static final double REVERSE_SPEED = -0.5;
     public static final double SLOW_REVERSE_SPEED = -0.1;
   }
+
+  public static class BoomstickSubsystemConstants {
+    public static final int ARM_MOTOR_ID = 7;
+
+    public static final double ARM_NOMINAL_VOLTAGE = 8;
+    public static final int ARM_STALL_CURRENT_LIMIT = 20;
+    public static final double ARM_SECONDARY_CURRENT_LIMIT = 30.0;
+    public static final double ARM_RAMP_RATE_IN_SEC = 0.15; // Ramp rate in seconds
+
+    public static final double ABS_ENC_OFFSET_VAL = 0.8810048; // @TODO: To be tuned later
+
+    public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot0;
+
+    // Arm PID Constants //
+    public static final double ARM_P = 1.0;
+    public static final double ARM_I = 0.0;
+    public static final double ARM_D = 0.0;
+    public static final double ARM_F = 0.0;
+    public static final double ARM_IZ = 0.0;
+    public static final double ARM_MIN_OUTPUT = -1;
+    public static final double ARM_MAX_OUTPUT = 1;
+
+    // MaxMotion Constants //
+    public static final double ARM_MAX_MAXMOTION_VELOCITY = 4000;
+    public static final double ARM_MAX_MAXMOTION_ACCELERATION = 4000;
+    public static final double ARM_MAXMOTION_ALLOWED_ERROR = 0.01;
+
+    // Arm Physical Constants //
+    public static final double ARM_REDUCTION = 12; // Mounted on 20:1 gear reduction
+    public static final double ARM_MASS_KG = Units.lbsToKilograms(1.8);
+    public static final double ARM_LENGTH_M = Units.inchesToMeters(22);
+
+    // Algae Arm Feedforward Constants
+    public static final double ARM_KS = 0.0; // TODO: To be tuned later
+    public static final double ARM_KV = 0.762; // TODO: To be tuned later
+    public static final double ARM_KA = 0.762; // TODO: To be tuned later
+    public static final double ARM_KG = 0.0; // TODO: To be tuned later
+
+    /*
+     * Desired absolute encoder setpoint for Boomstick subsystem
+     */
+    public static final double ARM_HIGH_DEALGAE_GOAL = 0.24;
+    public static final double ARM_LOW_DEALGAE_GOAL = 0.24;
+    public static final double ARM_HOME_GOAL = 0.1;
+  }  
 
   public static class AlgaeSubsystemConstants {
     public static final int ARM_LEAD_MOTOR_ID = 2;

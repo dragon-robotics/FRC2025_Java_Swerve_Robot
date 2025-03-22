@@ -132,8 +132,8 @@ public class AutoAlignToReefTag extends Command {
       double strafe = -strafeCorrection;
 
       // Optionally clamp outputs to your robot’s maximum speed.
-      forward = MathUtil.clamp(forward, -m_maxSpeed, m_maxSpeed);
-      strafe  = MathUtil.clamp(strafe, -m_maxSpeed, m_maxSpeed);
+      forward = MathUtil.clamp(forward, -2, 2);
+      strafe  = MathUtil.clamp(strafe, -2, 2);
 
       System.out.println(
           " Tag ID: " + m_lockedTagId +    
