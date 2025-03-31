@@ -5,45 +5,94 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "sequential",
           "data": {
-            "pathName": "S2-R10-Path"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "S2-R10-Path"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "R10-LC1-Path"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R10-LC1-Path"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "sequential",
           "data": {
-            "pathName": "LC1-R09-Path"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LC1-R09-Path"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "R09-LC1-Path"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R09-LC1-Path"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "sequential",
           "data": {
-            "pathName": "LC1-R08-Path"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LC1-R08-Path"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "R08-LC1-Path"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R08-LC1-Path"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "sequential",
           "data": {
-            "pathName": "LC1-R07-Path"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LC1-R07-Path"
+                }
+              }
+            ]
           }
         }
       ]

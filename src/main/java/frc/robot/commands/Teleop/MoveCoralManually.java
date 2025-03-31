@@ -4,19 +4,23 @@
 
 package frc.robot.commands.Teleop;
 
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.coral.CoralSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class ScoreCoral extends Command {
+public class MoveCoralManually extends Command {
 
   private CoralSubsystem m_coral;
+  private DoubleSupplier m_speed;
 
-  /** Creates a new ScoreCoral. */
-  public ScoreCoral(CoralSubsystem coral) {
-
+  /** Creates a new MoveCoralManually. */
+  public MoveCoralManually(CoralSubsystem coral, DoubleSupplier speed) {
     m_coral = coral;
-
+    m_speed = speed;
+    
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(coral);
   }
@@ -27,7 +31,10 @@ public class ScoreCoral extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    double motorSpeed = MathUtil.applyDeadband(m_speed.getAsDouble(), 0.1);
+    m_coral.setCoralMotorSpeeds(motorSpeed);
+  }
 
   // Called once the command ends or is interrupted.
   @Override

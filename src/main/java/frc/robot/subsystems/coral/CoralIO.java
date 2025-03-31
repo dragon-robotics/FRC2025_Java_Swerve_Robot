@@ -24,6 +24,9 @@ public interface CoralIO {
 
         // Is the current limit tripped? //
         public boolean intakeCurrentLimitTripped;
+
+        // // Is the coral in the robot ? //
+        // public boolean isCoralInRobot;
     }
 
     default void updateInputs(CoralIOInputs inputs) {}

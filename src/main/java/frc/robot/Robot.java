@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 // import org.littletonrobotics.junction.LogFileUtil;
 // import org.littletonrobotics.junction.LoggedRobot;
 // import org.littletonrobotics.junction.Logger;
@@ -126,20 +128,32 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+
+    // The swerve drive should be in brake mode during auto to improve accuracy //
+    m_robotContainer.m_swerveDriveSubsystem.configNeutralMode(NeutralModeValue.Brake);
+
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
    
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    // m_robotContainer.m_superstructureSubsystem.initCurrentHeading();
   }
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    // m_robotContainer.m_superstructureSubsystem.initCurrentHeading();
+  }
 
   @Override
   public void teleopInit() {
+
+    // The swerve drive should be in coast mode during teleop for speed //
+    m_robotContainer.m_swerveDriveSubsystem.configNeutralMode(NeutralModeValue.Coast);
+
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -147,6 +161,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    // Initialize current heading after auto
+    m_robotContainer.m_superstructureSubsystem.initCurrentHeading();
   }
 
   /** This function is called periodically during operator control. */

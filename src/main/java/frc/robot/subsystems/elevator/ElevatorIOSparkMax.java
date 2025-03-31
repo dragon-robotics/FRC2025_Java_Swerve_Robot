@@ -25,143 +25,78 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import static frc.robot.Constants.ElevatorSubsystemConstants.*;
 
 public class ElevatorIOSparkMax implements ElevatorIO {
-  private final SparkMax m_elevatorLeftMotor = new SparkMax(LEFT_MOTOR_ID, MotorType.kBrushless);
-  private final SparkMax m_elevatorRightMotor = new SparkMax(RIGHT_MOTOR_ID, MotorType.kBrushless);
+  private final SparkMax m_elevatorLeadMotor = new SparkMax(LEAD_MOTOR_ID, MotorType.kBrushless);
+  private final SparkMax m_elevatorFollowMotor = new SparkMax(FOLLOW_MOTOR_ID, MotorType.kBrushless);
 
-  private final SparkClosedLoopController m_elevatorLeftController = m_elevatorLeftMotor.getClosedLoopController();
-  private final SparkMaxAlternateEncoder m_elevatorLeftRelEncoder = (SparkMaxAlternateEncoder) m_elevatorLeftMotor.getAlternateEncoder();
+  private final SparkClosedLoopController m_elevatorLeadController = m_elevatorLeadMotor.getClosedLoopController();
+  private final SparkMaxAlternateEncoder m_elevatorLeadRelEncoder = (SparkMaxAlternateEncoder) m_elevatorLeadMotor.getAlternateEncoder();
   private final ProfiledPIDController m_pidController;
 
   // Feedforward for elevator motor //
-  private final ElevatorFeedforward m_elevatorLeftFeedforward = new ElevatorFeedforward(ELEVATOR_KS, ELEVATOR_KG, ELEVATOR_KV, ELEVATOR_KA);
+  private final ElevatorFeedforward m_elevatorLeadFeedforward = new ElevatorFeedforward(ELEVATOR_KS, ELEVATOR_KG, ELEVATOR_KV, ELEVATOR_KA);
 
   public ElevatorIOSparkMax() {
-    // Left and Right Elevator Motor Configuration //
-    SparkMaxConfig m_elevatorLeftMotorConfig = new SparkMaxConfig();
-    SparkMaxConfig m_elevatorRightMotorConfig = new SparkMaxConfig();
+    // Lead and Follow Elevator Motor Configuration //
+    SparkMaxConfig m_elevatorLeadMotorConfig = new SparkMaxConfig();
+    SparkMaxConfig m_elevatorFollowMotorConfig = new SparkMaxConfig();
 
-        // Left Motor Configuration //
-    m_elevatorLeftMotorConfig
+    // Lead Motor Configuration //
+    m_elevatorLeadMotorConfig
       .voltageCompensation(NOMINAL_VOLTAGE)
       .smartCurrentLimit(STALL_CURRENT_LIMIT, FREE_CURRENT_LIMIT)
       .secondaryCurrentLimit(SECONDARY_CURRENT_LIMIT)
       .openLoopRampRate(RAMP_RATE_IN_SEC)
       .idleMode(IdleMode.kBrake);
 
-    // Left Motor Soft Limits //
-    m_elevatorLeftMotorConfig.softLimit
-      .forwardSoftLimitEnabled(true)
-      .forwardSoftLimit(ENDING_LIMIT)
-      .reverseSoftLimitEnabled(true)
-      .reverseSoftLimit(STARTING_LIMIT);
+    // Lead Motor Soft Limits //
+    // m_elevatorLeadMotorConfig.softLimit
+    //   .forwardSoftLimitEnabled(true)
+    //   .forwardSoftLimit(ENDING_LIMIT)
+    //   .reverseSoftLimitEnabled(true)
+    //   .reverseSoftLimit(STARTING_LIMIT);
 
-    // Left Motor Relative Encoder Configuration //
-    m_elevatorLeftMotorConfig.alternateEncoder
+    // Lead Motor Relative Encoder Configuration //
+    m_elevatorLeadMotorConfig.alternateEncoder
       .averageDepth(AVERAGE_DEPTH)
       .countsPerRevolution(COUNTS_PER_REVOLUTION)
       .inverted(false);
 
-    // Left Motor Closed Loop Configuration //
-    m_elevatorLeftMotorConfig.closedLoop
+    // Lead Motor Closed Loop Configuration //
+    m_elevatorLeadMotorConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
       .pid(P, I, D, PID_SLOT)
       .outputRange(MIN_OUTPUT, MAX_OUTPUT)
-      .positionWrappingEnabled(true)
-      .positionWrappingInputRange(POS_WRAP_MIN_INPUT, POS_WRAP_MAX_INPUT)
       .maxMotion
         .maxVelocity(MAX_MAXMOTION_VELOCITY)
         .maxAcceleration(MAX_MAXMOTION_ACCELERATION)
         .allowedClosedLoopError(MAXMOTION_ALLOWED_ERROR, PID_SLOT)
         .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal, PID_SLOT);
 
-    // Left Motor Signals Configuration //
-    m_elevatorLeftMotorConfig.signals
-      .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
-      .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
-      .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
-      .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
-      .analogPositionAlwaysOn(false)               // Turn off analog position
-      .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
-      .analogVelocityAlwaysOn(false)               // Turn off analog velocity
-      .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
-      .analogVoltageAlwaysOn(false)                // Turn off analog voltage
-      .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
-      .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
-      .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
-      .externalOrAltEncoderPositionAlwaysOn(true)  // Turn on external or alt encoder position
-      .externalOrAltEncoderPosition(5)            // Set external or alt encoder position period to 5 ms
-      .externalOrAltEncoderVelocityAlwaysOn(true)  // Turn on external or alt encoder velocity
-      .externalOrAltEncoderVelocity(5)            // Set external or alt encoder velocity period to 5 ms
-      .faultsAlwaysOn(false)                       // Turn off faults
-      .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
-      .iAccumulationAlwaysOn(false)                // Turn off i accumulation
-      .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
-      .limitsPeriodMs(20)                         // Set limits period to 20 ms
-      .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
-      .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
-      .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
-      .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
-      .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
-      .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
-      .warningsAlwaysOn(false)                     // Turn off warnings
-      .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms                 // Set warnings period to 500000 ms
-
-    // Right Motor Configuration //
-    m_elevatorRightMotorConfig
+    // Follow Motor Configuration //
+    m_elevatorFollowMotorConfig
       .voltageCompensation(NOMINAL_VOLTAGE)
       .smartCurrentLimit(STALL_CURRENT_LIMIT, FREE_CURRENT_LIMIT)
       .secondaryCurrentLimit(SECONDARY_CURRENT_LIMIT)
       .openLoopRampRate(RAMP_RATE_IN_SEC)
-      .idleMode(IdleMode.kBrake);
+      .idleMode(IdleMode.kBrake)
+      .follow(LEAD_MOTOR_ID, true);
 
-    // Right Motor Signal Conifguration //
-    m_elevatorRightMotorConfig.signals
-      .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
-      .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
-      .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
-      .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
-      .analogPositionAlwaysOn(false)               // Turn off analog position
-      .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
-      .analogVelocityAlwaysOn(false)               // Turn off analog velocity
-      .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
-      .analogVoltageAlwaysOn(false)                // Turn off analog voltage
-      .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
-      .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
-      .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
-      .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
-      .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
-      .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
-      .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
-      .faultsAlwaysOn(false)                       // Turn off faults
-      .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
-      .iAccumulationAlwaysOn(false)                // Turn off i accumulation
-      .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
-      .limitsPeriodMs(20)                         // Set limits period to 20 ms
-      .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
-      .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
-      .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
-      .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
-      .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
-      .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
-      .warningsAlwaysOn(false)                     // Turn off warnings
-      .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
-
-    m_elevatorLeftMotor.configure(
-        m_elevatorLeftMotorConfig,
+    m_elevatorLeadMotor.configure(
+        m_elevatorLeadMotorConfig,
         ResetMode.kNoResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    m_elevatorRightMotor.configure(
-        m_elevatorRightMotorConfig,
+    m_elevatorFollowMotor.configure(
+        m_elevatorFollowMotorConfig,
         ResetMode.kNoResetSafeParameters,
         PersistMode.kPersistParameters);
 
     // Set the motors to start at 0 //
-    m_elevatorLeftMotor.set(0);
-    m_elevatorRightMotor.set(0);
+    m_elevatorLeadMotor.set(0);
+    m_elevatorFollowMotor.set(0);
 
     // Set the encoder to be 0 //
-    m_elevatorLeftRelEncoder.setPosition(0);
+    m_elevatorLeadRelEncoder.setPosition(0);
 
     // PID Controller
     m_pidController = new ProfiledPIDController(
@@ -176,32 +111,42 @@ public class ElevatorIOSparkMax implements ElevatorIO {
   }
 
   private double calculateFeedforward(double setpoint) {
-    double pidOutput = m_pidController.calculate(m_elevatorLeftRelEncoder.getPosition(), setpoint);
+    double pidOutput = m_pidController.calculate(m_elevatorLeadRelEncoder.getPosition(), setpoint);
     State setpointState = m_pidController.getSetpoint();
-    return m_elevatorLeftFeedforward.calculate(setpointState.velocity);
+    return m_elevatorLeadFeedforward.calculate(setpointState.velocity);
+  }
+
+  @Override
+  public void seedElevatorMotorEncoderPosition(double position) {
+    m_elevatorLeadRelEncoder.setPosition(position);
   }
 
   @Override
   public void setElevatorMotorVoltage(double voltage) {
-    m_elevatorLeftMotor.setVoltage(MathUtil.clamp(voltage, -NOMINAL_VOLTAGE, NOMINAL_VOLTAGE));
+    m_elevatorLeadMotor.setVoltage(MathUtil.clamp(voltage, -NOMINAL_VOLTAGE, NOMINAL_VOLTAGE));
   }
 
   @Override
   public void setElevatorMotorPercentage(double percentage) {
-    m_elevatorLeftMotor.set(MathUtil.clamp(percentage, -1, 1));
+    m_elevatorLeadMotor.set(MathUtil.clamp(percentage, -1, 1));
   }
 
   @Override
   public void setElevatorMotorSetpoint(double setpoint) {
-    m_elevatorLeftController.setReference(
+    m_elevatorLeadController.setReference(
       setpoint,
-      ControlType.kMAXMotionPositionControl,
+      ControlType.kPosition,
       PID_SLOT);
   }
 
   @Override
+  public double getElevatorSetpoint() {
+    return m_elevatorLeadRelEncoder.getPosition();
+  }
+
+  @Override
   public void setElevatorSetpointFF(double setpoint) {
-    m_elevatorLeftController.setReference(
+    m_elevatorLeadController.setReference(
       setpoint,
       ControlType.kMAXMotionPositionControl,
       PID_SLOT,
@@ -212,26 +157,26 @@ public class ElevatorIOSparkMax implements ElevatorIO {
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
     // Check if motors are connected //
-    inputs.elevatorLeftMotorConnected = m_elevatorLeftMotor.getDeviceId() == LEFT_MOTOR_ID;
-    inputs.elevatorRightMotorConnected = m_elevatorRightMotor.getDeviceId() == RIGHT_MOTOR_ID;
+    inputs.elevatorLeadMotorConnected = m_elevatorLeadMotor.getDeviceId() == LEAD_MOTOR_ID;
+    inputs.elevatorFollowMotorConnected = m_elevatorFollowMotor.getDeviceId() == FOLLOW_MOTOR_ID;
 
     // Update motor data //
-    inputs.elevatorLeftMotorVoltage = m_elevatorLeftMotor.getBusVoltage();
-    inputs.elevatorLeftMotorDutyCycle = m_elevatorLeftMotor.getAppliedOutput();
-    inputs.elevatorLeftMotorCurrent = m_elevatorLeftMotor.getOutputCurrent();
-    inputs.elevatorLeftMotorTemperature = m_elevatorLeftMotor.getMotorTemperature();
-    inputs.elevatorLeftMotorPosition = m_elevatorLeftMotor.getAlternateEncoder().getPosition();
-    inputs.elevatorLeftMotorVelocity = m_elevatorLeftMotor.getAlternateEncoder().getVelocity();
+    inputs.elevatorLeadMotorVoltage = m_elevatorLeadMotor.getBusVoltage();
+    inputs.elevatorLeadMotorDutyCycle = m_elevatorLeadMotor.getAppliedOutput();
+    inputs.elevatorLeadMotorCurrent = m_elevatorLeadMotor.getOutputCurrent();
+    inputs.elevatorLeadMotorTemperature = m_elevatorLeadMotor.getMotorTemperature();
+    inputs.elevatorLeadMotorPosition = m_elevatorLeadMotor.getAlternateEncoder().getPosition();
+    inputs.elevatorLeadMotorVelocity = m_elevatorLeadMotor.getAlternateEncoder().getVelocity();
 
-    inputs.elevatorRightMotorVoltage = m_elevatorRightMotor.getBusVoltage();
-    inputs.elevatorRightMotorDutyCycle = m_elevatorRightMotor.getAppliedOutput();
-    inputs.elevatorRightMotorCurrent = m_elevatorRightMotor.getOutputCurrent();
-    inputs.elevatorRightMotorTemperature = m_elevatorRightMotor.getMotorTemperature();
+    inputs.elevatorFollowMotorVoltage = m_elevatorFollowMotor.getBusVoltage();
+    inputs.elevatorFollowMotorDutyCycle = m_elevatorFollowMotor.getAppliedOutput();
+    inputs.elevatorFollowMotorCurrent = m_elevatorFollowMotor.getOutputCurrent();
+    inputs.elevatorFollowMotorTemperature = m_elevatorFollowMotor.getMotorTemperature();
 
     // Check if the current limit is tripped //
-    inputs.elevatorCurrentLimitTripped = m_elevatorLeftMotor.isFollower() && m_elevatorRightMotor.isFollower();
+    inputs.elevatorCurrentLimitTripped = m_elevatorLeadMotor.getOutputCurrent() >= STALL_CURRENT_LIMIT;
 
     // Check if the elevator is at the slow down threshold //
-    inputs.elevatorAtSlowDownThreshold = m_elevatorLeftMotor.getAlternateEncoder().getPosition() <= HOME_GOAL;
+    inputs.elevatorAtSlowDownThreshold = m_elevatorLeadMotor.getAlternateEncoder().getPosition() >= HOME;
   }
 }
