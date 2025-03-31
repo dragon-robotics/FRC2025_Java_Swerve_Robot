@@ -1,20 +1,17 @@
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Meter;
+import static frc.robot.Constants.VisionConstants.*;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import java.util.List;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
-
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
-
-import static edu.wpi.first.units.Units.Meter;
-import static edu.wpi.first.units.Units.Meters;
-import static frc.robot.Constants.VisionConstants.*;
-
-import java.util.List;
 
 public class VisionIOPVSim implements VisionIO {
 
@@ -30,15 +27,15 @@ public class VisionIOPVSim implements VisionIO {
   private int targetId;
 
   public VisionIOPVSim() {
-    
+
     // Create the vision system simulation which handles cameras and targets on the
     // field.
     visionSim = new VisionSystemSim("main");
-    
+
     // Add all the AprilTags inside the tag layout as visible targets to this
     // simulated field.
     visionSim.addAprilTags(APTAG_FIELD_LAYOUT);
-    
+
     // Create simulated camera properties. These can be set to mimic your actual
     // camera.
     var cameraProp = new SimCameraProperties();
@@ -47,7 +44,7 @@ public class VisionIOPVSim implements VisionIO {
     cameraProp.setFPS(30);
     cameraProp.setAvgLatencyMs(40);
     cameraProp.setLatencyStdDevMs(15);
-    
+
     // Create a PhotonCameraSim which will update the linked PhotonCamera's values
     // with visible
     // targets.
@@ -70,7 +67,7 @@ public class VisionIOPVSim implements VisionIO {
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
-    
+
     List<PhotonPipelineResult> leftCameraResults =
         aprilTagAlignLeftCameraSim.getCamera().getAllUnreadResults();
 
@@ -80,8 +77,9 @@ public class VisionIOPVSim implements VisionIO {
     // Get the last result timestamp for the left camera if there are any unread results
     if (inputs.hasTargets[0]) {
       // Get the last result for the left camera //
-      PhotonPipelineResult leftCamLastResult = leftCameraResults.get(leftCameraResults.size() - 1); // This is the last result
-  
+      PhotonPipelineResult leftCamLastResult =
+          leftCameraResults.get(leftCameraResults.size() - 1); // This is the last result
+
       // Get the last timestamp for the left camera //
       inputs.lastTimestamp[0] = leftCamLastResult.getTimestampSeconds();
 
@@ -107,8 +105,9 @@ public class VisionIOPVSim implements VisionIO {
     // Get the last result timestamp for the right camera if there are any unread results
     if (inputs.hasTargets[1]) {
       // Get the last result for the right camera //
-      PhotonPipelineResult rightCamLastResult = rightCameraResults.get(rightCameraResults.size() - 1); // This is the last result
-  
+      PhotonPipelineResult rightCamLastResult =
+          rightCameraResults.get(rightCameraResults.size() - 1); // This is the last result
+
       // Get the last timestamp for the right camera //
       inputs.lastTimestamp[1] = rightCamLastResult.getTimestampSeconds();
 
@@ -127,5 +126,4 @@ public class VisionIOPVSim implements VisionIO {
 
     inputs.targetTagId = targetId;
   }
-
 }

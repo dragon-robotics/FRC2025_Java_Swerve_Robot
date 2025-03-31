@@ -4,17 +4,16 @@
 
 package frc.robot.subsystems.elevator;
 
+import static frc.robot.Constants.ElevatorSubsystemConstants.*;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ElevatorSubsystemConstants;
 import frc.robot.subsystems.elevator.ElevatorIO.ElevatorIOInputs;
-
-import static frc.robot.Constants.ElevatorSubsystemConstants.*;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
   // @TODO: Create Elastic Tabs for the Elevator Subsystem //
-  
+
   // Algae Subsystem States //
   public enum ElevatorState {
     IDLE,
@@ -45,21 +44,21 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public boolean isAtElevatorState() {
-    return switch(m_elevatorState){
+    return switch (m_elevatorState) {
       case L1 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L1, 0.01);
       case L2 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L2, 0.01);
       case L3 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L3, 0.01);
       case L4 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L4, 0.01);
       case HOME -> {
         // Get the current encoder position.
-        double encoderPosition = m_elevatorIOInputs.elevatorLeadMotorPosition;        
+        double encoderPosition = m_elevatorIOInputs.elevatorLeadMotorPosition;
 
         // Check if the encoder is at the bottom
         boolean encoderAtBottom = MathUtil.isNear(HOME, encoderPosition, 0.01);
 
         // Check if the current limit is tripped
         boolean currentSpiked = m_elevatorIOInputs.elevatorCurrentLimitTripped;
-        
+
         yield encoderAtBottom && currentSpiked;
       }
       default -> false;
@@ -72,13 +71,14 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   /**
    * Set the height of the elevator
+   *
    * @param wantedElevatorState
    */
   public void setElevatorState(ElevatorState wantedElevatorState) {
 
     m_elevatorState = wantedElevatorState;
 
-    switch(m_elevatorState){
+    switch (m_elevatorState) {
       case L1:
         m_elevatorIO.setElevatorMotorSetpoint(L1);
         break;
@@ -109,7 +109,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    
+
     // Update inputs
     m_elevatorIO.updateInputs(m_elevatorIOInputs);
   }

@@ -1,18 +1,18 @@
 package frc.robot.subsystems.coral;
 
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
+import static frc.robot.Constants.CoralSubsystemConstants.*;
+
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.signals.UpdateModeValue;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
-import static frc.robot.Constants.CoralSubsystemConstants.*;
 
 public class CoralIOSparkMax implements CoralIO {
   private final SparkMax m_intakeMotor;
@@ -30,24 +30,24 @@ public class CoralIOSparkMax implements CoralIO {
     // Configure the CANrange Flight-of-Time Sensor //
     m_canRangeConfigs = new CANrangeConfiguration();
     m_canRangeConfigs.ToFParams.UpdateMode = UpdateModeValue.ShortRange100Hz;
-    m_canRangeConfigs.ProximityParams.ProximityHysteresis = Units.Meters.of(CORAL_DETECT_CANRANGE_HYSTERESIS).in(Units.Meters);
-    m_canRangeConfigs.ProximityParams.ProximityThreshold = Units.Meters.of(CORAL_DETECT_CANRANGE_THRESHOLD).in(Units.Meters);
+    m_canRangeConfigs.ProximityParams.ProximityHysteresis =
+        Units.Meters.of(CORAL_DETECT_CANRANGE_HYSTERESIS).in(Units.Meters);
+    m_canRangeConfigs.ProximityParams.ProximityThreshold =
+        Units.Meters.of(CORAL_DETECT_CANRANGE_THRESHOLD).in(Units.Meters);
     m_canRange.getConfigurator().apply(m_canRangeConfigs);
 
     // Intake Motor Configuration //
     SparkMaxConfig m_intakeMotorConfig = new SparkMaxConfig();
     m_intakeMotorConfig
-      .voltageCompensation(NOMINAL_VOLTAGE)
-      .smartCurrentLimit(STALL_CURRENT_LIMIT, FREE_CURRENT_LIMIT)
-      .secondaryCurrentLimit(SECONDARY_CURRENT_LIMIT)
-      .openLoopRampRate(RAMP_RATE_IN_SEC)
-      .idleMode(IdleMode.kBrake);
+        .voltageCompensation(NOMINAL_VOLTAGE)
+        .smartCurrentLimit(STALL_CURRENT_LIMIT, FREE_CURRENT_LIMIT)
+        .secondaryCurrentLimit(SECONDARY_CURRENT_LIMIT)
+        .openLoopRampRate(RAMP_RATE_IN_SEC)
+        .idleMode(IdleMode.kBrake);
 
     // Apply motor configurations //
     m_intakeMotor.configure(
-        m_intakeMotorConfig,
-        ResetMode.kNoResetSafeParameters,
-        PersistMode.kPersistParameters);
+        m_intakeMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
@@ -74,6 +74,7 @@ public class CoralIOSparkMax implements CoralIO {
     inputs.beamBreakTripped = m_canRange.getIsDetected().getValue();
 
     // Check if the current limit is tripped //
-    inputs.intakeCurrentLimitTripped = m_intakeMotor.getOutputCurrent() > CORAL_DETECT_CURRENT_THRESHOLD;
+    inputs.intakeCurrentLimitTripped =
+        m_intakeMotor.getOutputCurrent() > CORAL_DETECT_CURRENT_THRESHOLD;
   }
 }

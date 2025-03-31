@@ -9,12 +9,6 @@ import static frc.robot.Constants.VisionConstants.DESIRED_RANGE;
 import static frc.robot.Constants.VisionConstants.DESIRED_YAW_LEFT;
 import static frc.robot.Constants.VisionConstants.DESIRED_YAW_RIGHT;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
-
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -26,6 +20,10 @@ import frc.robot.Constants.GeneralConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
+import java.util.Arrays;
+import java.util.List;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAlignToReefTag extends Command {
@@ -44,13 +42,12 @@ public class AutoAlignToReefTag extends Command {
 
   /** Creates a new AutoAlignToReefTag. */
   public AutoAlignToReefTag(
-    boolean useLeftCamera,
-    PIDController aimController,
-    PIDController rangeController,
-    SwerveRequest.FieldCentricFacingAngle driveMaintainHeading,
-    VisionSubsystem vision,
-    CommandSwerveDrivetrain swerve
-  ) {
+      boolean useLeftCamera,
+      PIDController aimController,
+      PIDController rangeController,
+      SwerveRequest.FieldCentricFacingAngle driveMaintainHeading,
+      VisionSubsystem vision,
+      CommandSwerveDrivetrain swerve) {
     m_useLeftCamera = useLeftCamera;
     m_aimController = aimController;
     m_rangeController = rangeController;
@@ -73,12 +70,14 @@ public class AutoAlignToReefTag extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    // List<PhotonPipelineResult> results = m_vision.getCamera(m_useLeftCamera).getAllUnreadResults();
+    // List<PhotonPipelineResult> results =
+    // m_vision.getCamera(m_useLeftCamera).getAllUnreadResults();
     // if (!results.isEmpty()) {
     //   PhotonPipelineResult result = results.get(results.size() - 1);
     //   if (result.hasTargets()) {
     //     int currentTagId = result.getBestTarget().getFiducialId();
-    //     if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == currentTagId)) {
+    //     if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i ==
+    // currentTagId)) {
     //       // Get the best reef target and lock it in //
     //       m_lockedTagId = currentTagId;
     //     }
@@ -98,7 +97,7 @@ public class AutoAlignToReefTag extends Command {
         // Get the current target
         PhotonTrackedTarget currentTag = result.getBestTarget();
         int currentTagId = result.getBestTarget().getFiducialId();
-        
+
         if (Arrays.stream(GeneralConstants.REEF_STATION_TAG_IDS).anyMatch(i -> i == currentTagId)) {
           m_lockedTagId = currentTagId;
 
@@ -120,7 +119,8 @@ public class AutoAlignToReefTag extends Command {
       // That turns strafe towards the tag, and gets the range right.
 
       // Calculate range error
-      double rangeError = m_tagRange - DESIRED_RANGE; // 8.364 inches is the distance to the wall of the reef
+      double rangeError =
+          m_tagRange - DESIRED_RANGE; // 8.364 inches is the distance to the wall of the reef
       double forwardCorrection = m_rangeController.calculate(m_tagRange, DESIRED_RANGE);
 
       // Calculate yaw error
@@ -133,22 +133,34 @@ public class AutoAlignToReefTag extends Command {
 
       // Optionally clamp outputs to your robot’s maximum speed.
       forward = MathUtil.clamp(forward, -2, 2);
-      strafe  = MathUtil.clamp(strafe, -2, 2);
+      strafe = MathUtil.clamp(strafe, -2, 2);
 
       System.out.println(
-          " Tag ID: " + m_lockedTagId +    
-          " Strafe: " + Double.toString(strafe) +
-          " Forward: " + Double.toString(forward) +
-          " At Range Setpoint: " + Boolean.toString(m_rangeController.atSetpoint()) +
-          " TagRange: " + Double.toString(m_tagRange) +
-          " RangeError: " + Double.toString(rangeError) +
-          " RangeCorrection: " + Double.toString(forwardCorrection) +
-          " At Yaw Setpoint: " + Boolean.toString(m_aimController.atSetpoint()) +
-          " TagYaw: " + Double.toString(m_tagYaw) +
-          " YawError: " + Double.toString(yawError) +
-          " YawCorrection: " + Double.toString(strafeCorrection));
+          " Tag ID: "
+              + m_lockedTagId
+              + " Strafe: "
+              + Double.toString(strafe)
+              + " Forward: "
+              + Double.toString(forward)
+              + " At Range Setpoint: "
+              + Boolean.toString(m_rangeController.atSetpoint())
+              + " TagRange: "
+              + Double.toString(m_tagRange)
+              + " RangeError: "
+              + Double.toString(rangeError)
+              + " RangeCorrection: "
+              + Double.toString(forwardCorrection)
+              + " At Yaw Setpoint: "
+              + Boolean.toString(m_aimController.atSetpoint())
+              + " TagYaw: "
+              + Double.toString(m_tagYaw)
+              + " YawError: "
+              + Double.toString(yawError)
+              + " YawCorrection: "
+              + Double.toString(strafeCorrection));
 
-      m_swerve.setOperatorPerspectiveForward(GeneralConstants.REEF_STATION_ID_ANGLE_MAP.get(m_lockedTagId));
+      m_swerve.setOperatorPerspectiveForward(
+          GeneralConstants.REEF_STATION_ID_ANGLE_MAP.get(m_lockedTagId));
       m_swerve.setControl(
           m_driveMaintainHeading
               .withVelocityX(forward)

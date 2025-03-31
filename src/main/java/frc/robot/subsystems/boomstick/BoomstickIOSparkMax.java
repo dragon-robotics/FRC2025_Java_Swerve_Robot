@@ -1,25 +1,19 @@
 package frc.robot.subsystems.boomstick;
 
+import static frc.robot.Constants.BoomstickSubsystemConstants.*;
+
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.MathUtil;
-import frc.robot.subsystems.algae.AlgaeIO.AlgaeIOInputs;
-
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-
-import static frc.robot.Constants.AlgaeSubsystemConstants.ALGAE_DETECT_CURRENT_THRESHOLD;
-import static frc.robot.Constants.AlgaeSubsystemConstants.INTAKE_MOTOR_ID;
-import static frc.robot.Constants.BoomstickSubsystemConstants.*;
 
 public class BoomstickIOSparkMax implements BoomstickIO {
   private final SparkMax m_armMotor;
@@ -40,35 +34,35 @@ public class BoomstickIOSparkMax implements BoomstickIO {
 
     // Left Motor Configuration //
     m_armMotorConfig
-      .voltageCompensation(ARM_NOMINAL_VOLTAGE)
-      .smartCurrentLimit(ARM_STALL_CURRENT_LIMIT)
-      .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
-      .openLoopRampRate(ARM_RAMP_RATE_IN_SEC)
-      .idleMode(IdleMode.kBrake);
+        .voltageCompensation(ARM_NOMINAL_VOLTAGE)
+        .smartCurrentLimit(ARM_STALL_CURRENT_LIMIT)
+        .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
+        .openLoopRampRate(ARM_RAMP_RATE_IN_SEC)
+        .idleMode(IdleMode.kBrake);
 
     // Left Motor Absolute Encoder Configuration //
-    m_armMotorConfig.absoluteEncoder
-      // .zeroCentered(true)
-      .zeroOffset(ABS_ENC_OFFSET_VAL)
-      .inverted(true);
+    m_armMotorConfig
+        .absoluteEncoder
+        // .zeroCentered(true)
+        .zeroOffset(ABS_ENC_OFFSET_VAL)
+        .inverted(true);
 
     // Left Motor Closed Loop Configuration //
-    m_armMotorConfig.closedLoop
-      .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-      .pidf(ARM_P, ARM_I, ARM_D, ARM_F, PID_SLOT)
-      .minOutput(-0.5, PID_SLOT)
-      .maxOutput(0.5, PID_SLOT)
-      .outputRange(-1, 1)
-      .maxMotion
+    m_armMotorConfig
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+        .pidf(ARM_P, ARM_I, ARM_D, ARM_F, PID_SLOT)
+        .minOutput(-0.5, PID_SLOT)
+        .maxOutput(0.5, PID_SLOT)
+        .outputRange(-1, 1)
+        .maxMotion
         .maxVelocity(ARM_MAX_MAXMOTION_VELOCITY)
         .maxAcceleration(ARM_MAX_MAXMOTION_ACCELERATION)
         .allowedClosedLoopError(ARM_MAXMOTION_ALLOWED_ERROR, PID_SLOT)
         .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal, PID_SLOT);
 
     m_armMotor.configure(
-        m_armMotorConfig,
-        ResetMode.kNoResetSafeParameters,
-        PersistMode.kPersistParameters); 
+        m_armMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
@@ -83,10 +77,7 @@ public class BoomstickIOSparkMax implements BoomstickIO {
 
   @Override
   public void setArmSetpoint(double setpoint) {
-    m_armController.setReference(
-      setpoint,
-      ControlType.kPosition,
-      PID_SLOT);
+    m_armController.setReference(setpoint, ControlType.kPosition, PID_SLOT);
   }
 
   @Override
@@ -102,5 +93,5 @@ public class BoomstickIOSparkMax implements BoomstickIO {
     inputs.armMotorTemperature = m_armMotor.getMotorTemperature();
     inputs.armMotorPosition = m_armAbsEncoder.getPosition();
     inputs.armMotorVelocity = m_armAbsEncoder.getVelocity();
-  }  
+  }
 }

@@ -6,11 +6,17 @@ package frc.robot.subsystems.vision;
 
 import static frc.robot.Constants.VisionConstants.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 import java.util.Optional;
-
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -20,23 +26,6 @@ import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
-
-import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
-
-import edu.wpi.first.math.MatBuilder;
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
 
 public class VisionSubsystem extends SubsystemBase {
 
@@ -59,16 +48,18 @@ public class VisionSubsystem extends SubsystemBase {
     aprilTagAlignLeftCamera = new PhotonCamera(APTAG_CAMERA_NAMES[0]);
     aprilTagAlignRightCamera = new PhotonCamera(APTAG_CAMERA_NAMES[1]);
 
-    photonEstimatorLeft = new PhotonPoseEstimator(
-        APTAG_FIELD_LAYOUT,
-        PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-        APTAG_ALIGN_LEFT_CAM_POS);
+    photonEstimatorLeft =
+        new PhotonPoseEstimator(
+            APTAG_FIELD_LAYOUT,
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            APTAG_ALIGN_LEFT_CAM_POS);
     photonEstimatorLeft.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
-    photonEstimatorRight = new PhotonPoseEstimator(
-        APTAG_FIELD_LAYOUT,
-        PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-        APTAG_ALIGN_RIGHT_CAM_POS);
+    photonEstimatorRight =
+        new PhotonPoseEstimator(
+            APTAG_FIELD_LAYOUT,
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            APTAG_ALIGN_RIGHT_CAM_POS);
     photonEstimatorRight.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
     this.driveState = driveState;
@@ -89,12 +80,12 @@ public class VisionSubsystem extends SubsystemBase {
       cameraProp.setFPS(50);
       cameraProp.setAvgLatencyMs(25);
       cameraProp.setLatencyStdDevMs(5);
-      
+
       // Create a PhotonCameraSim which will update the linked PhotonCamera's values
       // with visible targets.
       aprilTagAlignLeftCameraSim = new PhotonCameraSim(aprilTagAlignLeftCamera, cameraProp);
       aprilTagAlignRightCameraSim = new PhotonCameraSim(aprilTagAlignRightCamera, cameraProp);
-      
+
       // Add the simulated camera to view the targets on this simulated field.
       visionSim.addCamera(aprilTagAlignLeftCameraSim, APTAG_ALIGN_LEFT_CAM_POS);
       visionSim.addCamera(aprilTagAlignRightCameraSim, APTAG_ALIGN_RIGHT_CAM_POS);
@@ -106,136 +97,137 @@ public class VisionSubsystem extends SubsystemBase {
 
   /**
    * Gets a fused pose estimate from multiple cameras.
+   *
    * @return An optional containing the fused robot pose if available.
    */
   public Optional<EstimatedRobotPose> getFusedRobotPose() {
-    Optional<EstimatedRobotPose> leftPose = photonEstimatorLeft.update(aprilTagAlignLeftCamera.getLatestResult());
-    Optional<EstimatedRobotPose> rightPose = photonEstimatorRight.update(aprilTagAlignRightCamera.getLatestResult());
-    
+    Optional<EstimatedRobotPose> leftPose =
+        photonEstimatorLeft.update(aprilTagAlignLeftCamera.getLatestResult());
+    Optional<EstimatedRobotPose> rightPose =
+        photonEstimatorRight.update(aprilTagAlignRightCamera.getLatestResult());
+
     // 1. Strategy: Choose the "best" estimate based on quality metrics
     if (leftPose.isPresent() && rightPose.isPresent()) {
-        // Determine quality factors for each pose estimate
-        int leftTagCount = leftPose.get().targetsUsed.size();
-        int rightTagCount = rightPose.get().targetsUsed.size(); 
-        
-        // Get the average ambiguity for each camera
-        double leftAmbiguity = getAverageAmbiguity(aprilTagAlignLeftCamera.getLatestResult());
-        double rightAmbiguity = getAverageAmbiguity(aprilTagAlignRightCamera.getLatestResult());
-        
-        // Choose the better estimate: prefer more tags, then lower ambiguity
-        if (leftTagCount > rightTagCount) {
-            curStdDevs = calculateStdDevs(leftTagCount, leftAmbiguity);
-            return leftPose;
-        } else if (rightTagCount > leftTagCount) {
-            curStdDevs = calculateStdDevs(rightTagCount, rightAmbiguity);
-            return rightPose;
-        } else {
-            // Same number of tags, choose based on ambiguity
-            if (leftAmbiguity <= rightAmbiguity) {
-                curStdDevs = calculateStdDevs(leftTagCount, leftAmbiguity);
-                return leftPose;
-            } else {
-                curStdDevs = calculateStdDevs(rightTagCount, rightAmbiguity);
-                return rightPose;
-            }
-        }
-    } else if (leftPose.isPresent()) {
-        int tagCount = leftPose.get().targetsUsed.size();
-        double ambiguity = getAverageAmbiguity(aprilTagAlignLeftCamera.getLatestResult());
-        curStdDevs = calculateStdDevs(tagCount, ambiguity);
+      // Determine quality factors for each pose estimate
+      int leftTagCount = leftPose.get().targetsUsed.size();
+      int rightTagCount = rightPose.get().targetsUsed.size();
+
+      // Get the average ambiguity for each camera
+      double leftAmbiguity = getAverageAmbiguity(aprilTagAlignLeftCamera.getLatestResult());
+      double rightAmbiguity = getAverageAmbiguity(aprilTagAlignRightCamera.getLatestResult());
+
+      // Choose the better estimate: prefer more tags, then lower ambiguity
+      if (leftTagCount > rightTagCount) {
+        curStdDevs = calculateStdDevs(leftTagCount, leftAmbiguity);
         return leftPose;
-    } else if (rightPose.isPresent()) {
-        int tagCount = rightPose.get().targetsUsed.size();
-        double ambiguity = getAverageAmbiguity(aprilTagAlignRightCamera.getLatestResult());
-        curStdDevs = calculateStdDevs(tagCount, ambiguity);
+      } else if (rightTagCount > leftTagCount) {
+        curStdDevs = calculateStdDevs(rightTagCount, rightAmbiguity);
         return rightPose;
+      } else {
+        // Same number of tags, choose based on ambiguity
+        if (leftAmbiguity <= rightAmbiguity) {
+          curStdDevs = calculateStdDevs(leftTagCount, leftAmbiguity);
+          return leftPose;
+        } else {
+          curStdDevs = calculateStdDevs(rightTagCount, rightAmbiguity);
+          return rightPose;
+        }
+      }
+    } else if (leftPose.isPresent()) {
+      int tagCount = leftPose.get().targetsUsed.size();
+      double ambiguity = getAverageAmbiguity(aprilTagAlignLeftCamera.getLatestResult());
+      curStdDevs = calculateStdDevs(tagCount, ambiguity);
+      return leftPose;
+    } else if (rightPose.isPresent()) {
+      int tagCount = rightPose.get().targetsUsed.size();
+      double ambiguity = getAverageAmbiguity(aprilTagAlignRightCamera.getLatestResult());
+      curStdDevs = calculateStdDevs(tagCount, ambiguity);
+      return rightPose;
     }
-    
+
     return Optional.empty();
   }
 
-/**
- * Advanced fusion using weighted averaging of poses.
- */
-public Optional<EstimatedRobotPose> getFusedRobotPoseWeighted() {
-    Optional<EstimatedRobotPose> leftPose = photonEstimatorLeft.update(aprilTagAlignLeftCamera.getLatestResult());
-    Optional<EstimatedRobotPose> rightPose = photonEstimatorRight.update(aprilTagAlignRightCamera.getLatestResult());
-    
+  /** Advanced fusion using weighted averaging of poses. */
+  public Optional<EstimatedRobotPose> getFusedRobotPoseWeighted() {
+    Optional<EstimatedRobotPose> leftPose =
+        photonEstimatorLeft.update(aprilTagAlignLeftCamera.getLatestResult());
+    Optional<EstimatedRobotPose> rightPose =
+        photonEstimatorRight.update(aprilTagAlignRightCamera.getLatestResult());
+
     if (!leftPose.isPresent() && !rightPose.isPresent()) {
-        return Optional.empty();
+      return Optional.empty();
     } else if (!leftPose.isPresent()) {
-        return rightPose;
+      return rightPose;
     } else if (!rightPose.isPresent()) {
-        return leftPose;
+      return leftPose;
     }
-    
+
     // Both poses exist - calculate quality weights
     Pose2d leftPose2d = leftPose.get().estimatedPose.toPose2d();
     Pose2d rightPose2d = rightPose.get().estimatedPose.toPose2d();
-    
+
     int leftTagCount = leftPose.get().targetsUsed.size();
     int rightTagCount = rightPose.get().targetsUsed.size();
     double leftAmbiguity = getAverageAmbiguity(aprilTagAlignLeftCamera.getLatestResult());
     double rightAmbiguity = getAverageAmbiguity(aprilTagAlignRightCamera.getLatestResult());
-    
+
     // Calculate weights based on tag count and ambiguity
     double leftWeight = leftTagCount / (1.0 + leftAmbiguity);
     double rightWeight = rightTagCount / (1.0 + rightAmbiguity);
     double totalWeight = leftWeight + rightWeight;
-    
+
     // Normalized weights
     leftWeight /= totalWeight;
     rightWeight /= totalWeight;
-    
+
     // Weighted average of positions
     double x = leftPose2d.getX() * leftWeight + rightPose2d.getX() * rightWeight;
     double y = leftPose2d.getY() * leftWeight + rightPose2d.getY() * rightWeight;
-    
+
     // For rotation, interpolate between the two angles
     Rotation2d rot = leftPose2d.getRotation().interpolate(rightPose2d.getRotation(), rightWeight);
-    
+
     // Create fused pose
     Pose2d fusedPose = new Pose2d(x, y, rot);
-    
-    // Calculate standard deviations based on quality of estimates
-    curStdDevs = calculateStdDevs(leftTagCount + rightTagCount, 
-                                 (leftAmbiguity * leftWeight + rightAmbiguity * rightWeight));
-    
-    // Create a new estimated robot pose with the newest timestamp
-    return Optional.of(new EstimatedRobotPose(
-        new edu.wpi.first.math.geometry.Pose3d(fusedPose), 
-        Math.max(leftPose.get().timestampSeconds, rightPose.get().timestampSeconds),
-        leftPose.get().targetsUsed,  // Use one camera's targets or combine them if needed
-        PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR
-    ));
-  }  
 
-  /**
-   * Calculates average ambiguity from a result with targets.
-   */
-  private double getAverageAmbiguity(PhotonPipelineResult result) {
-      if (!result.hasTargets()) {
-          return Double.MAX_VALUE;
-      }
-      
-      return result.getTargets().stream()
-          .mapToDouble(PhotonTrackedTarget::getPoseAmbiguity)
-          .average()
-          .orElse(Double.MAX_VALUE);
+    // Calculate standard deviations based on quality of estimates
+    curStdDevs =
+        calculateStdDevs(
+            leftTagCount + rightTagCount,
+            (leftAmbiguity * leftWeight + rightAmbiguity * rightWeight));
+
+    // Create a new estimated robot pose with the newest timestamp
+    return Optional.of(
+        new EstimatedRobotPose(
+            new edu.wpi.first.math.geometry.Pose3d(fusedPose),
+            Math.max(leftPose.get().timestampSeconds, rightPose.get().timestampSeconds),
+            leftPose.get().targetsUsed, // Use one camera's targets or combine them if needed
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR));
   }
 
-  /**
-   * Calculate standard deviations based on the quality of pose estimation.
-   */
+  /** Calculates average ambiguity from a result with targets. */
+  private double getAverageAmbiguity(PhotonPipelineResult result) {
+    if (!result.hasTargets()) {
+      return Double.MAX_VALUE;
+    }
+
+    return result.getTargets().stream()
+        .mapToDouble(PhotonTrackedTarget::getPoseAmbiguity)
+        .average()
+        .orElse(Double.MAX_VALUE);
+  }
+
+  /** Calculate standard deviations based on the quality of pose estimation. */
   private Matrix<N3, N1> calculateStdDevs(int tagCount, double ambiguity) {
     // Base standard deviations - adjust these based on your robot/camera setup
     double baseXY = 0.5; // meters
     double baseTheta = 0.5; // radians
-    
+
     // Lower the std devs with more tags and lower ambiguity
     double xyStdDev = baseXY / Math.sqrt(tagCount) * (1 + ambiguity);
     double thetaStdDev = baseTheta / Math.sqrt(tagCount) * (1 + ambiguity);
-    
+
     return VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev);
   }
 
@@ -329,8 +321,7 @@ public Optional<EstimatedRobotPose> getFusedRobotPoseWeighted() {
   /**
    * Returns the latest standard deviations of the estimated pose from {@link
    * #getEstimatedGlobalPose()}, for use with {@link
-   * edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
-   * SwerveDrivePoseEstimator}. This should
+   * edu.wpi.first.math.estimator.SwerveDrivePoseEstimator SwerveDrivePoseEstimator}. This should
    * only be used when there are targets visible.
    */
   public Matrix<N3, N1> getEstimationStdDevs() {
@@ -344,14 +335,12 @@ public Optional<EstimatedRobotPose> getFusedRobotPoseWeighted() {
 
   /** Reset pose history of the robot in the vision system simulation. */
   public void resetSimPose(Pose2d pose) {
-    if (Robot.isSimulation())
-      visionSim.resetRobotPose(pose);
+    if (Robot.isSimulation()) visionSim.resetRobotPose(pose);
   }
 
   /** A Field2d for visualizing our robot and objects on the field. */
   public Field2d getSimDebugField() {
-    if (!Robot.isSimulation())
-      return null;
+    if (!Robot.isSimulation()) return null;
     return visionSim.getDebugField();
   }
 

@@ -4,10 +4,7 @@
 
 package frc.robot;
 
-import java.util.Map;
-
 import com.revrobotics.spark.ClosedLoopSlot;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -19,17 +16,14 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import java.util.Map;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide
- * numerical or boolean
- * constants. This class should not be used for any other purpose. All constants
- * should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>
- * It is advised to statically import this class (or one of its inner classes)
- * wherever the
+ * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
@@ -56,13 +50,19 @@ public final class Constants {
     public static enum RobotMode {
       /** Running on test mode */
       TEST,
+      /** Running on simulation mode */
+      SIM,
       /** Running on competition mode */
-      COMP
+      COMP,
+      /** Replaying from a log file */
+      REPLAY
     }
 
     // Robot heading constants for different field elements //
-    public static final Rotation2d LEFT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(-54.011);
-    public static final Rotation2d RIGHT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(54.011);
+    public static final Rotation2d LEFT_CORAL_STATION_INTAKE_ANGLE =
+        Rotation2d.fromDegrees(-54.011);
+    public static final Rotation2d RIGHT_CORAL_STATION_INTAKE_ANGLE =
+        Rotation2d.fromDegrees(54.011);
     public static final Rotation2d ALGAE_PROCESSOR_STATION_ANGLE = Rotation2d.fromDegrees(-90);
 
     // Blue Reef Station ID Angle Constant //
@@ -81,20 +81,20 @@ public final class Constants {
     public static final Rotation2d REEF_STATION_ID_10_ANGLE = Rotation2d.fromDegrees(180);
     public static final Rotation2d REEF_STATION_ID_11_ANGLE = Rotation2d.fromDegrees(-120);
 
-    public static final Map<Integer, Rotation2d> REEF_STATION_ID_ANGLE_MAP = Map.ofEntries(
-      Map.entry(6, REEF_STATION_ID_6_ANGLE),
-      Map.entry(7, REEF_STATION_ID_7_ANGLE),
-      Map.entry(8, REEF_STATION_ID_8_ANGLE),
-      Map.entry(9, REEF_STATION_ID_9_ANGLE),
-      Map.entry(10, REEF_STATION_ID_10_ANGLE),
-      Map.entry(11, REEF_STATION_ID_11_ANGLE),
-      Map.entry(17, REEF_STATION_ID_17_ANGLE),
-      Map.entry(18, REEF_STATION_ID_18_ANGLE),
-      Map.entry(19, REEF_STATION_ID_19_ANGLE),
-      Map.entry(20, REEF_STATION_ID_20_ANGLE),
-      Map.entry(21, REEF_STATION_ID_21_ANGLE),
-      Map.entry(22, REEF_STATION_ID_22_ANGLE)
-    );
+    public static final Map<Integer, Rotation2d> REEF_STATION_ID_ANGLE_MAP =
+        Map.ofEntries(
+            Map.entry(6, REEF_STATION_ID_6_ANGLE),
+            Map.entry(7, REEF_STATION_ID_7_ANGLE),
+            Map.entry(8, REEF_STATION_ID_8_ANGLE),
+            Map.entry(9, REEF_STATION_ID_9_ANGLE),
+            Map.entry(10, REEF_STATION_ID_10_ANGLE),
+            Map.entry(11, REEF_STATION_ID_11_ANGLE),
+            Map.entry(17, REEF_STATION_ID_17_ANGLE),
+            Map.entry(18, REEF_STATION_ID_18_ANGLE),
+            Map.entry(19, REEF_STATION_ID_19_ANGLE),
+            Map.entry(20, REEF_STATION_ID_20_ANGLE),
+            Map.entry(21, REEF_STATION_ID_21_ANGLE),
+            Map.entry(22, REEF_STATION_ID_22_ANGLE));
 
     // Reef station tag ID array //
     public static final int[] REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
@@ -106,65 +106,71 @@ public final class Constants {
 
   public static class VisionConstants {
     public static final String[] APTAG_CAMERA_NAMES = {
-        "AprilTagAlignLeftCamera",
-        "AprilTagAlignRightCamera",
-        "AprilTagPoseEstCameraFL",
-        "AprilTagPoseEstCameraFR",
-        "AprilTagPoseEstCameraBL",
-        "AprilTagPoseEstCameraBR"
+      "AprilTagAlignLeftCamera",
+      "AprilTagAlignRightCamera",
+      "AprilTagPoseEstCameraFL",
+      "AprilTagPoseEstCameraFR",
+      "AprilTagPoseEstCameraBL",
+      "AprilTagPoseEstCameraBR"
     };
 
     // Main Apriltag alignment cam mounted facing forward, half a meter forward of
     // center, half a meter up from center.
-    public static final Transform3d APTAG_ALIGN_LEFT_CAM_POS = new Transform3d(
-        new Translation3d(
-            Units.inchesToMeters(9.249),
-            Units.inchesToMeters(4.910),
-            Units.inchesToMeters(8.3885)),
-        new Rotation3d(0, Units.degreesToRadians(-20), 0));
+    public static final Transform3d APTAG_ALIGN_LEFT_CAM_POS =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(9.249),
+                Units.inchesToMeters(4.910),
+                Units.inchesToMeters(8.3885)),
+            new Rotation3d(0, Units.degreesToRadians(-20), 0));
 
     // Main Apriltag alignment cam mounted facing forward, half a meter forward of
     // center, half a meter up from center.
-    public static final Transform3d APTAG_ALIGN_RIGHT_CAM_POS = new Transform3d(
-        new Translation3d(
-            Units.inchesToMeters(9.249),
-            Units.inchesToMeters(-4.910),
-            Units.inchesToMeters(8.3885)),
-        new Rotation3d(0, Units.degreesToRadians(-20), 0));
+    public static final Transform3d APTAG_ALIGN_RIGHT_CAM_POS =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(9.249),
+                Units.inchesToMeters(-4.910),
+                Units.inchesToMeters(8.3885)),
+            new Rotation3d(0, Units.degreesToRadians(-20), 0));
 
     // Front-Left Camera: Mounted at front-left corner, pointing outward at 45
     // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_FL_POS = new Transform3d(
-        new Translation3d(0.5, 0.5, 1), // Example position (x, y, z)
-        new Rotation3d(0, 0, Units.degreesToRadians(45)));
+    public static final Transform3d APTAG_POSE_EST_CAM_FL_POS =
+        new Transform3d(
+            new Translation3d(0.5, 0.5, 1), // Example position (x, y, z)
+            new Rotation3d(0, 0, Units.degreesToRadians(45)));
 
     // Front-Right Camera: Mounted at front-right corner, pointing outward at -45
     // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_FR_POS = new Transform3d(
-        new Translation3d(0.5, -0.5, 1), // Example position (x, y, z)
-        new Rotation3d(0, 0, Units.degreesToRadians(-45)));
+    public static final Transform3d APTAG_POSE_EST_CAM_FR_POS =
+        new Transform3d(
+            new Translation3d(0.5, -0.5, 1), // Example position (x, y, z)
+            new Rotation3d(0, 0, Units.degreesToRadians(-45)));
 
     // Back-Left Camera: Mounted at back-left corner, pointing outward at 135
     // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_BL_POS = new Transform3d(
-        new Translation3d(-0.5, 0.5, 1), // Example position (x, y, z)
-        new Rotation3d(0, 0, Units.degreesToRadians(135)));
+    public static final Transform3d APTAG_POSE_EST_CAM_BL_POS =
+        new Transform3d(
+            new Translation3d(-0.5, 0.5, 1), // Example position (x, y, z)
+            new Rotation3d(0, 0, Units.degreesToRadians(135)));
 
     // Back-Right Camera: Mounted at back-right corner, pointing outward at -135
     // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_BR_POS = new Transform3d(
-        new Translation3d(-0.5, -0.5, 1), // Example position (x, y, z)
-        new Rotation3d(0, 0, Units.degreesToRadians(-135)));
+    public static final Transform3d APTAG_POSE_EST_CAM_BR_POS =
+        new Transform3d(
+            new Translation3d(-0.5, -0.5, 1), // Example position (x, y, z)
+            new Rotation3d(0, 0, Units.degreesToRadians(-135)));
     public static final Transform3d[] APTAG_POSE_EST_CAM_POSITIONS = {
-        APTAG_POSE_EST_CAM_FL_POS,
-        APTAG_POSE_EST_CAM_FR_POS,
-        APTAG_POSE_EST_CAM_BL_POS,
-        APTAG_POSE_EST_CAM_BR_POS
+      APTAG_POSE_EST_CAM_FL_POS,
+      APTAG_POSE_EST_CAM_FR_POS,
+      APTAG_POSE_EST_CAM_BL_POS,
+      APTAG_POSE_EST_CAM_BR_POS
     };
 
     // The layout of the AprilTags on the field
-    public static final AprilTagFieldLayout APTAG_FIELD_LAYOUT = AprilTagFieldLayout
-        .loadField(AprilTagFields.kDefaultField);
+    public static final AprilTagFieldLayout APTAG_FIELD_LAYOUT =
+        AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
     // The standard deviations of our vision estimated poses, which affect
     // correction rate
@@ -256,7 +262,7 @@ public final class Constants {
     public static final double ARM_HIGH_DEALGAE_GOAL = 0.24;
     public static final double ARM_LOW_DEALGAE_GOAL = 0.24;
     public static final double ARM_HOME_GOAL = 0.1;
-  }  
+  }
 
   public static class AlgaeSubsystemConstants {
     public static final int ARM_LEAD_MOTOR_ID = 2;
@@ -504,9 +510,10 @@ public final class Constants {
     public static final double WHEEL_DIAMETER_INCHES = 4.0;
     public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(WHEEL_DIAMETER_INCHES);
     public static final double MAX_SPEED_FEET_PER_SECOND = 18.2; // 18.2 feet per second
-    public static final double MAX_SPEED_METERS_PER_SECOND = Units.feetToMeters(MAX_SPEED_FEET_PER_SECOND); // 18.2 feet
-                                                                                                            // per
-                                                                                                            // second
+    public static final double MAX_SPEED_METERS_PER_SECOND =
+        Units.feetToMeters(MAX_SPEED_FEET_PER_SECOND); // 18.2 feet
+    // per
+    // second
 
     public static final double ROBOT_MASS = (148 - 20.3) * 0.453592;
     public static final double CHASSIS_MASS = ROBOT_MASS;

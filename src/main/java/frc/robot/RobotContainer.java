@@ -4,6 +4,14 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.OperatorControlNameConstants;
 import frc.robot.Constants.SwerveConstants;
@@ -19,16 +27,6 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 import frc.robot.util.OperatorDashboard;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -98,32 +96,33 @@ public class RobotContainer {
     m_testerController = new CommandJoystick(OperatorConstants.TEST_PORT);
 
     // Instantiate all the subsystems //
-    m_swerveDriveSubsystem = TunerConstants.createDrivetrain(
-        250,
-        SwerveConstants.ODOMETRY_STD,
-        VisionConstants.DEFAULT_TAG_STDDEV);
+    m_swerveDriveSubsystem =
+        TunerConstants.createDrivetrain(
+            250, SwerveConstants.ODOMETRY_STD, VisionConstants.DEFAULT_TAG_STDDEV);
     m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
     m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
     m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
     m_visionSubsystem = new VisionSubsystem(m_swerveDriveSubsystem.getState());
 
     // Create the superstructure subsystem //
-    m_superstructureSubsystem = new Superstructure(
-        m_swerveDriveSubsystem,
-        m_coralSubsystem,
-        m_elevatorSubsystem,
-        m_algaeSubsystem,
-        m_visionSubsystem,
-        this);
+    m_superstructureSubsystem =
+        new Superstructure(
+            m_swerveDriveSubsystem,
+            m_coralSubsystem,
+            m_elevatorSubsystem,
+            m_algaeSubsystem,
+            m_visionSubsystem,
+            this);
 
     // Instantiate all commands used //
 
     // Instantiate Swerve Commands //
-    m_defaultDriveCommand = m_superstructureSubsystem.DefaultDriveCommand(
-        () -> -m_driverController.getLeftY(),
-        () -> -m_driverController.getLeftX(),
-        () -> -m_driverController.getRightX(),
-        () -> m_driverController.getHID().getXButton());
+    m_defaultDriveCommand =
+        m_superstructureSubsystem.DefaultDriveCommand(
+            () -> -m_driverController.getLeftY(),
+            () -> -m_driverController.getLeftX(),
+            () -> -m_driverController.getRightX(),
+            () -> m_driverController.getHID().getXButton());
     m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
     m_swerveBrakeCommand = m_superstructureSubsystem.SwerveBrake();
     m_seedFieldCentricCommand = m_superstructureSubsystem.SeedFieldCentric();
@@ -167,8 +166,10 @@ public class RobotContainer {
 
     // Register Coral Commands //
     NamedCommands.registerCommand("IntakeCoral", m_intakeCoralCommand);
-    NamedCommands.registerCommand("IntakeFromLeftCoralStation", m_intakeFromLeftCoralStationCommand);
-    NamedCommands.registerCommand("IntakeFromRightCoralStation", m_intakeFromRightCoralStationCommand);
+    NamedCommands.registerCommand(
+        "IntakeFromLeftCoralStation", m_intakeFromLeftCoralStationCommand);
+    NamedCommands.registerCommand(
+        "IntakeFromRightCoralStation", m_intakeFromRightCoralStationCommand);
     NamedCommands.registerCommand("HoldCoral", m_holdCoralCommand);
     NamedCommands.registerCommand("AlignToLeftReefBranch", m_alignToLeftReefBranchCommand);
     NamedCommands.registerCommand("AlignToRightReefBranch", m_alignToRightReefBranchCommand);
@@ -203,7 +204,7 @@ public class RobotContainer {
     // Swerve Drive Default Command //
     m_swerveDriveSubsystem.setDefaultCommand(m_defaultDriveCommand);
 
-    m_coralSubsystem.setDefaultCommand(m_holdCoralCommand);    
+    m_coralSubsystem.setDefaultCommand(m_holdCoralCommand);
     m_algaeSubsystem.setDefaultCommand(m_algaeHomeCommand);
     // m_elevatorSubsystem.setDefaultCommand(m_elevatorHomeCommand);
 
@@ -214,12 +215,10 @@ public class RobotContainer {
     m_driverController.b().whileTrue(m_swerveBrakeCommand);
 
     // Press the left bumper to trigger coral intake //
-    m_driverController.leftBumper()
-        .onTrue(m_intakeCoralCommand);
+    m_driverController.leftBumper().onTrue(m_intakeCoralCommand);
 
-    m_driverController.rightBumper()
-        .whileTrue(m_scoreCoralCommand);
-    
+    m_driverController.rightBumper().whileTrue(m_scoreCoralCommand);
+
     m_driverController.pov(0).whileTrue(m_aimAndAlignToReefApriltagCommand);
 
     // Operator button box controls //
@@ -270,7 +269,7 @@ public class RobotContainer {
         .button(OperatorControlNameConstants.INTAKE_ALGAE_BTN)
         .whileTrue(m_intakeAlgaeCommand)
         .onFalse(m_holdAlgaeCommand);
-        
+
     m_operatorButtonBoxController
         .button(OperatorControlNameConstants.SCORE_ALGAE_BTN)
         .onTrue(m_scoreAlgaeCommand);
@@ -279,9 +278,7 @@ public class RobotContainer {
         .button(OperatorControlNameConstants.DEALGAE_BTN)
         .whileTrue(m_deAlgaeCommand);
 
-    m_driverController
-        .y()
-        .whileTrue(m_deAlgaeCommand);
+    m_driverController.y().whileTrue(m_deAlgaeCommand);
   }
 
   /**

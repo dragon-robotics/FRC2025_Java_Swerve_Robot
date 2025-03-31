@@ -4,11 +4,10 @@
 
 package frc.robot.subsystems.coral;
 
-import frc.robot.subsystems.coral.CoralIO.CoralIOInputs;
 import static frc.robot.Constants.CoralSubsystemConstants.*;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.coral.CoralIO.CoralIOInputs;
 
 public class CoralSubsystem extends SubsystemBase {
 
@@ -27,7 +26,8 @@ public class CoralSubsystem extends SubsystemBase {
   }
 
   private enum HoldState {
-    REVERSE, FORWARD
+    REVERSE,
+    FORWARD
   }
 
   private HoldState m_holdState = HoldState.REVERSE;
@@ -39,9 +39,7 @@ public class CoralSubsystem extends SubsystemBase {
 
   private boolean m_hasCoral;
 
-  /**
-   * Creates a new IntakeSubsystem.
-   */
+  /** Creates a new IntakeSubsystem. */
   public CoralSubsystem(CoralIO coralIO) {
     m_coralIO = coralIO;
     m_coralIOInputs = new CoralIOInputs();
@@ -49,16 +47,14 @@ public class CoralSubsystem extends SubsystemBase {
     m_hasCoral = false; // The robot initially has no coral
   }
 
-  /**
-   * Get whether the coral intake has a coral
-   */
+  /** Get whether the coral intake has a coral */
   public boolean hasCoral() {
     return m_hasCoral;
   }
 
   /**
    * Set whether the coral intake has a coral
-   * 
+   *
    * @param hasCoral
    */
   public void setHasCoral(boolean hasCoral) {
@@ -71,7 +67,7 @@ public class CoralSubsystem extends SubsystemBase {
 
   /**
    * Set the state of the coral intake
-   * 
+   *
    * @param wantedCoralState
    */
   public void setCoralState(CoralState wantedCoralState) {
@@ -127,9 +123,7 @@ public class CoralSubsystem extends SubsystemBase {
     }
   }
 
-  /**
-   * Set the motor speeds manually
-   */
+  /** Set the motor speeds manually */
   public void setCoralMotorSpeeds(double intakeSpeed) {
     m_coralIO.setIntakeMotorPercentage(intakeSpeed);
   }
