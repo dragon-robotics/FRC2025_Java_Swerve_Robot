@@ -6,6 +6,9 @@ package frc.robot;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.PathPlannerLogging;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -48,8 +51,18 @@ public class Robot extends LoggedRobot {
         break;
     }
 
-    // DO THIS FIRST
+    // Setup PathPlanner compatibility with AdvantageKit
     Pathfinding.setPathfinder(new LocalADStarAK());
+    PathPlannerLogging.setLogActivePathCallback(
+        (activePath) -> {
+          Logger.recordOutput(
+              "Drive/PathFollowing/PathPlanner/Trajectory", activePath.toArray(new Pose2d[0]));
+        });
+    PathPlannerLogging.setLogTargetPoseCallback(
+        (targetPose) -> {
+          Logger.recordOutput(
+              "Drive/PathFollowing/PathPlanner/TrajectorySetpoint", new Pose2d[] {targetPose});
+        });
 
     // Set up data receivers & replay source
     switch (GeneralConstants.CURRENT_MODE) {
