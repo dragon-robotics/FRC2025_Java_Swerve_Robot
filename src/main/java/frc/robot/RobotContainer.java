@@ -66,8 +66,13 @@ public class RobotContainer {
   private Command m_elevatorL2Command;
   private Command m_elevatorL3Command;
   private Command m_elevatorL4Command;
+  private Command m_elevatorManualUpCommand;
+  private Command m_elevatorManualDownCommand;
+  private Command m_elevatorStopCommand;
+  private Command m_elevatorSeedCommand;
 
   // Coral Commands //
+  private Command m_slowReverseCoralIntakeCommand;
   private Command m_intakeCoralCommand;
   private Command m_intakeFromLeftCoralStationCommand;
   private Command m_intakeFromRightCoralStationCommand;
@@ -134,8 +139,13 @@ public class RobotContainer {
     m_elevatorL2Command = m_superstructureSubsystem.ElevatorL2();
     m_elevatorL3Command = m_superstructureSubsystem.ElevatorL3();
     m_elevatorL4Command = m_superstructureSubsystem.ElevatorL4();
+    m_elevatorManualUpCommand = m_superstructureSubsystem.ElevatorManualUp();
+    m_elevatorManualDownCommand = m_superstructureSubsystem.ElevatorManualDown();
+    m_elevatorStopCommand = m_superstructureSubsystem.ElevatorStop();
+    m_elevatorSeedCommand = m_superstructureSubsystem.ElevatorZero();
 
     // Instantiate Coral Commands //
+    m_slowReverseCoralIntakeCommand = m_superstructureSubsystem.ReverseCoralIntake();
     m_intakeCoralCommand = m_superstructureSubsystem.IntakeCoral();
     m_intakeFromLeftCoralStationCommand = m_superstructureSubsystem.SetCoralStation(true);
     m_intakeFromRightCoralStationCommand = m_superstructureSubsystem.SetCoralStation(false);
@@ -164,8 +174,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("ElevatorL2", m_elevatorL2Command);
     NamedCommands.registerCommand("ElevatorL3", m_elevatorL3Command);
     NamedCommands.registerCommand("ElevatorL4", m_elevatorL4Command);
+    NamedCommands.registerCommand("ElevatorManualUp", m_elevatorManualUpCommand);
+    NamedCommands.registerCommand("ElevatorManualDown", m_elevatorManualDownCommand);
+    NamedCommands.registerCommand("ElevatorStop", m_elevatorStopCommand);
+    NamedCommands.registerCommand("ElevatorSeed", m_elevatorSeedCommand);
 
     // Register Coral Commands //
+    NamedCommands.registerCommand("ReverseIntakeCoral", m_slowReverseCoralIntakeCommand);
     NamedCommands.registerCommand("IntakeCoral", m_intakeCoralCommand);
     NamedCommands.registerCommand("IntakeFromLeftCoralStation", m_intakeFromLeftCoralStationCommand);
     NamedCommands.registerCommand("IntakeFromRightCoralStation", m_intakeFromRightCoralStationCommand);
@@ -220,7 +235,16 @@ public class RobotContainer {
     m_driverController.rightBumper()
         .whileTrue(m_scoreCoralCommand);
     
-    m_driverController.pov(0).whileTrue(m_aimAndAlignToReefApriltagCommand);
+    m_driverController.pov(180).whileTrue(m_slowReverseCoralIntakeCommand);
+
+    // m_driverController.pov(90)
+    //     .whileTrue(m_elevatorManualUpCommand)
+    //     .onFalse(m_elevatorStopCommand); // Elevator Manual Up
+    // m_driverController.pov(270)
+    //     .whileTrue(m_elevatorManualDownCommand)
+    //     .onFalse(m_elevatorStopCommand); // Elevator Manual Down
+    // m_driverController.pov(180)
+    //     .onTrue(m_elevatorSeedCommand); // Elevator Rezero
 
     // Operator button box controls //
     // // Set to intake left or right

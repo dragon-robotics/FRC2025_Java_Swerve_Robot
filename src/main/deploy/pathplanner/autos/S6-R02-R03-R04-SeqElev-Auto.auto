@@ -83,22 +83,9 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "deadline",
+                      "type": "named",
                       "data": {
-                        "commands": [
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 2.0
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "IntakeCoral"
-                            }
-                          }
-                        ]
+                        "name": "IntakeCoral"
                       }
                     },
                     {
@@ -211,22 +198,9 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "deadline",
+                      "type": "named",
                       "data": {
-                        "commands": [
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 2.0
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "IntakeCoral"
-                            }
-                          }
-                        ]
+                        "name": "IntakeCoral"
                       }
                     },
                     {

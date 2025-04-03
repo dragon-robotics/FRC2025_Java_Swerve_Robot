@@ -327,6 +327,38 @@ public class Superstructure extends SubsystemBase {
 
   // Elevator Subsystem Commands //
 
+  public Command ElevatorZero() {
+    Command resetEncoder = new InstantCommand(() -> {
+      m_elevator.seedElevatorMotorEncoderPosition(0);
+    });
+
+    return resetEncoder;
+  }
+
+  public Command ElevatorStop() {
+    Command setElevatorToIdle = new InstantCommand(() -> {
+      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE);
+    }, m_elevator);
+
+    return setElevatorToIdle;
+  }
+
+  public Command ElevatorManualDown() {
+    Command manuallyMoveElevatorDown = new RunCommand(() -> {
+      m_elevator.setElevatorMotorSpeed(-0.5);
+    }, m_elevator);
+
+    return manuallyMoveElevatorDown;
+  }
+
+  public Command ElevatorManualUp() {
+    Command manuallyMoveElevatorUp = new RunCommand(() -> {
+      m_elevator.setElevatorMotorSpeed(0.5);
+    }, m_elevator);
+
+    return manuallyMoveElevatorUp;
+  }
+
   public Command ElevatorIdle() {
     Command resetEncoder = new InstantCommand(() -> {
       m_elevator.seedElevatorMotorEncoderPosition(0);
@@ -485,6 +517,15 @@ public class Superstructure extends SubsystemBase {
     .andThen(runUntilCoralIsDetectedAgain)
     .andThen(slowIntakeAgain)
     .andThen(new WaitCommand(0.02));
+  }
+
+  public Command ReverseCoralIntake() {
+    Command slowReverseIntake = new RunCommand(
+      () -> m_coral.setCoralState(CoralSubsystem.CoralState.SLOW_REVERSE),
+      m_coral
+    );
+
+    return slowReverseIntake;
   }
 
   public Command AimAndRangeReefApriltag() {
