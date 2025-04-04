@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.OperatorControlNameConstants;
 import frc.robot.Constants.SwerveConstants;
@@ -24,6 +25,7 @@ import frc.robot.subsystems.coral.CoralIOSparkMax;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSparkMax;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.vision.VisionIOPV;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 import frc.robot.util.OperatorDashboard;
@@ -54,7 +56,7 @@ public class RobotContainer {
 
   // Swerve Commands //
   private Command m_defaultDriveCommand;
-  private Command m_aimAndAlignToReefApriltagCommand;
+  //   private Command m_aimAndAlignToReefApriltagCommand;
   private Command m_swerveBrakeCommand;
   private Command m_seedFieldCentricCommand;
 
@@ -95,14 +97,61 @@ public class RobotContainer {
     m_operatorButtonBoxController = new CommandJoystick(OperatorConstants.OPERATOR_BUTTON_PORT);
     m_testerController = new CommandJoystick(OperatorConstants.TEST_PORT);
 
-    // Instantiate all the subsystems //
     m_swerveDriveSubsystem =
         TunerConstants.createDrivetrain(
             250, SwerveConstants.ODOMETRY_STD, VisionConstants.DEFAULT_TAG_STDDEV);
     m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
     m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
     m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
-    m_visionSubsystem = new VisionSubsystem(m_swerveDriveSubsystem.getState());
+
+    // Instantiate all the subsystems based on robot mode //
+    switch (GeneralConstants.CURRENT_MODE) {
+      case COMP:
+        m_visionSubsystem =
+            new VisionSubsystem(
+                m_swerveDriveSubsystem::addVisionMeasurement,
+                new VisionIOPV(
+                    VisionConstants.APTAG_CAMERA_NAMES[0],
+                    VisionConstants.APTAG_ALIGN_LEFT_CAM_POS),
+                new VisionIOPV(
+                    VisionConstants.APTAG_CAMERA_NAMES[1],
+                    VisionConstants.APTAG_ALIGN_LEFT_CAM_POS));
+        break;
+      case SIM:
+        m_visionSubsystem =
+            new VisionSubsystem(
+                m_swerveDriveSubsystem::addVisionMeasurement,
+                new VisionIOPV(
+                    VisionConstants.APTAG_CAMERA_NAMES[0],
+                    VisionConstants.APTAG_ALIGN_LEFT_CAM_POS),
+                new VisionIOPV(
+                    VisionConstants.APTAG_CAMERA_NAMES[1],
+                    VisionConstants.APTAG_ALIGN_LEFT_CAM_POS),
+                new VisionIOPV(
+                    VisionConstants.APTAG_CAMERA_NAMES[2],
+                    VisionConstants.APTAG_POSE_EST_CAM_POSITIONS[0]),
+                new VisionIOPV(
+                    VisionConstants.APTAG_CAMERA_NAMES[3],
+                    VisionConstants.APTAG_POSE_EST_CAM_POSITIONS[1]),
+                new VisionIOPV(
+                    VisionConstants.APTAG_CAMERA_NAMES[4],
+                    VisionConstants.APTAG_POSE_EST_CAM_POSITIONS[2]),
+                new VisionIOPV(
+                    VisionConstants.APTAG_CAMERA_NAMES[5],
+                    VisionConstants.APTAG_POSE_EST_CAM_POSITIONS[3]));
+        break;
+      default:
+        m_visionSubsystem =
+            new VisionSubsystem(
+                m_swerveDriveSubsystem::addVisionMeasurement,
+                new VisionIOPV(
+                    VisionConstants.APTAG_CAMERA_NAMES[0],
+                    VisionConstants.APTAG_ALIGN_LEFT_CAM_POS),
+                new VisionIOPV(
+                    VisionConstants.APTAG_CAMERA_NAMES[1],
+                    VisionConstants.APTAG_ALIGN_LEFT_CAM_POS));
+        break;
+    }
 
     // Create the superstructure subsystem //
     m_superstructureSubsystem =
@@ -123,7 +172,7 @@ public class RobotContainer {
             () -> -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX(),
             () -> m_driverController.getHID().getXButton());
-    m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
+    // m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
     m_swerveBrakeCommand = m_superstructureSubsystem.SwerveBrake();
     m_seedFieldCentricCommand = m_superstructureSubsystem.SeedFieldCentric();
 
@@ -153,7 +202,8 @@ public class RobotContainer {
     // Register Named Commands //
     // Register Swerve Commands //
     NamedCommands.registerCommand("DefaultDrive", m_defaultDriveCommand);
-    NamedCommands.registerCommand("AimAndAlignToReefAprilTag", m_aimAndAlignToReefApriltagCommand);
+    // NamedCommands.registerCommand("AimAndAlignToReefAprilTag",
+    // m_aimAndAlignToReefApriltagCommand);
     NamedCommands.registerCommand("SwerveBrake", m_swerveBrakeCommand);
     NamedCommands.registerCommand("SeedFieldCentric", m_seedFieldCentricCommand);
 
@@ -219,7 +269,7 @@ public class RobotContainer {
 
     m_driverController.rightBumper().whileTrue(m_scoreCoralCommand);
 
-    m_driverController.pov(0).whileTrue(m_aimAndAlignToReefApriltagCommand);
+    // m_driverController.pov(0).whileTrue(m_aimAndAlignToReefApriltagCommand);
 
     // Operator button box controls //
     // // Set to intake left or right

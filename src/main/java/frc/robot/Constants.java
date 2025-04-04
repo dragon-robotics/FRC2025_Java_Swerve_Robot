@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import java.util.Map;
 
 /**
@@ -45,7 +46,8 @@ public final class Constants {
   public static final class GeneralConstants {
 
     // Robot mode
-    public static final RobotMode CURRENT_MODE = RobotMode.COMP;
+    public static final RobotMode CURRENT_MODE =
+        RobotBase.isReal() ? RobotMode.COMP : RobotMode.SIM;
 
     public static enum RobotMode {
       /** Running on test mode */
@@ -105,6 +107,7 @@ public final class Constants {
   }
 
   public static class VisionConstants {
+
     public static final String[] APTAG_CAMERA_NAMES = {
       "AprilTagAlignLeftCamera",
       "AprilTagAlignRightCamera",
@@ -161,6 +164,7 @@ public final class Constants {
         new Transform3d(
             new Translation3d(-0.5, -0.5, 1), // Example position (x, y, z)
             new Rotation3d(0, 0, Units.degreesToRadians(-135)));
+
     public static final Transform3d[] APTAG_POSE_EST_CAM_POSITIONS = {
       APTAG_POSE_EST_CAM_FL_POS,
       APTAG_POSE_EST_CAM_FR_POS,
@@ -178,6 +182,27 @@ public final class Constants {
     public static final Matrix<N3, N1> SINGLE_TAG_STDDEV = VecBuilder.fill(4, 4, 8);
     public static final Matrix<N3, N1> MULTI_TAG_STDDEV = VecBuilder.fill(0.5, 0.5, 1);
     public static final Matrix<N3, N1> DEFAULT_TAG_STDDEV = VecBuilder.fill(0.9, 0.9, 0.9);
+
+    // Basic filtering thresholds
+    public static double MAX_AMBIGUITY = 0.3;
+    public static double MAX_Z_ERR = 0.75;
+
+    // Standard deviation baselines, for 1 meter distance and 1 tag
+    // (Adjusted automatically based on distance and # of tags)
+    public static double LINEAR_STDDEV_BASELINE = 0.02; // Meters
+    public static double ANGULAR_STDDEV_BASELINE = 0.06; // Radians
+
+    // Standard deviation multipliers for each camera
+    // (Adjust to trust some cameras more than others)
+    public static double[] CAMERA_STDDEV_FACTORS =
+        new double[] {
+          1.0, // APTAG_LEFT_CAM
+          1.0, // APTAG_RIGHT_CAM
+          1.0, // APTAG_FL_CAM
+          1.0, // APTAG_FR_CAM
+          1.0, // APTAG_BL_CAM
+          1.0 // APTAG_BR_CAM
+        };
 
     // Vision range and aim PID constants //
     public static final double RANGE_P = 2;

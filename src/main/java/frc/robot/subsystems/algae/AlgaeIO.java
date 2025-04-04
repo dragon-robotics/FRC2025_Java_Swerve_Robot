@@ -1,5 +1,7 @@
 package frc.robot.subsystems.algae;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface AlgaeIO {
 
   default void setArmMotorVoltage(double voltage) {
@@ -26,6 +28,7 @@ public interface AlgaeIO {
     throw new UnsupportedOperationException("setIntakeMotorPercentage is not implemented");
   }
 
+  @AutoLog
   class AlgaeIOInputs {
 
     // Are the motors connected to the CAN bus? //

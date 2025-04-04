@@ -1,5 +1,7 @@
 package frc.robot.subsystems.coral;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface CoralIO {
   default void setIntakeMotorVoltage(double voltage) {
     throw new UnsupportedOperationException("setIntakeMotorVoltage is not implemented");
@@ -9,6 +11,7 @@ public interface CoralIO {
     throw new UnsupportedOperationException("setIntakeMotorPercentage is not implemented");
   }
 
+  @AutoLog
   class CoralIOInputs {
 
     // Are the motors connected to the CAN bus? //

@@ -1,5 +1,7 @@
 package frc.robot.subsystems.elevator;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface ElevatorIO {
   default void seedElevatorMotorEncoderPosition(double position) {
     throw new UnsupportedOperationException("seedElevatorMotorEncoderPosition is not implemented");
@@ -25,6 +27,7 @@ public interface ElevatorIO {
     throw new UnsupportedOperationException("setElevatorSetpointFF is not implemented");
   }
 
+  @AutoLog
   class ElevatorIOInputs {
 
     // Are the motors connected to the CAN bus? //
