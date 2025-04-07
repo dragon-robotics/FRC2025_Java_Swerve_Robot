@@ -50,15 +50,15 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.Teleop.AutoAlignToReefTag;
+// import frc.robot.commands.Teleop.AutoAlignToReefTag;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorState;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.RobotContainer;
-import frc.robot.Telemetry;
 import frc.robot.swerve_constant.TunerConstants;
+import frc.robot.util.Telemetry;
 
 public class Superstructure extends SubsystemBase {
 
@@ -528,38 +528,38 @@ public class Superstructure extends SubsystemBase {
     return slowReverseIntake;
   }
 
-  public Command AimAndRangeReefApriltag() {
+  // public Command AimAndRangeReefApriltag() {
     
-    Command autoAlignToReefTag = new AutoAlignToReefTag(
-      useLeftCamera,
-      visionAimPID,
-      visionRangePID,
-      driveMaintainHeading,
-      m_vision,
-      m_swerve);
+  //   Command autoAlignToReefTag = new AutoAlignToReefTag(
+  //     useLeftCamera,
+  //     visionAimPID,
+  //     visionRangePID,
+  //     driveMaintainHeading,
+  //     m_vision,
+  //     m_swerve);
 
-    Command setCurrentHeading = new InstantCommand(() -> {
-      currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
-    });
+  //   Command setCurrentHeading = new InstantCommand(() -> {
+  //     currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
+  //   });
 
-    return autoAlignToReefTag
-          .andThen(setCurrentHeading);
-  }
+  //   return autoAlignToReefTag
+  //         .andThen(setCurrentHeading);
+  // }
 
-  public Command AlignToScoreCoral(){
+  // public Command AlignToScoreCoral(){
 
-    Command autoDriveToReefStation = AimAndRangeReefApriltag();
+  //   Command autoDriveToReefStation = AimAndRangeReefApriltag();
 
-    Command setElevatorLevel = new InstantCommand(() -> {
-      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
-    }, m_elevator);
+  //   Command setElevatorLevel = new InstantCommand(() -> {
+  //     m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
+  //   }, m_elevator);
 
-    Command waitUntilElevatorIsAtLevel = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+  //   Command waitUntilElevatorIsAtLevel = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
 
-    return autoDriveToReefStation
-          .andThen(setElevatorLevel)
-          .andThen(waitUntilElevatorIsAtLevel);
-  }
+  //   return autoDriveToReefStation
+  //         .andThen(setElevatorLevel)
+  //         .andThen(waitUntilElevatorIsAtLevel);
+  // }
 
   public Command ScoreCoral() {
     Command scoreCoral = new RunCommand(

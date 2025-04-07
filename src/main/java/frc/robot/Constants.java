@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -51,13 +52,15 @@ public final class Constants {
   public static final class GeneralConstants {
 
     // Robot mode
-    public static final RobotMode CURRENT_MODE = RobotMode.COMP;
+    public static final RobotMode CURRENT_MODE = RobotBase.isReal() ? RobotMode.COMP : RobotMode.SIM;
 
     public static enum RobotMode {
       /** Running on test mode */
       TEST,
       /** Running on competition mode */
-      COMP
+      COMP,
+      /** Running on simulation mode */
+      SIM
     }
 
     // Robot heading constants for different field elements //
@@ -172,6 +175,31 @@ public final class Constants {
     public static final Matrix<N3, N1> SINGLE_TAG_STDDEV = VecBuilder.fill(4, 4, 8);
     public static final Matrix<N3, N1> MULTI_TAG_STDDEV = VecBuilder.fill(0.5, 0.5, 1);
     public static final Matrix<N3, N1> DEFAULT_TAG_STDDEV = VecBuilder.fill(0.9, 0.9, 0.9);
+
+    // Basic filtering thresholds
+    public static double MAX_AMBIGUITY = 0.3;
+    public static double MAX_Z_ERROR = 0.75;
+
+    // Standard deviation baselines, for 1 meter distance and 1 tag
+    // (Adjusted automatically based on distance and # of tags)
+    public static double LINEAR_STDDEV_BASELINE = 0.02; // Meters
+    public static double ANGULAR_STDDEV_BASELINE = 0.06; // Radians
+
+    // Standard deviation multipliers for each camera
+    // (Adjust to trust some cameras more than others)
+    public static double[] CAMERA_STDDEV_FACTORS =
+        new double[] {
+          1.0,  // APTAG_LEFT_CAM
+          1.0,  // APTAG_RIGHT_CAM
+          1.0,  // APTAG_POSE_EST_CAM_FL_POS
+          1.0,  // APTAG_POSE_EST_CAM_FR_POS
+          1.0,  // APTAG_POSE_EST_CAM_BL_POS
+          1.0   // APTAG_POSE_EST_CAM_BR_POS
+        };
+
+    // Multipliers to apply for MegaTag 2 observations
+    public static double LINEAR_STDDEV_MEGATAG2_FACTOR = 0.5; // More stable than full 3D solve
+    public static double ANGULAR_STDDEV_MEGATAG2_ANGLE_FACTOR = Double.POSITIVE_INFINITY;; // More stable than full 3D solve
 
     // Vision range and aim PID constants //
     public static final double RANGE_P = 2;
