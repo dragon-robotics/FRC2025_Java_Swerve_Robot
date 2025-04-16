@@ -33,7 +33,9 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
    * @param poseSupplier Supplier for the robot pose to use in simulation.
    */
   public VisionIOPhotonVisionSim(
-      String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier) {
+      String name,
+      Transform3d robotToCamera,
+      Supplier<Pose2d> poseSupplier) {
     super(name, robotToCamera);
     m_poseSupplier = poseSupplier;
 
@@ -48,14 +50,14 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
     cameraProperties.setCalibration(640, 480, Rotation2d.fromDegrees(70));
     cameraProperties.setCalibError(0.64, 0.25);
     cameraProperties.setFPS(50);
-    cameraProperties.setAvgLatencyMs(30);
+    cameraProperties.setAvgLatencyMs(25);
     cameraProperties.setLatencyStdDevMs(10);
     
     m_cameraSim = new PhotonCameraSim(m_camera, cameraProperties, APTAG_FIELD_LAYOUT);
 
     m_visionSim.addCamera(m_cameraSim, robotToCamera);
 
-    m_cameraSim.enableDrawWireframe(true);
+    // m_cameraSim.enableDrawWireframe(true);
   }
 
   @Override

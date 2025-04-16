@@ -129,15 +129,34 @@ public class RobotContainer {
         m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem = new VisionSubsystem(
-          m_swerveDriveSubsystem::addVisionMeasurement,
-          new VisionIOPhotonVisionSim(
-              APTAG_CAMERA_NAMES[0],
-              VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState().Pose),
-          new VisionIOPhotonVisionSim(
-              APTAG_CAMERA_NAMES[1],
-              VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-            () -> m_swerveDriveSubsystem.getState().Pose));
+            m_swerveDriveSubsystem::addVisionMeasurement,
+            // Auto-Align Cameras //
+            new VisionIOPhotonVisionSim(
+                APTAG_CAMERA_NAMES[0],
+                VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
+                () -> m_swerveDriveSubsystem.getState().Pose),
+            new VisionIOPhotonVisionSim(
+                APTAG_CAMERA_NAMES[1],
+                VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
+                () -> m_swerveDriveSubsystem.getState().Pose)
+            // // Apriltag Pose-Estimation Cameras //
+            // new VisionIOPhotonVisionSim(
+            //     APTAG_CAMERA_NAMES[2],
+            //     VisionConstants.APTAG_POSE_EST_CAM_FL_POS,
+            //     () -> m_swerveDriveSubsystem.getState().Pose),
+            // new VisionIOPhotonVisionSim(
+            //     APTAG_CAMERA_NAMES[3],
+            //     VisionConstants.APTAG_POSE_EST_CAM_FR_POS,
+            //     () -> m_swerveDriveSubsystem.getState().Pose),
+            // new VisionIOPhotonVisionSim(
+            //     APTAG_CAMERA_NAMES[4],
+            //     VisionConstants.APTAG_POSE_EST_CAM_BL_POS,
+            //     () -> m_swerveDriveSubsystem.getState().Pose),
+            // new VisionIOPhotonVisionSim(
+            //     APTAG_CAMERA_NAMES[5],
+            //     VisionConstants.APTAG_POSE_EST_CAM_BR_POS,
+            //     () -> m_swerveDriveSubsystem.getState().Pose)
+        );
         break;
       case TEST:
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());

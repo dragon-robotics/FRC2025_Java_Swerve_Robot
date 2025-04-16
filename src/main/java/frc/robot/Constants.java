@@ -166,8 +166,8 @@ public final class Constants {
     };
 
     // The layout of the AprilTags on the field
-    public static final AprilTagFieldLayout APTAG_FIELD_LAYOUT = AprilTagFieldLayout
-        .loadField(AprilTagFields.kDefaultField);
+    public static final AprilTagFieldLayout APTAG_FIELD_LAYOUT =
+        AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
     // The standard deviations of our vision estimated poses, which affect
     // correction rate

@@ -18,7 +18,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 public class VisionIOPhotonVision implements VisionIO {
 	protected final PhotonCamera m_camera;
 	protected final Transform3d m_robotToCamera;
-  protected final PhotonPoseEstimator m_poseEstimator;
 
   /**
    * Creates a new VisionIOPV.
@@ -29,7 +28,6 @@ public class VisionIOPhotonVision implements VisionIO {
   public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
     m_camera = new PhotonCamera(name);
     m_robotToCamera = robotToCamera;
-    m_poseEstimator = new PhotonPoseEstimator(APTAG_FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, m_robotToCamera);
   }
 
   @Override
