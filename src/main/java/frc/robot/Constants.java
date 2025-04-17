@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -19,6 +21,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -85,24 +89,23 @@ public final class Constants {
     public static final Rotation2d REEF_STATION_ID_11_ANGLE = Rotation2d.fromDegrees(-120);
 
     public static final Map<Integer, Rotation2d> REEF_STATION_ID_ANGLE_MAP = Map.ofEntries(
-      Map.entry(6, REEF_STATION_ID_6_ANGLE),
-      Map.entry(7, REEF_STATION_ID_7_ANGLE),
-      Map.entry(8, REEF_STATION_ID_8_ANGLE),
-      Map.entry(9, REEF_STATION_ID_9_ANGLE),
-      Map.entry(10, REEF_STATION_ID_10_ANGLE),
-      Map.entry(11, REEF_STATION_ID_11_ANGLE),
-      Map.entry(17, REEF_STATION_ID_17_ANGLE),
-      Map.entry(18, REEF_STATION_ID_18_ANGLE),
-      Map.entry(19, REEF_STATION_ID_19_ANGLE),
-      Map.entry(20, REEF_STATION_ID_20_ANGLE),
-      Map.entry(21, REEF_STATION_ID_21_ANGLE),
-      Map.entry(22, REEF_STATION_ID_22_ANGLE)
-    );
+        Map.entry(6, REEF_STATION_ID_6_ANGLE),
+        Map.entry(7, REEF_STATION_ID_7_ANGLE),
+        Map.entry(8, REEF_STATION_ID_8_ANGLE),
+        Map.entry(9, REEF_STATION_ID_9_ANGLE),
+        Map.entry(10, REEF_STATION_ID_10_ANGLE),
+        Map.entry(11, REEF_STATION_ID_11_ANGLE),
+        Map.entry(17, REEF_STATION_ID_17_ANGLE),
+        Map.entry(18, REEF_STATION_ID_18_ANGLE),
+        Map.entry(19, REEF_STATION_ID_19_ANGLE),
+        Map.entry(20, REEF_STATION_ID_20_ANGLE),
+        Map.entry(21, REEF_STATION_ID_21_ANGLE),
+        Map.entry(22, REEF_STATION_ID_22_ANGLE));
 
     // Reef station tag ID array //
-    public static final int[] REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
-    public static final int[] BLUE_REEF_STATION_TAG_IDS = {17, 18, 19, 20, 21, 22};
-    public static final int[] RED_REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11};
+    public static final int[] REEF_STATION_TAG_IDS = { 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 };
+    public static final int[] BLUE_REEF_STATION_TAG_IDS = { 17, 18, 19, 20, 21, 22 };
+    public static final int[] RED_REEF_STATION_TAG_IDS = { 6, 7, 8, 9, 10, 11 };
 
     public static boolean disableHAL = false;
   }
@@ -165,9 +168,82 @@ public final class Constants {
         APTAG_POSE_EST_CAM_BR_POS
     };
 
-    // The layout of the AprilTags on the field
-    public static final AprilTagFieldLayout APTAG_FIELD_LAYOUT =
-        AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    // The different layouts of the AprilTags on the field
+    public static final AprilTagFieldLayout DEFAULT_APTAG_FIELD_LAYOUT;
+    public static final AprilTagFieldLayout WELDED_RED_APTAG_FIELD_LAYOUT;
+    public static final AprilTagFieldLayout WELDED_BLUE_APTAG_FIELD_LAYOUT;
+    public static final AprilTagFieldLayout APTAG_FIELD_LAYOUT;
+
+    // Static initializer block
+    static {
+      // Load default layout - this does NOT throw IOException
+      // It might return null if the resource is missing, though kDefaultField should
+      // be safe.
+      AprilTagFieldLayout defaultLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+      if (defaultLayout == null) {
+        System.err.println("!!! CRITICAL: Failed to load default AprilTag field resource!");
+        DriverStation.reportError("CRITICAL: Failed to load default AprilTag field resource!", true);
+        // defaultLayout remains null
+      }
+
+      // Initialize temporary variables for welded layouts
+      AprilTagFieldLayout redLayout = null;
+      AprilTagFieldLayout blueLayout = null;
+
+      // Construct paths for welded layouts
+      Path redPath = Path.of(
+          Filesystem.getDeployDirectory().getPath(),
+          "apriltags",
+          "welded",
+          "2025-red-no-barge.json");
+      Path bluePath = Path.of(
+          Filesystem.getDeployDirectory().getPath(),
+          "apriltags",
+          "welded",
+          "2025-blue-no-barge.json");
+
+      // Try loading layouts from file paths - THESE can throw IOException
+      try {
+        redLayout = new AprilTagFieldLayout(redPath);
+        blueLayout = new AprilTagFieldLayout(bluePath);
+      } catch (IOException e) {
+        // Handle the error if loading from files fails
+        System.err.println("!!! Failed to load welded AprilTag field layout files!");
+        e.printStackTrace();
+        DriverStation.reportError("Failed to load welded AprilTag layouts: " + e.getMessage(), true);
+        // redLayout and blueLayout will remain null if they failed
+      } finally {
+        // Assign the loaded layouts to the final fields
+        // Use default layout as fallback if welded layouts are still null
+        DEFAULT_APTAG_FIELD_LAYOUT = defaultLayout;
+        WELDED_RED_APTAG_FIELD_LAYOUT = (redLayout != null) ? redLayout : defaultLayout;
+        WELDED_BLUE_APTAG_FIELD_LAYOUT = (blueLayout != null) ? blueLayout : defaultLayout;
+
+        // Now initialize the main layout based on alliance
+        AprilTagFieldLayout selectedLayout = DEFAULT_APTAG_FIELD_LAYOUT; // Start with default
+        if (DriverStation.getAlliance().isPresent()) {
+          if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+            // Prefer loaded red layout, fallback to default
+            selectedLayout = WELDED_RED_APTAG_FIELD_LAYOUT;
+          } else { // Blue Alliance
+            // Prefer loaded blue layout, fallback to default
+            selectedLayout = WELDED_BLUE_APTAG_FIELD_LAYOUT;
+          }
+        } else {
+          // Default if no alliance is set (e.g., practice mode) - use Blue or Default
+          selectedLayout = WELDED_BLUE_APTAG_FIELD_LAYOUT;
+        }
+
+        // Assign the final selected layout
+        APTAG_FIELD_LAYOUT = selectedLayout;
+
+        // Final check if the main layout is still null (only if default also failed)
+        if (APTAG_FIELD_LAYOUT == null) {
+          // This is a critical state
+          DriverStation.reportError("CRITICAL: No AprilTag field layout could be assigned!", true);
+        }
+      }
+    }
 
     // The standard deviations of our vision estimated poses, which affect
     // correction rate
@@ -177,8 +253,8 @@ public final class Constants {
     public static final Matrix<N3, N1> DEFAULT_TAG_STDDEV = VecBuilder.fill(0.9, 0.9, 0.9);
 
     // Basic filtering thresholds
-    public static double MAX_AMBIGUITY = 0.3;
-    public static double MAX_Z_ERROR = 0.75;
+    public static double MAX_AMBIGUITY = 0.1;
+    public static double MAX_Z_ERROR = 0.5;
 
     // Standard deviation baselines, for 1 meter distance and 1 tag
     // (Adjusted automatically based on distance and # of tags)
@@ -187,19 +263,19 @@ public final class Constants {
 
     // Standard deviation multipliers for each camera
     // (Adjust to trust some cameras more than others)
-    public static double[] CAMERA_STDDEV_FACTORS =
-        new double[] {
-          1.0,  // APTAG_LEFT_CAM
-          1.0,  // APTAG_RIGHT_CAM
-          1.0,  // APTAG_POSE_EST_CAM_FL_POS
-          1.0,  // APTAG_POSE_EST_CAM_FR_POS
-          1.0,  // APTAG_POSE_EST_CAM_BL_POS
-          1.0   // APTAG_POSE_EST_CAM_BR_POS
-        };
+    public static double[] CAMERA_STDDEV_FACTORS = new double[] {
+        1.0, // APTAG_LEFT_CAM
+        1.0, // APTAG_RIGHT_CAM
+        1.0, // APTAG_POSE_EST_CAM_FL_POS
+        1.0, // APTAG_POSE_EST_CAM_FR_POS
+        1.0, // APTAG_POSE_EST_CAM_BL_POS
+        1.0 // APTAG_POSE_EST_CAM_BR_POS
+    };
 
     // Multipliers to apply for MegaTag 2 observations
     public static double LINEAR_STDDEV_MEGATAG2_FACTOR = 0.5; // More stable than full 3D solve
-    public static double ANGULAR_STDDEV_MEGATAG2_ANGLE_FACTOR = Double.POSITIVE_INFINITY;; // More stable than full 3D solve
+    public static double ANGULAR_STDDEV_MEGATAG2_ANGLE_FACTOR = Double.POSITIVE_INFINITY;; // More stable than full 3D
+                                                                                           // solve
 
     // Vision range and aim PID constants //
     public static final double RANGE_P = 2;
@@ -284,7 +360,7 @@ public final class Constants {
     public static final double ARM_HIGH_DEALGAE_GOAL = 0.24;
     public static final double ARM_LOW_DEALGAE_GOAL = 0.24;
     public static final double ARM_HOME_GOAL = 0.1;
-  }  
+  }
 
   public static class AlgaeSubsystemConstants {
     public static final int ARM_LEAD_MOTOR_ID = 2;
