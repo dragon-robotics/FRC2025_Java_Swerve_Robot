@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -19,15 +20,21 @@ public class VisionIOPhotonVision implements VisionIO {
 	protected final PhotonCamera m_camera;
 	protected final Transform3d m_robotToCamera;
 
+  protected final Supplier<Rotation2d> m_headingSupplier;
+
   /**
    * Creates a new VisionIOPV.
    *
    * @param name The configured name of the camera.
    * @param rotationSupplier The 3D position of the camera relative to the robot.
    */
-  public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
+  public VisionIOPhotonVision(
+      String name,
+      Transform3d robotToCamera,
+      Supplier<Rotation2d> headingSupplier) {
     m_camera = new PhotonCamera(name);
     m_robotToCamera = robotToCamera;
+    m_headingSupplier = headingSupplier;
   }
 
   @Override

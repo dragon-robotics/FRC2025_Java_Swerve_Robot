@@ -22,9 +22,9 @@ import java.util.function.Supplier;
 public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
 
   private static VisionSystemSim m_visionSim;
+  private final PhotonCameraSim m_cameraSim;
 
   private final Supplier<Pose2d> m_poseSupplier;
-  private final PhotonCameraSim m_cameraSim;
 
   /**
    * Creates a new VisionIOPhotonVisionSim.
@@ -35,8 +35,9 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
   public VisionIOPhotonVisionSim(
       String name,
       Transform3d robotToCamera,
-      Supplier<Pose2d> poseSupplier) {
-    super(name, robotToCamera);
+      Supplier<Pose2d> poseSupplier,
+      Supplier<Rotation2d> headingSupplier) {
+    super(name, robotToCamera, headingSupplier);
     m_poseSupplier = poseSupplier;
 
     // Initialize vision sim
