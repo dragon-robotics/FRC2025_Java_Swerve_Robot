@@ -111,7 +111,6 @@ public class VisionSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     for (int i = 0; i < m_io.length; i++) {
       m_io[i].updateInputs(m_inputs[i]);
-      // SignalLogger.
     }
 
     // Initialize logging values
