@@ -10,7 +10,6 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.wpilibj.Timer;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -30,14 +29,10 @@ public class AlgaeIOSparkMax implements AlgaeIO {
   private final AbsoluteEncoder m_armLeadAbsEncoder;
   private final ProfiledPIDController m_armPidController;
 
-  private double currentLimitCheckTime;
-
   // Feedforward for arm motor //
   private final ArmFeedforward m_armLeadFeedforward = new ArmFeedforward(ARM_KS, ARM_KG, ARM_KV, ARM_KA);
 
   public AlgaeIOSparkMax() {
-    // Initialize current limit check time //
-    currentLimitCheckTime = Timer.getFPGATimestamp();
 
     // Instantiate the motors //
     m_intakeMotor = new SparkMax(INTAKE_MOTOR_ID, MotorType.kBrushless);
@@ -66,38 +61,6 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .secondaryCurrentLimit(INTAKE_STALL_CURRENT_LIMIT)
       .idleMode(IdleMode.kBrake);
 
-    // // Intake Motor Signals Configuration //
-    // m_intakeMotorConfig.signals
-    //   .absoluteEncoderPositionAlwaysOn(false)      // Turn off absolute encoder position
-    //   .absoluteEncoderPositionPeriodMs(500000)    // Set absolute encoder position period to 500000 ms
-    //   .absoluteEncoderVelocityAlwaysOn(false)      // Turn off absolute encoder velocity
-    //   .absoluteEncoderVelocityPeriodMs(500000)    // Set absolute encoder velocity period to 500000 ms
-    //   .analogPositionAlwaysOn(false)               // Turn off analog position
-    //   .analogPositionPeriodMs(500000)             // Set analog position period to 500000 ms
-    //   .analogVelocityAlwaysOn(false)               // Turn off analog velocity
-    //   .analogVelocityPeriodMs(500000)             // Set analog velocity period to 500000 ms
-    //   .analogVoltageAlwaysOn(false)                // Turn off analog voltage
-    //   .analogVoltagePeriodMs(500000)              // Set analog voltage period to 500000 ms
-    //   .appliedOutputPeriodMs(5)                   // Set applied output period to 5 ms
-    //   .busVoltagePeriodMs(5)                      // Set bus voltage period to 5 ms
-    //   .externalOrAltEncoderPositionAlwaysOn(false) // Turn off external or alt encoder position 
-    //   .externalOrAltEncoderPosition(500000)       // Set external or alt encoder position to 500000 ms
-    //   .externalOrAltEncoderVelocityAlwaysOn(false) // Turn off external or alt encoder velocity
-    //   .externalOrAltEncoderVelocity(500000)       // Set external or alt encoder velocity to 500000 ms
-    //   .faultsAlwaysOn(false)                       // Turn off faults
-    //   .faultsPeriodMs(500000)                     // Set faults period to 500000 ms
-    //   .iAccumulationAlwaysOn(false)                // Turn off i accumulation
-    //   .iAccumulationPeriodMs(500000)              // Set i accumulation period to 500000 ms
-    //   .limitsPeriodMs(500000)                     // Set limits period to 500000 ms
-    //   .motorTemperaturePeriodMs(5)                // Set motor temperature period to 5 ms
-    //   .outputCurrentPeriodMs(5)                   // Set output current period to 5 ms
-    //   .primaryEncoderPositionAlwaysOn(false)       // Turn off primary encoder position
-    //   .primaryEncoderPositionPeriodMs(500000)     // Set primary encoder position period to 500000 ms
-    //   .primaryEncoderVelocityAlwaysOn(false)       // Turn off primary encoder velocity
-    //   .primaryEncoderVelocityPeriodMs(500000)     // Set primary encoder velocity period to 500000 ms
-    //   .warningsAlwaysOn(false)                     // Turn off warnings
-    //   .warningsPeriodMs(500000);                  // Set warnings period to 500000 ms
-
     // Apply motor configurations //
     m_intakeMotor.configure(
         m_intakeMotorConfig,
@@ -116,13 +79,6 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .openLoopRampRate(ARM_RAMP_RATE_IN_SEC)
       .idleMode(IdleMode.kBrake);
 
-    // Left Motor Soft Limits //
-    // m_armLeadMotorConfig.softLimit
-    //   .forwardSoftLimitEnabled(true)
-    //   .forwardSoftLimit(0.5)
-    //   .reverseSoftLimitEnabled(true)
-    //   .reverseSoftLimit(-0.5);
-
     // Left Motor Absolute Encoder Configuration //
     m_armLeadMotorConfig.absoluteEncoder
       // .zeroCentered(true)
@@ -135,10 +91,6 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .pidf(ARM_P, ARM_I, ARM_D, ARM_F, PID_SLOT)
       .minOutput(-0.5, PID_SLOT)
       .maxOutput(0.5, PID_SLOT)
-      // .positionWrappingEnabled(true)
-      // .positionWrappingInputRange(0.5, -0.5)
-      // .positionWrappingMinInput(-0.5)
-      // .positionWrappingMaxInput(0.5)
       .outputRange(-1, 1)
       .maxMotion
         .maxVelocity(ARM_MAX_MAXMOTION_VELOCITY)
@@ -222,7 +174,6 @@ public class AlgaeIOSparkMax implements AlgaeIO {
 
     // Check if motors are connected //
     inputs.armLeadMotorConnected = m_armLeadMotor.getDeviceId() == ARM_LEAD_MOTOR_ID;
-    // inputs.armLeadMotorConnected = m_armFollowMotor.getDeviceId() == ARM_FOLLOW_MOTOR_ID;
     inputs.armLeadMotorConnected = m_intakeMotor.getDeviceId() == INTAKE_MOTOR_ID;
 
     // Get left arm motor data //
@@ -232,12 +183,6 @@ public class AlgaeIOSparkMax implements AlgaeIO {
     inputs.armLeadMotorTemperature = m_armLeadMotor.getMotorTemperature();
     inputs.armLeadMotorPosition = m_armLeadAbsEncoder.getPosition();
     inputs.armLeadMotorVelocity = m_armLeadAbsEncoder.getVelocity();
-
-    // // Get right arm motor data //
-    // inputs.armFollowMotorVoltage = m_armFollowMotor.getBusVoltage();
-    // inputs.armFollowMotorDutyCycle = m_armLeadMotor.getAppliedOutput();
-    // inputs.armFollowMotorCurrent = m_armFollowMotor.getOutputCurrent();
-    // inputs.armFollowMotorTemperature = m_armFollowMotor.getMotorTemperature();
 
     // Get intake motor data //
     inputs.intakeMotorVoltage = m_intakeMotor.getBusVoltage();

@@ -124,11 +124,11 @@ public class RobotContainer {
           new VisionIOPhotonVision(
               APTAG_CAMERA_NAMES[0],
               VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState().RawHeading),
+              () -> m_swerveDriveSubsystem.getState()),
           new VisionIOPhotonVision(
               APTAG_CAMERA_NAMES[1],
               VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState().RawHeading));
+              () -> m_swerveDriveSubsystem.getState()));
         break;
       case SIM:
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -140,34 +140,28 @@ public class RobotContainer {
             new VisionIOPhotonVisionSim(
                 APTAG_CAMERA_NAMES[0],
                 VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-                () -> m_swerveDriveSubsystem.getState().Pose,
-                () -> m_swerveDriveSubsystem.getState().RawHeading),
+                () -> m_swerveDriveSubsystem.getState()),
             new VisionIOPhotonVisionSim(
                 APTAG_CAMERA_NAMES[1],
                 VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-                () -> m_swerveDriveSubsystem.getState().Pose,
-                () -> m_swerveDriveSubsystem.getState().RawHeading)
-            // // Apriltag Pose-Estimation Cameras //
-            // new VisionIOPhotonVisionSim(
-            //     APTAG_CAMERA_NAMES[2],
-            //     VisionConstants.APTAG_POSE_EST_CAM_FL_POS,
-            //     () -> m_swerveDriveSubsystem.getState().Pose,
-            //     () -> m_swerveDriveSubsystem.getState().RawHeading),
-            // new VisionIOPhotonVisionSim(
-            //     APTAG_CAMERA_NAMES[3],
-            //     VisionConstants.APTAG_POSE_EST_CAM_FR_POS,
-            //     () -> m_swerveDriveSubsystem.getState().Pose,
-            //     () -> m_swerveDriveSubsystem.getState().RawHeading),
-            // new VisionIOPhotonVisionSim(
-            //     APTAG_CAMERA_NAMES[4],
-            //     VisionConstants.APTAG_POSE_EST_CAM_BL_POS,
-            //     () -> m_swerveDriveSubsystem.getState().Pose,
-            //     () -> m_swerveDriveSubsystem.getState().RawHeading),
-            // new VisionIOPhotonVisionSim(
-            //     APTAG_CAMERA_NAMES[5],
-            //     VisionConstants.APTAG_POSE_EST_CAM_BR_POS,
-            //     () -> m_swerveDriveSubsystem.getState().Pose,
-            //     () -> m_swerveDriveSubsystem.getState().RawHeading)
+                () -> m_swerveDriveSubsystem.getState()),
+            // Apriltag Pose-Estimation Cameras //
+            new VisionIOPhotonVisionSim(
+                APTAG_CAMERA_NAMES[2],
+                VisionConstants.APTAG_POSE_EST_CAM_FL_POS,
+                () -> m_swerveDriveSubsystem.getState()),
+            new VisionIOPhotonVisionSim(
+                APTAG_CAMERA_NAMES[3],
+                VisionConstants.APTAG_POSE_EST_CAM_FR_POS,
+                () -> m_swerveDriveSubsystem.getState()),
+            new VisionIOPhotonVisionSim(
+                APTAG_CAMERA_NAMES[4],
+                VisionConstants.APTAG_POSE_EST_CAM_BL_POS,
+                () -> m_swerveDriveSubsystem.getState()),
+            new VisionIOPhotonVisionSim(
+                APTAG_CAMERA_NAMES[5],
+                VisionConstants.APTAG_POSE_EST_CAM_BR_POS,
+                () -> m_swerveDriveSubsystem.getState())
         );
         break;
       case TEST:
@@ -179,11 +173,11 @@ public class RobotContainer {
           new VisionIOPhotonVision(
               APTAG_CAMERA_NAMES[0],
               VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState().RawHeading),
+              () -> m_swerveDriveSubsystem.getState()),
           new VisionIOPhotonVision(
               APTAG_CAMERA_NAMES[1],
               VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState().RawHeading));
+              () -> m_swerveDriveSubsystem.getState()));
         break;
       default: // Default should be in comp mode //
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -194,11 +188,11 @@ public class RobotContainer {
           new VisionIOPhotonVision(
               APTAG_CAMERA_NAMES[0],
               VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState().RawHeading),
+              () -> m_swerveDriveSubsystem.getState()),
           new VisionIOPhotonVision(
               APTAG_CAMERA_NAMES[1],
               VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState().RawHeading));
+              () -> m_swerveDriveSubsystem.getState()));
         break;
     }
 

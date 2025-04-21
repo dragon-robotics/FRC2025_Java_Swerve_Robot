@@ -7,7 +7,6 @@ package frc.robot.subsystems.coral;
 import frc.robot.subsystems.coral.CoralIO.CoralIOInputs;
 import static frc.robot.Constants.CoralSubsystemConstants.*;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralSubsystem extends SubsystemBase {

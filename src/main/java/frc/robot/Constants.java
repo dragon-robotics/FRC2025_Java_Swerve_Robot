@@ -67,6 +67,10 @@ public final class Constants {
       SIM
     }
 
+    public static boolean disableHAL = false;
+  }
+
+  public static class FieldConstants {
     // Robot heading constants for different field elements //
     public static final Rotation2d LEFT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(-54.011);
     public static final Rotation2d RIGHT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(54.011);
@@ -106,67 +110,6 @@ public final class Constants {
     public static final int[] REEF_STATION_TAG_IDS = { 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 };
     public static final int[] BLUE_REEF_STATION_TAG_IDS = { 17, 18, 19, 20, 21, 22 };
     public static final int[] RED_REEF_STATION_TAG_IDS = { 6, 7, 8, 9, 10, 11 };
-
-    public static boolean disableHAL = false;
-  }
-
-  public static class VisionConstants {
-    public static final String[] APTAG_CAMERA_NAMES = {
-        "AprilTagAlignLeftCamera",
-        "AprilTagAlignRightCamera",
-        "AprilTagPoseEstCameraFL",
-        "AprilTagPoseEstCameraFR",
-        "AprilTagPoseEstCameraBL",
-        "AprilTagPoseEstCameraBR"
-    };
-
-    // Main Apriltag alignment cam mounted facing forward, half a meter forward of
-    // center, half a meter up from center.
-    public static final Transform3d APTAG_ALIGN_LEFT_CAM_POS = new Transform3d(
-        new Translation3d(
-            Units.inchesToMeters(9.249),
-            Units.inchesToMeters(4.910),
-            Units.inchesToMeters(8.3885)),
-        new Rotation3d(0, Units.degreesToRadians(-20), 0));
-
-    // Main Apriltag alignment cam mounted facing forward, half a meter forward of
-    // center, half a meter up from center.
-    public static final Transform3d APTAG_ALIGN_RIGHT_CAM_POS = new Transform3d(
-        new Translation3d(
-            Units.inchesToMeters(9.249),
-            Units.inchesToMeters(-4.910),
-            Units.inchesToMeters(8.3885)),
-        new Rotation3d(0, Units.degreesToRadians(-20), 0));
-
-    // Front-Left Camera: Mounted at front-left corner, pointing outward at 45
-    // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_FL_POS = new Transform3d(
-        new Translation3d(0.5, 0.5, 1), // Example position (x, y, z)
-        new Rotation3d(0, 0, Units.degreesToRadians(45)));
-
-    // Front-Right Camera: Mounted at front-right corner, pointing outward at -45
-    // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_FR_POS = new Transform3d(
-        new Translation3d(0.5, -0.5, 1), // Example position (x, y, z)
-        new Rotation3d(0, 0, Units.degreesToRadians(-45)));
-
-    // Back-Left Camera: Mounted at back-left corner, pointing outward at 135
-    // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_BL_POS = new Transform3d(
-        new Translation3d(-0.5, 0.5, 1), // Example position (x, y, z)
-        new Rotation3d(0, 0, Units.degreesToRadians(135)));
-
-    // Back-Right Camera: Mounted at back-right corner, pointing outward at -135
-    // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_BR_POS = new Transform3d(
-        new Translation3d(-0.5, -0.5, 1), // Example position (x, y, z)
-        new Rotation3d(0, 0, Units.degreesToRadians(-135)));
-    public static final Transform3d[] APTAG_POSE_EST_CAM_POSITIONS = {
-        APTAG_POSE_EST_CAM_FL_POS,
-        APTAG_POSE_EST_CAM_FR_POS,
-        APTAG_POSE_EST_CAM_BL_POS,
-        APTAG_POSE_EST_CAM_BR_POS
-    };
 
     // The different layouts of the AprilTags on the field
     public static final AprilTagFieldLayout DEFAULT_APTAG_FIELD_LAYOUT;
@@ -243,7 +186,111 @@ public final class Constants {
           DriverStation.reportError("CRITICAL: No AprilTag field layout could be assigned!", true);
         }
       }
-    }
+    }    
+  }
+
+  public static class VisionConstants {
+    public static final String[] APTAG_CAMERA_NAMES = {
+        "AprilTagAlignLeftCamera",
+        "AprilTagAlignRightCamera",
+        "AprilTagPoseEstCameraFL",
+        "AprilTagPoseEstCameraFR",
+        "AprilTagPoseEstCameraBL",
+        "AprilTagPoseEstCameraBR"
+    };
+
+    // Main Apriltag alignment cam mounted facing forward, half a meter forward of
+    // center, half a meter up from center.
+    public static final Transform3d APTAG_ALIGN_LEFT_CAM_POS = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(9.249),
+            Units.inchesToMeters(4.910),
+            Units.inchesToMeters(8.3885)),
+        new Rotation3d(
+            0,
+            Units.degreesToRadians(-20),
+            0)
+    );
+
+    // Main Apriltag alignment cam mounted facing forward, half a meter forward of
+    // center, half a meter up from center.
+    public static final Transform3d APTAG_ALIGN_RIGHT_CAM_POS = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(9.249),
+            Units.inchesToMeters(-4.910),
+            Units.inchesToMeters(8.3885)),
+        new Rotation3d(
+            0,
+            Units.degreesToRadians(-20),
+            0)
+    );
+
+    // Front-Left Camera: Mounted at front-left corner, pointing outward at 30
+    // degrees
+    public static final Transform3d APTAG_POSE_EST_CAM_FL_POS = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(17.125),
+            Units.inchesToMeters(17.125),
+            Units.inchesToMeters(6.825)
+        ),
+        new Rotation3d(
+            0,
+            Units.degreesToRadians(-20),
+            Units.degreesToRadians(45)
+        )
+    );
+
+    // Front-Right Camera: Mounted at front-right corner, pointing outward at -30
+    // degrees
+    public static final Transform3d APTAG_POSE_EST_CAM_FR_POS = new Transform3d(
+        new Translation3d(
+          Units.inchesToMeters(17.125),
+          Units.inchesToMeters(-17.125),
+          Units.inchesToMeters(6.825)
+      ),
+      new Rotation3d(
+            0,
+            Units.degreesToRadians(-20),
+            Units.degreesToRadians(-45)
+        )
+    );
+
+    // Back-Left Camera: Mounted at back-left corner, pointing outward at 135
+    // degrees
+    public static final Transform3d APTAG_POSE_EST_CAM_BL_POS = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(-17.125),
+            Units.inchesToMeters(17.125),
+            Units.inchesToMeters(6.825)
+        ),
+        new Rotation3d(
+            0,
+            Units.degreesToRadians(-20),
+            Units.degreesToRadians(135)
+        )
+    );
+
+    // Back-Right Camera: Mounted at back-right corner, pointing outward at -135
+    // degrees
+    public static final Transform3d APTAG_POSE_EST_CAM_BR_POS = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(-17.125),
+            Units.inchesToMeters(-17.125),
+            Units.inchesToMeters(6.825)
+        ),
+        new Rotation3d(
+            0,
+            Units.degreesToRadians(-20),
+            Units.degreesToRadians(-135)
+        )
+    );
+
+    public static final Transform3d[] APTAG_POSE_EST_CAM_POSITIONS = {
+        APTAG_POSE_EST_CAM_FL_POS,
+        APTAG_POSE_EST_CAM_FR_POS,
+        APTAG_POSE_EST_CAM_BL_POS,
+        APTAG_POSE_EST_CAM_BR_POS
+    };
 
     // The standard deviations of our vision estimated poses, which affect
     // correction rate

@@ -1,22 +1,16 @@
 package frc.robot.subsystems.vision;
 
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
-import org.photonvision.targeting.PhotonPipelineResult;
+
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.util.Units;
+import static frc.robot.Constants.FieldConstants.*;
 
-import static edu.wpi.first.units.Units.Meter;
-import static edu.wpi.first.units.Units.Meters;
-import static frc.robot.Constants.VisionConstants.*;
-
-import java.util.List;
 import java.util.function.Supplier;
 
 public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
@@ -24,7 +18,7 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
   private static VisionSystemSim m_visionSim;
   private final PhotonCameraSim m_cameraSim;
 
-  private final Supplier<Pose2d> m_poseSupplier;
+  private final Supplier<SwerveDriveState> m_swerveDriveStateSupplier;
 
   /**
    * Creates a new VisionIOPhotonVisionSim.
@@ -35,10 +29,9 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
   public VisionIOPhotonVisionSim(
       String name,
       Transform3d robotToCamera,
-      Supplier<Pose2d> poseSupplier,
-      Supplier<Rotation2d> headingSupplier) {
-    super(name, robotToCamera, headingSupplier);
-    m_poseSupplier = poseSupplier;
+      Supplier<SwerveDriveState> swerveDriveStateSupplier) {
+    super(name, robotToCamera, swerveDriveStateSupplier);
+    m_swerveDriveStateSupplier = swerveDriveStateSupplier;
 
     // Initialize vision sim
     if (m_visionSim == null) {
@@ -48,22 +41,22 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
 
     // Add sim camera
     var cameraProperties = new SimCameraProperties();
-    cameraProperties.setCalibration(640, 480, Rotation2d.fromDegrees(70));
-    cameraProperties.setCalibError(0.64, 0.25);
-    cameraProperties.setFPS(50);
-    cameraProperties.setAvgLatencyMs(25);
-    cameraProperties.setLatencyStdDevMs(10);
+    // cameraProperties.setCalibration(640, 480, Rotation2d.fromDegrees(70));
+    // cameraProperties.setCalibError(0.64, 0.25);
+    // cameraProperties.setFPS(50);
+    // cameraProperties.setAvgLatencyMs(25);
+    // cameraProperties.setLatencyStdDevMs(10);
     
     m_cameraSim = new PhotonCameraSim(m_camera, cameraProperties, APTAG_FIELD_LAYOUT);
 
     m_visionSim.addCamera(m_cameraSim, robotToCamera);
 
-    // m_cameraSim.enableDrawWireframe(true);
+    m_cameraSim.enableDrawWireframe(true);
   }
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
-    m_visionSim.update(m_poseSupplier.get());
+    m_visionSim.update(m_swerveDriveStateSupplier.get().Pose);
     super.updateInputs(inputs);
   }
 
