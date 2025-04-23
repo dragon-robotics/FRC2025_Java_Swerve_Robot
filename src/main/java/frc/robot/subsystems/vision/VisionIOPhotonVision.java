@@ -1,10 +1,6 @@
 package frc.robot.subsystems.vision;
 
 import static frc.robot.Constants.FieldConstants.APTAG_FIELD_LAYOUT;
-import static frc.robot.Constants.VisionConstants.SINGLE_TAG_STDDEV;
-import static frc.robot.Constants.VisionConstants.MULTI_TAG_STDDEV;
-import static frc.robot.Constants.VisionConstants.DEFAULT_TAG_STDDEV;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,15 +17,10 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.Robot;
 
 public class VisionIOPhotonVision implements VisionIO {
 	protected final PhotonCamera m_camera;
@@ -65,8 +56,7 @@ public class VisionIOPhotonVision implements VisionIO {
     inputs.connected = m_camera.isConnected();
 
     // Update pose estimation heading data //
-    m_poseEstimator.addHeadingData(Timer.getFPGATimestamp(), m_swerveDriveStateSupplier.get().RawHeading);
-    // m_poseEstimator.addHeadingData(m_swerveDriveStateSupplier.get().Timestamp, m_swerveDriveStateSupplier.get().RawHeading);
+    m_poseEstimator.addHeadingData(Timer.getFPGATimestamp(), m_swerveDriveStateSupplier.get().Pose.getRotation());
 
     // Read new camera observations
     Set<Short> tagIds = new HashSet<>();
@@ -123,9 +113,7 @@ public class VisionIOPhotonVision implements VisionIO {
                     ambiguity, // Ambiguity
                     result.getTargets().size(), // Tag count
                     totalTagDistance, // Average tag distance
-                    PoseObservationType.PHOTONVISION)); // Observation type            
-
-            // estConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+                    PoseObservationType.PHOTONVISION)); // Observation type
           }
       );
     }

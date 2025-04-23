@@ -144,24 +144,24 @@ public class RobotContainer {
             new VisionIOPhotonVisionSim(
                 APTAG_CAMERA_NAMES[1],
                 VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-                () -> m_swerveDriveSubsystem.getState()),
-            // Apriltag Pose-Estimation Cameras //
-            new VisionIOPhotonVisionSim(
-                APTAG_CAMERA_NAMES[2],
-                VisionConstants.APTAG_POSE_EST_CAM_FL_POS,
-                () -> m_swerveDriveSubsystem.getState()),
-            new VisionIOPhotonVisionSim(
-                APTAG_CAMERA_NAMES[3],
-                VisionConstants.APTAG_POSE_EST_CAM_FR_POS,
-                () -> m_swerveDriveSubsystem.getState()),
-            new VisionIOPhotonVisionSim(
-                APTAG_CAMERA_NAMES[4],
-                VisionConstants.APTAG_POSE_EST_CAM_BL_POS,
-                () -> m_swerveDriveSubsystem.getState()),
-            new VisionIOPhotonVisionSim(
-                APTAG_CAMERA_NAMES[5],
-                VisionConstants.APTAG_POSE_EST_CAM_BR_POS,
                 () -> m_swerveDriveSubsystem.getState())
+            // // Apriltag Pose-Estimation Cameras //
+            // new VisionIOPhotonVisionSim(
+            //     APTAG_CAMERA_NAMES[2],
+            //     VisionConstants.APTAG_POSE_EST_CAM_FL_POS,
+            //     () -> m_swerveDriveSubsystem.getState()),
+            // new VisionIOPhotonVisionSim(
+            //     APTAG_CAMERA_NAMES[3],
+            //     VisionConstants.APTAG_POSE_EST_CAM_FR_POS,
+            //     () -> m_swerveDriveSubsystem.getState()),
+            // new VisionIOPhotonVisionSim(
+            //     APTAG_CAMERA_NAMES[4],
+            //     VisionConstants.APTAG_POSE_EST_CAM_BL_POS,
+            //     () -> m_swerveDriveSubsystem.getState()),
+            // new VisionIOPhotonVisionSim(
+            //     APTAG_CAMERA_NAMES[5],
+            //     VisionConstants.APTAG_POSE_EST_CAM_BR_POS,
+            //     () -> m_swerveDriveSubsystem.getState())
         );
         break;
       case TEST:

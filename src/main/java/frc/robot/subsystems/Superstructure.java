@@ -14,6 +14,7 @@ import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -201,6 +202,9 @@ public class Superstructure extends SubsystemBase {
 
     // Register the telemetry for the swerve drive //
     m_swerve.registerTelemetry(logger::telemeterize);
+
+    // Warmup PathPlanner to avoid Java pauses
+    FollowPathCommand.warmupCommand().schedule();
   }
 
   // Swerve Drive Subsystem Commands //
