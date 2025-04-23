@@ -21,6 +21,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.Constants.VisionConstants;
 
 public class VisionIOPhotonVision implements VisionIO {
 	protected final PhotonCamera m_camera;
@@ -52,8 +53,15 @@ public class VisionIOPhotonVision implements VisionIO {
   }
 
   @Override
+  public String getCameraName() {
+    // Get the camera object
+    return m_camera.getName();
+  }
+
+  @Override
   public void updateInputs(VisionIOInputs inputs) {
     inputs.connected = m_camera.isConnected();
+    inputs.cameraName = m_camera.getName();
 
     // Update pose estimation heading data //
     m_poseEstimator.addHeadingData(Timer.getFPGATimestamp(), m_swerveDriveStateSupplier.get().Pose.getRotation());
@@ -82,14 +90,14 @@ public class VisionIOPhotonVision implements VisionIO {
             Pose3d robotPose = estimator.estimatedPose;
 
             // Calculate tag distance
-            double totalTagDistance = 0.0;
+            double totalAvgTagDistance = 0.0;
             for (var target : result.targets) {
-              totalTagDistance += target.bestCameraToTarget.getTranslation().getNorm();
+              totalAvgTagDistance += target.bestCameraToTarget.getTranslation().getNorm();
             }
 
             // Calculate average tag distance if multiple tags are used
             if (result.getTargets().size() > 0) {
-              totalTagDistance /= result.getTargets().size();
+              totalAvgTagDistance /= result.getTargets().size();
             }
 
             // Add tag IDs
@@ -105,6 +113,31 @@ public class VisionIOPhotonVision implements VisionIO {
                 .average()
                 .orElse(0.0);
 
+            // Calculate latency
+            double latencySeconds = result.metadata.getLatencyMillis() / 1000;
+
+            // Calculate Edge Factor //
+            double maxEdgeScore = 1.0; // Default: assume centered
+            if (result.hasTargets()) {
+                // Define thresholds based on your camera's FOV (e.g., half the FOV)
+                double yawThreshold = VisionConstants.CAMERA_FOV_HORIZONTAL_DEGREES / 2.0 * 0.8; // e.g., 80% of half-FOV
+                double pitchThreshold = VisionConstants.CAMERA_FOV_VERTICAL_DEGREES / 2.0 * 0.8;
+
+                for (var target : result.targets) {
+                    double targetYaw = Math.abs(target.getYaw());
+                    double targetPitch = Math.abs(target.getPitch());
+
+                    // Calculate a score (higher means closer to edge)
+                    // Simple example: Max normalized distance from center
+                    double yawScore = Math.max(0, targetYaw - yawThreshold * 0.5) / (yawThreshold * 0.5); // Score from 0 up based on exceeding 50% threshold
+                    double pitchScore = Math.max(0, targetPitch - pitchThreshold * 0.5) / (pitchThreshold * 0.5);
+                    double currentTargetEdgeScore = 1.0 + Math.max(yawScore, pitchScore); // Factor starts at 1, increases if near edge
+
+                    maxEdgeScore = Math.max(maxEdgeScore, currentTargetEdgeScore); // Use the worst score among visible tags
+                }
+            }
+            double edgeFactor = maxEdgeScore;
+
             // Add pose observation calculated from the PhotonPoseEstimator
             poseObservations.add(
                 new PoseObservation(
@@ -112,7 +145,9 @@ public class VisionIOPhotonVision implements VisionIO {
                     robotPose, // 3D pose estimate
                     ambiguity, // Ambiguity
                     result.getTargets().size(), // Tag count
-                    totalTagDistance, // Average tag distance
+                    totalAvgTagDistance, // Average tag distance
+                    latencySeconds, // Latency
+                    edgeFactor, // Edge factor
                     PoseObservationType.PHOTONVISION)); // Observation type
           }
       );

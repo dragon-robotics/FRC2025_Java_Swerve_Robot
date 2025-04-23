@@ -308,6 +308,43 @@ public final class Constants {
     public static double LINEAR_STDDEV_BASELINE = 0.02; // Meters
     public static double ANGULAR_STDDEV_BASELINE = 0.06; // Radians
 
+    // Known values
+    public static final double CAMERA_FOV_HORIZONTAL_DEGREES = 73.0; // Your known horizontal FOV
+    public static final double CAMERA_ASPECT_RATIO_WIDTH = 4.0;
+    public static final double CAMERA_ASPECT_RATIO_HEIGHT = 3.0;
+
+    // Calculated value
+    public static final double CAMERA_FOV_VERTICAL_DEGREES = calculateVerticalFOV(
+        CAMERA_FOV_HORIZONTAL_DEGREES,
+        CAMERA_ASPECT_RATIO_WIDTH,
+        CAMERA_ASPECT_RATIO_HEIGHT
+    );
+
+    /**
+     * Calculates the vertical Field of View (FOV) from the horizontal FOV and aspect ratio.
+     *
+     * @param horizontalFOV Horizontal FOV in degrees.
+     * @param aspectRatioWidth Width component of the aspect ratio.
+     * @param aspectRatioHeight Height component of the aspect ratio.
+     * @return Vertical FOV in degrees.
+     */
+    private static double calculateVerticalFOV(double horizontalFOV, double aspectRatioWidth, double aspectRatioHeight) {
+        // Convert horizontal FOV to radians for Math functions
+        double horizontalFOV_rad = Math.toRadians(horizontalFOV);
+
+        // Calculate tan(HFOV / 2)
+        double tan_hFOV_half = Math.tan(horizontalFOV_rad / 2.0);
+
+        // Calculate tan(VFOV / 2) using the aspect ratio
+        double tan_vFOV_half = tan_hFOV_half * (aspectRatioHeight / aspectRatioWidth);
+
+        // Calculate VFOV / 2 in radians
+        double vFOV_half_rad = Math.atan(tan_vFOV_half);
+
+        // Calculate VFOV in radians and then convert to degrees
+        return Math.toDegrees(vFOV_half_rad * 2.0);
+    }    
+
     // Standard deviation multipliers for each camera
     // (Adjust to trust some cameras more than others)
     public static double[] CAMERA_STDDEV_FACTORS = new double[] {

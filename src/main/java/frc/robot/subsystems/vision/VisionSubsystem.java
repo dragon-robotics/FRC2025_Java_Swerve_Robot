@@ -31,10 +31,10 @@ public class VisionSubsystem extends SubsystemBase {
   private final Alert[] m_disconnectedAlerts;
 
   // Per-Camera Logging
-  StructArrayPublisher<Pose3d> m_tagPosesPerCamArrayPublisher;
-  StructArrayPublisher<Pose3d> m_robotPosesPerCamArrayPublisher;
-  StructArrayPublisher<Pose3d> m_robotPosesAcceptedPerCamArrayPublisher;
-  StructArrayPublisher<Pose3d> m_robotPosesRejectedPerCamArrayPublisher;
+  private List<StructArrayPublisher<Pose3d>> m_tagPosesPerCamArrayPublisherList;
+  private List<StructArrayPublisher<Pose3d>> m_robotPosesPerCamArrayPublisherList;
+  private List<StructArrayPublisher<Pose3d>> m_robotPosesAcceptedPerCamArrayPublisherList;
+  private List<StructArrayPublisher<Pose3d>> m_robotPosesRejectedPerCamArrayPublisherList;
 
   // Summary (All Camera) Logging
 
@@ -52,28 +52,42 @@ public class VisionSubsystem extends SubsystemBase {
     m_inputs = new VisionIOInputs[m_io.length];
     m_disconnectedAlerts = new Alert[m_io.length];
 
+    // Initialize the per-camera loggers
+    m_tagPosesPerCamArrayPublisherList = new LinkedList<>();
+    m_robotPosesPerCamArrayPublisherList = new LinkedList<>();
+    m_robotPosesAcceptedPerCamArrayPublisherList = new LinkedList<>();
+    m_robotPosesRejectedPerCamArrayPublisherList = new LinkedList<>();
+
     for (int i = 0; i < m_inputs.length; i++) {
       m_inputs[i] = new VisionIOInputs();
       m_disconnectedAlerts[i] =
           new Alert(
-              "Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
+              "Vision camera " + io[i].getCameraName() + " is disconnected.", AlertType.kWarning);
       
       // Initialize the per-camera loggers
-      m_tagPosesPerCamArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
-        "Vision/Camera" + Integer.toString(i) + "/TagPoses", Pose3d.struct).publish();
-      m_robotPosesPerCamArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
-        "Vision/Camera" + Integer.toString(i) + "/RobotPoses", Pose3d.struct).publish();
-      m_robotPosesAcceptedPerCamArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
-        "Vision/Camera" + Integer.toString(i) + "/RobotPosesAccepted", Pose3d.struct).publish();
-      m_robotPosesRejectedPerCamArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
-        "Vision/Camera" + Integer.toString(i) + "/RobotPosesRejected", Pose3d.struct).publish();
+      m_tagPosesPerCamArrayPublisherList.add(
+          NetworkTableInstance.getDefault().getStructArrayTopic(
+              "Vision/Camera-" + io[i].getCameraName() + "/TagPoses", Pose3d.struct).publish());
+      m_robotPosesPerCamArrayPublisherList.add(
+          NetworkTableInstance.getDefault().getStructArrayTopic(
+              "Vision/Camera-" + io[i].getCameraName() + "/RobotPoses", Pose3d.struct).publish());
+      m_robotPosesAcceptedPerCamArrayPublisherList.add(
+          NetworkTableInstance.getDefault().getStructArrayTopic(
+              "Vision/Camera-" + io[i].getCameraName() + "/RobotPosesAccepted", Pose3d.struct).publish());
+      m_robotPosesRejectedPerCamArrayPublisherList.add(
+          NetworkTableInstance.getDefault().getStructArrayTopic(
+              "Vision/Camera-" + io[i].getCameraName() + "/RobotPosesRejected", Pose3d.struct).publish());
     }
 
     // Initialize the summary loggers
-    m_tagPosesArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("Vision/Summary/TagPoses", Pose3d.struct).publish();
-    m_robotPosesArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("Vision/Summary/RobotPoses", Pose3d.struct).publish();
-    m_robotPosesAcceptedArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("Vision/Summary/RobotPosesAccepted", Pose3d.struct).publish();
-    m_robotPosesRejectedArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("Vision/Summary/RobotPosesRejected", Pose3d.struct).publish();
+    m_tagPosesArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
+        "Vision/Summary/TagPoses", Pose3d.struct).publish();
+    m_robotPosesArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
+        "Vision/Summary/RobotPoses", Pose3d.struct).publish();
+    m_robotPosesAcceptedArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
+        "Vision/Summary/RobotPosesAccepted", Pose3d.struct).publish();
+    m_robotPosesRejectedArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
+        "Vision/Summary/RobotPosesRejected", Pose3d.struct).publish();
   }
 
   @FunctionalInterface
@@ -118,6 +132,7 @@ public class VisionSubsystem extends SubsystemBase {
 
       // Loop over pose observations
       for (var observation : m_inputs[cameraIndex].poseObservations) {
+
         // Check whether to reject pose
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
@@ -147,7 +162,9 @@ public class VisionSubsystem extends SubsystemBase {
 
         // Calculate standard deviations
         double stdDevFactor =
-            Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+          (1 + observation.averageTagDistance()) * (1 + observation.ambiguity()) /
+          Math.sqrt(Math.max(observation.tagCount(), 1));
+
         double linearStdDev = LINEAR_STDDEV_BASELINE * stdDevFactor;
         double angularStdDev = ANGULAR_STDDEV_BASELINE * stdDevFactor;
         if (observation.type() == PoseObservationType.MEGATAG_2) {
@@ -155,8 +172,23 @@ public class VisionSubsystem extends SubsystemBase {
           angularStdDev *= ANGULAR_STDDEV_MEGATAG2_ANGLE_FACTOR;
         }
         if (cameraIndex < CAMERA_STDDEV_FACTORS.length) {
-          linearStdDev *= CAMERA_STDDEV_FACTORS[cameraIndex];
-          angularStdDev *= CAMERA_STDDEV_FACTORS[cameraIndex];
+          // --- Calculate Dynamic Per-Camera/Observation Factor ---
+          // Start with a base factor of 1.0
+          double dynamicCamFactor = 1.0;
+
+          // Increase factor based on latency: Higher latency = less trustworthy
+          // Example: Add 1.0 to the factor for every 100ms of latency. Adjust the multiplier (10.0) as needed.
+          dynamicCamFactor += observation.latencySeconds() * 10.0;
+
+          // Increase factor based on edge proximity: Higher edgeFactor = less trustworthy
+          // Since edgeFactor is already >= 1.0, we can multiply by it directly,
+          // or use a function of it if we want a different scaling.
+          // Example: Multiply by edgeFactor. If edgeFactor is 1.5, uncertainty increases by 50%.
+          dynamicCamFactor *= observation.edgeFactor();
+
+          // Apply the calculated dynamic factor
+          linearStdDev *= dynamicCamFactor;
+          angularStdDev *= dynamicCamFactor;
         }
 
         // Send vision observation
@@ -167,10 +199,14 @@ public class VisionSubsystem extends SubsystemBase {
       }
 
       // Log camera datadata
-      m_tagPosesPerCamArrayPublisher.set(allTagPoses.toArray(new Pose3d[tagPoses.size()]));
-      m_robotPosesPerCamArrayPublisher.set(allRobotPoses.toArray(new Pose3d[robotPoses.size()]));
-      m_robotPosesAcceptedPerCamArrayPublisher.set(allRobotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
-      m_robotPosesRejectedPerCamArrayPublisher.set(allRobotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
+      m_tagPosesPerCamArrayPublisherList.get(cameraIndex).set(
+        tagPoses.toArray(new Pose3d[tagPoses.size()]));
+      m_robotPosesPerCamArrayPublisherList.get(cameraIndex).set(
+        robotPoses.toArray(new Pose3d[robotPoses.size()]));
+      m_robotPosesAcceptedPerCamArrayPublisherList.get(cameraIndex).set(
+        robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
+      m_robotPosesRejectedPerCamArrayPublisherList.get(cameraIndex).set(
+        robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
   
       allTagPoses.addAll(tagPoses);
       allRobotPoses.addAll(robotPoses);
@@ -179,9 +215,13 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     // Log summary data
-    m_tagPosesArrayPublisher.set(allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
-    m_robotPosesArrayPublisher.set(allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
-    m_robotPosesAcceptedArrayPublisher.set(allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
-    m_robotPosesRejectedArrayPublisher.set(allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+    m_tagPosesArrayPublisher.set(
+      allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
+    m_robotPosesArrayPublisher.set(
+      allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
+    m_robotPosesAcceptedArrayPublisher.set(
+      allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
+    m_robotPosesRejectedArrayPublisher.set(
+      allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
   }
 }

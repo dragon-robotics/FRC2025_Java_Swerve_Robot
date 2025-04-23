@@ -6,7 +6,6 @@ import org.photonvision.simulation.VisionSystemSim;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import static frc.robot.Constants.FieldConstants.*;
@@ -52,6 +51,12 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
     m_visionSim.addCamera(m_cameraSim, robotToCamera);
 
     // m_cameraSim.enableDrawWireframe(true);
+  }
+
+  @Override
+  public String getCameraName() {
+    // Get the camera object
+    return m_camera.getName();
   }
 
   @Override
