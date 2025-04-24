@@ -6,6 +6,9 @@ package frc.robot;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -14,9 +17,13 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -24,6 +31,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.FieldConstants.AprilTagLayoutType;
+import frc.robot.FieldConstants.ReefLevel;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -71,6 +80,13 @@ public final class Constants {
   }
 
   public static class FieldConstants {
+    public static class ReefStationConstants {
+      public static final double REEF_STATION_X = 0.0; // Meters
+      public static final double REEF_STATION_Y = 0.0; // Meters
+      public static final double REEF_STATION_Z = 0.0; // Meters
+    }
+
+
     // Robot heading constants for different field elements //
     public static final Rotation2d LEFT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(-54.011);
     public static final Rotation2d RIGHT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(54.011);
@@ -186,7 +202,143 @@ public final class Constants {
           DriverStation.reportError("CRITICAL: No AprilTag field layout could be assigned!", true);
         }
       }
-    }    
+    }
+
+    public static final double FIELD_LENGTH = APTAG_FIELD_LAYOUT.getFieldLength();
+    public static final double FIELD_WIDTH = APTAG_FIELD_LAYOUT.getFieldWidth();
+
+    public static class Reef {
+
+      public static final Pose2d REEF_A_BLUE =
+          new Pose2d(3.1886031999999997, 4.1902126, Rotation2d.fromDegrees(0))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor
+      public static final Pose2d REEF_B_BLUE =
+          new Pose2d(3.1886031999999997, 3.8615874000000003, Rotation2d.fromDegrees(0))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+      public static final Pose2d REEF_C_BLUE =
+          new Pose2d(3.6966769142381293, 2.9815779129493296, Rotation2d.fromDegrees(60))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+      public static final Pose2d REEF_D_BLUE =
+          new Pose2d(3.9812746857618713, 2.81726531294933, Rotation2d.fromDegrees(60))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+      public static final Pose2d REEF_E_BLUE =
+          new Pose2d(4.9974221142381285, 2.81726531294933, Rotation2d.fromDegrees(120))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+      public static final Pose2d REEF_F_BLUE =
+          new Pose2d(5.282019885761871, 2.9815779129493296, Rotation2d.fromDegrees(120))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+      public static final Pose2d REEF_G_BLUE =
+          new Pose2d(5.7900936000000005, 3.8615874, Rotation2d.fromDegrees(360 - 180))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+      public static final Pose2d REEF_H_BLUE =
+          new Pose2d(5.7900936000000005, 4.1902126, Rotation2d.fromDegrees(360 - 180))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+      public static final Pose2d REEF_I_BLUE =
+          new Pose2d(5.282019885761871, 5.070222087050671, Rotation2d.fromDegrees(360 - 120))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+      public static final Pose2d REEF_J_BLUE =
+          new Pose2d(4.9974221142381285, 5.234534687050671, Rotation2d.fromDegrees(360 - 120))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+      public static final Pose2d REEF_K_BLUE =
+          new Pose2d(3.9812746857618713, 5.234534687050671, Rotation2d.fromDegrees(360 - 60))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+      public static final Pose2d REEF_L_BLUE =
+          new Pose2d(3.6966769142381293, 5.070222087050671, Rotation2d.fromDegrees(360 - 60))
+          .transformBy(new Transform2d(-0.08, 0.0, Rotation2d.kZero)); // Fudge Factor;
+
+
+      public static final Pose2d REEF_A_RED = new Pose2d(
+          FIELD_LENGTH - REEF_A_BLUE.getX(),
+          FIELD_WIDTH - REEF_A_BLUE.getY(),
+          REEF_A_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+
+      public static final Pose2d REEF_B_RED = new Pose2d(
+          FIELD_LENGTH - REEF_B_BLUE.getX(),
+          FIELD_WIDTH - REEF_B_BLUE.getY(),
+          REEF_B_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+
+      public static final Pose2d REEF_C_RED = new Pose2d(
+          FIELD_LENGTH - REEF_C_BLUE.getX(),
+          FIELD_WIDTH - REEF_C_BLUE.getY(),
+          REEF_C_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+            
+      public static final Pose2d REEF_D_RED = new Pose2d(
+          FIELD_LENGTH - REEF_D_BLUE.getX(),
+          FIELD_WIDTH - REEF_D_BLUE.getY(),
+          REEF_D_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+
+      public static final Pose2d REEF_E_RED = new Pose2d(
+          FIELD_LENGTH - REEF_E_BLUE.getX(),
+          FIELD_WIDTH - REEF_E_BLUE.getY(),
+          REEF_E_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+
+      public static final Pose2d REEF_F_RED = new Pose2d(
+          FIELD_LENGTH - REEF_F_BLUE.getX(),
+          FIELD_WIDTH - REEF_F_BLUE.getY(),
+          REEF_F_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+
+      public static final Pose2d REEF_G_RED = new Pose2d(
+          FIELD_LENGTH - REEF_G_BLUE.getX(),
+          FIELD_WIDTH - REEF_G_BLUE.getY(),
+          REEF_G_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+
+      public static final Pose2d REEF_H_RED = new Pose2d(
+          FIELD_LENGTH - REEF_H_BLUE.getX(),
+          FIELD_WIDTH - REEF_H_BLUE.getY(),
+          REEF_H_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+                
+      public static final Pose2d REEF_I_RED = new Pose2d(
+          FIELD_LENGTH - REEF_I_BLUE.getX(),
+          FIELD_WIDTH - REEF_I_BLUE.getY(),
+          REEF_I_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+  
+      public static final Pose2d REEF_J_RED = new Pose2d(
+          FIELD_LENGTH - REEF_J_BLUE.getX(),
+          FIELD_WIDTH - REEF_J_BLUE.getY(),
+          REEF_J_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+
+      public static final Pose2d REEF_K_RED = new Pose2d(
+          FIELD_LENGTH - REEF_K_BLUE.getX(),
+          FIELD_WIDTH - REEF_K_BLUE.getY(),
+          REEF_K_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+
+      public static final Pose2d REEF_L_RED = new Pose2d(
+          FIELD_LENGTH - REEF_L_BLUE.getX(),
+          FIELD_WIDTH - REEF_L_BLUE.getY(),
+          REEF_L_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+
+      // Blue Reef Station 2D Poses //
+      public static final List<Pose2d> BLUE_REEF_STATION_POSES = new ArrayList<>(List.of(
+        REEF_A_BLUE,
+        REEF_B_BLUE,
+        REEF_C_BLUE,
+        REEF_D_BLUE,
+        REEF_E_BLUE,
+        REEF_F_BLUE,
+        REEF_G_BLUE,
+        REEF_H_BLUE,
+        REEF_I_BLUE,
+        REEF_J_BLUE,
+        REEF_K_BLUE,
+        REEF_L_BLUE            
+      ));
+
+      // Red Reef Station 2D Poses //
+      public static final List<Pose2d> RED_REEF_STATION_POSES = new ArrayList<>(List.of(
+        REEF_A_RED,
+        REEF_B_RED,
+        REEF_C_RED,
+        REEF_D_RED,
+        REEF_E_RED,
+        REEF_F_RED,
+        REEF_G_RED,
+        REEF_H_RED,
+        REEF_I_RED,
+        REEF_J_RED,
+        REEF_K_RED,
+        REEF_L_RED            
+      ));
+    }
   }
 
   public static class VisionConstants {

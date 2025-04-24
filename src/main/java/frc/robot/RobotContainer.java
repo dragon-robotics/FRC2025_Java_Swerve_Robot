@@ -62,6 +62,7 @@ public class RobotContainer {
   // Swerve Commands //
   private Command m_defaultDriveCommand;
   // private Command m_aimAndAlignToReefApriltagCommand;
+  private Command m_driveToPoseCommand;
   private Command m_swerveBrakeCommand;
   private Command m_seedFieldCentricCommand;
 
@@ -214,6 +215,7 @@ public class RobotContainer {
         () -> -m_driverController.getRightX(),
         () -> m_driverController.getHID().getXButton());
     // m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
+    m_driveToPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand();
     m_swerveBrakeCommand = m_superstructureSubsystem.SwerveBrake();
     m_seedFieldCentricCommand = m_superstructureSubsystem.SeedFieldCentric();
 
@@ -320,6 +322,9 @@ public class RobotContainer {
         .whileTrue(m_scoreCoralCommand);
     
     m_driverController.pov(180).whileTrue(m_slowReverseCoralIntakeCommand);
+
+    m_driverController.pov(90)
+        .onTrue(m_driveToPoseCommand);
 
     // m_driverController.pov(90)
     //     .whileTrue(m_elevatorManualUpCommand)

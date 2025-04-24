@@ -6,34 +6,49 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static frc.robot.Constants.ElevatorSubsystemConstants.L2;
+import static frc.robot.Constants.FieldConstants.RED_REEF_STATION_TAG_IDS;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.FieldConstants.ReefLevel;
+import frc.robot.commands.Teleop.DriveToPosePID;
 // import frc.robot.commands.Teleop.AutoAlignToReefTag;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
 import frc.robot.subsystems.coral.CoralSubsystem;
@@ -202,9 +217,6 @@ public class Superstructure extends SubsystemBase {
 
     // Register the telemetry for the swerve drive //
     m_swerve.registerTelemetry(logger::telemeterize);
-
-    // Warmup PathPlanner to avoid Java pauses
-    FollowPathCommand.warmupCommand().schedule();
   }
 
   // Swerve Drive Subsystem Commands //
@@ -298,6 +310,119 @@ public class Superstructure extends SubsystemBase {
       }
 
     }, m_swerve);
+  }
+
+  public Command DriveToClosestReefPoseCommand() {
+      // Define PathConstraints (adjust values as needed)
+      PathConstraints constraints = new PathConstraints(
+          3.0,                  // Max velocity (m/s)
+          4.0,            // Max acceleration (m/s^2)
+          Units.degreesToRadians(540), // Max angular velocity (rad/s)
+          Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
+      );
+
+      return new DeferredCommand(() -> {
+        // Grab the robot's current alliance
+        Optional<Alliance> alliance = DriverStation.getAlliance();
+
+        // Grab the robot's current pose
+        Pose2d currentPose = m_swerve.getState().Pose;
+
+        List<Pose2d> targetPoses =
+            alliance.isPresent() && alliance.get() == Alliance.Red ?
+                FieldConstants.Reef.RED_REEF_STATION_POSES :
+                FieldConstants.Reef.BLUE_REEF_STATION_POSES;
+
+        // Calculate the pose closest to the current pose
+        Pose2d closestPose = null;
+        double minDistanceSq = Double.MAX_VALUE; // Use squared distance to avoid sqrt
+    
+        // Iterate through the list of target poses
+        for (Pose2d targetPose : targetPoses) {
+            Transform2d translationDelta = targetPose.minus(currentPose);
+
+            // Calculate the squared distance between the translations
+            double distanceSq = translationDelta.getTranslation().getNorm();
+
+            // If this pose is closer than the current minimum, update
+            if (distanceSq < minDistanceSq) {
+                minDistanceSq = distanceSq;
+                closestPose = targetPose;
+            }
+        }        
+
+        return AutoBuilder.pathfindToPose(closestPose, constraints);
+      }, Set.of(m_swerve))
+      .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
+  }
+
+  public Command DriveToPoseCommand(boolean usePID) {
+
+    // Calculate the closest reef pose to the current pose //
+    Pose2d closestPose = null;
+
+    // Are we red or blue?
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    // If we are red, use the red reef poses //
+    if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+      // Get the current robot pose //
+      Pose2d currentPose = m_swerve.getState().Pose;
+
+      double minDistanceSq = Double.MAX_VALUE; // Use squared distance to avoid sqrt
+
+      // Iterate through the list of target poses
+      for (Pose2d targetPose : FieldConstants.Reef.RED_REEF_STATION_POSES) {
+
+        Transform2d translationDelta = targetPose.minus(currentPose);
+
+        // Calculate the squared distance between the translations
+        double distanceSq = translationDelta.getTranslation().getNorm();
+
+        // If this pose is closer than the current minimum, update
+        if (distanceSq < minDistanceSq) {
+          minDistanceSq = distanceSq;
+          closestPose = targetPose;
+        }
+      }
+    }
+    // If we are blue, use the blue reef poses //
+    else {
+      // Get the current robot pose //
+      Pose2d currentPose = m_swerve.getState().Pose;
+
+      double minDistanceSq = Double.MAX_VALUE; // Use squared distance to avoid sqrt
+
+      // Iterate through the list of target poses
+      for (Pose2d targetPose : FieldConstants.Reef.BLUE_REEF_STATION_POSES) {
+        Transform2d translationDelta = targetPose.minus(currentPose);
+
+        // Calculate the squared distance between the translations
+        double distanceSq = translationDelta.getTranslation().getNorm();
+
+        // If this pose is closer than the current minimum, update
+        if (distanceSq < minDistanceSq) {
+          minDistanceSq = distanceSq;
+          closestPose = targetPose;
+        }
+      }
+    }
+
+    if (usePID) {
+      return new DriveToPosePID(m_swerve, applyRobotSpeeds, closestPose);
+    } else {
+      // Use default constraints defined elsewhere (e.g., AutoConstants)
+      PathConstraints constraints = new PathConstraints(
+          5,
+          3,
+          Units.degreesToRadians(540),
+          Units.degreesToRadians(720)
+      );
+
+      return AutoBuilder.pathfindToPose(
+          closestPose,
+          constraints
+      );
+    }
   }
 
   public void initCurrentHeading() {
