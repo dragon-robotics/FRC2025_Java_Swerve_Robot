@@ -19,12 +19,15 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.subsystems.vision.VisionIO.VisionIOInputs;
 
 public class VisionSubsystem extends SubsystemBase {
 
+  private final CommandSwerveDrivetrain m_swerve;
   private final VisionConsumer m_consumer;
   private final VisionIO[] m_io;
   private final VisionIOInputs[] m_inputs;
@@ -43,8 +46,16 @@ public class VisionSubsystem extends SubsystemBase {
   private StructArrayPublisher<Pose3d> m_robotPosesAcceptedArrayPublisher;
   private StructArrayPublisher<Pose3d> m_robotPosesRejectedArrayPublisher;
 
+  // Check for odometry initialization and use about  //
+  private int m_stablePoseCounter = 5;
+  private boolean m_odometryInitialized = false;
+
   /** Creates a new VisionSubsystem. */
-  public VisionSubsystem(VisionConsumer consumer, VisionIO... io) {
+  public VisionSubsystem(
+    CommandSwerveDrivetrain swerve,
+    VisionConsumer consumer,
+    VisionIO... io) {
+    m_swerve = swerve;
     m_consumer = consumer;
     m_io = io;
 
@@ -150,8 +161,21 @@ public class VisionSubsystem extends SubsystemBase {
         // Add pose to log
         robotPoses.add(observation.pose());
         if (rejectPose) {
+          m_stablePoseCounter = 5; // Reset counter if we reject a pose
           robotPosesRejected.add(observation.pose());
         } else {
+
+          // If odometry isn't initialized, check we have 5 consecutive good poses
+          if (!m_odometryInitialized) {
+            if (m_stablePoseCounter > 0) {
+              m_stablePoseCounter--;
+            } else {
+              // If we have 5 good poses, set odometry
+              m_swerve.resetPose(observation.pose().toPose2d());
+              m_odometryInitialized = true;
+            }
+          }
+
           robotPosesAccepted.add(observation.pose());
         }
 
@@ -190,6 +214,9 @@ public class VisionSubsystem extends SubsystemBase {
           linearStdDev *= dynamicCamFactor;
           angularStdDev *= dynamicCamFactor;
         }
+
+        // System.out.println("Linear StdDev: " + linearStdDev);
+        // System.out.println("Angular StdDev: " + angularStdDev);
 
         // Send vision observation
         m_consumer.accept(

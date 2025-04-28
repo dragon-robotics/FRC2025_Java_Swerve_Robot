@@ -120,22 +120,24 @@ public class RobotContainer {
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
         m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
-        m_visionSubsystem = new VisionSubsystem(
-          m_swerveDriveSubsystem::addVisionMeasurement,
-          new VisionIOPhotonVision(
-              APTAG_CAMERA_NAMES[0],
-              VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState()),
-          new VisionIOPhotonVision(
-              APTAG_CAMERA_NAMES[1],
-              VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState()));
+        m_visionSubsystem = new VisionSubsystem(          
+            m_swerveDriveSubsystem,
+            m_swerveDriveSubsystem::addVisionMeasurement,
+            new VisionIOPhotonVision(
+                APTAG_CAMERA_NAMES[0],
+                VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
+                () -> m_swerveDriveSubsystem.getState()),
+            new VisionIOPhotonVision(
+                APTAG_CAMERA_NAMES[1],
+                VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
+                () -> m_swerveDriveSubsystem.getState()));
         break;
       case SIM:
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
         m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem = new VisionSubsystem(
+            m_swerveDriveSubsystem,
             m_swerveDriveSubsystem::addVisionMeasurement,
             // Auto-Align Cameras //
             new VisionIOPhotonVisionSim(
@@ -170,30 +172,32 @@ public class RobotContainer {
         m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem = new VisionSubsystem(
-          m_swerveDriveSubsystem::addVisionMeasurement,
-          new VisionIOPhotonVision(
-              APTAG_CAMERA_NAMES[0],
-              VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState()),
-          new VisionIOPhotonVision(
-              APTAG_CAMERA_NAMES[1],
-              VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState()));
+						m_swerveDriveSubsystem,
+						m_swerveDriveSubsystem::addVisionMeasurement,
+						new VisionIOPhotonVision(
+								APTAG_CAMERA_NAMES[0],
+								VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
+								() -> m_swerveDriveSubsystem.getState()),
+						new VisionIOPhotonVision(
+								APTAG_CAMERA_NAMES[1],
+								VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
+								() -> m_swerveDriveSubsystem.getState()));
         break;
       default: // Default should be in comp mode //
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
         m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem = new VisionSubsystem(
-          m_swerveDriveSubsystem::addVisionMeasurement,
-          new VisionIOPhotonVision(
-              APTAG_CAMERA_NAMES[0],
-              VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState()),
-          new VisionIOPhotonVision(
-              APTAG_CAMERA_NAMES[1],
-              VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-              () -> m_swerveDriveSubsystem.getState()));
+						m_swerveDriveSubsystem,
+						m_swerveDriveSubsystem::addVisionMeasurement,
+						new VisionIOPhotonVision(
+								APTAG_CAMERA_NAMES[0],
+								VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
+								() -> m_swerveDriveSubsystem.getState()),
+						new VisionIOPhotonVision(
+								APTAG_CAMERA_NAMES[1],
+								VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
+								() -> m_swerveDriveSubsystem.getState()));
         break;
     }
 
@@ -324,7 +328,7 @@ public class RobotContainer {
     m_driverController.pov(180).whileTrue(m_slowReverseCoralIntakeCommand);
 
     m_driverController.pov(90)
-        .onTrue(m_driveToPoseCommand);
+        .whileTrue(m_driveToPoseCommand);
 
     // m_driverController.pov(90)
     //     .whileTrue(m_elevatorManualUpCommand)
