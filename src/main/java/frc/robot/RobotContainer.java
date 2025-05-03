@@ -215,9 +215,9 @@ public class RobotContainer {
 
     // Instantiate Swerve Commands //
     m_defaultDriveCommand = m_superstructureSubsystem.DefaultDriveCommand(
-        () -> -m_driverController.getLeftY(),
-        () -> -m_driverController.getLeftX(),
-        () -> -m_driverController.getRightX(),
+        () -> -m_driverController.getLeftY() * 0.5,
+        () -> -m_driverController.getLeftX() * 0.5,
+        () -> -m_driverController.getRightX() * 0.5,
         () -> m_driverController.getHID().getXButton());
     // m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
     m_swerveBrakeCommand = m_superstructureSubsystem.SwerveBrake();

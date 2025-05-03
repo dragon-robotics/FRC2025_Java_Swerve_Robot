@@ -429,7 +429,7 @@ public final class Constants {
     public static final int LEAD_MOTOR_ID = 6;
     public static final int FOLLOW_MOTOR_ID = 5;
 
-    public static final double NOMINAL_VOLTAGE = 12.0;
+    public static final double NOMINAL_VOLTAGE = 10.0;
     public static final int FREE_CURRENT_LIMIT = 40;
     public static final int STALL_CURRENT_LIMIT = 60;
     public static final double SECONDARY_CURRENT_LIMIT = 80.0;
@@ -445,8 +445,8 @@ public final class Constants {
     public static final double D = 0.1;
     public static final double F = 0.0;
     public static final double IZ = 0.0;
-    public static final double MIN_OUTPUT = -1;
-    public static final double MAX_OUTPUT = 1;
+    public static final double MIN_OUTPUT = -0.5;
+    public static final double MAX_OUTPUT = 0.5;
 
     // MaxMotion Constants //
     public static final double MAX_MAXMOTION_VELOCITY = 4000;
