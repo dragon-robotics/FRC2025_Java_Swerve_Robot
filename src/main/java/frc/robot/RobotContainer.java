@@ -4,13 +4,21 @@
 
 package frc.robot;
 
-import static frc.robot.Constants.GeneralConstants.*;
-import static frc.robot.Constants.VisionConstants.APTAG_CAMERA_NAMES;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import static frc.robot.Constants.GeneralConstants.CURRENT_MODE;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.OperatorControlNameConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
+import static frc.robot.Constants.VisionConstants.APTAG_CAMERA_NAMES;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.algae.AlgaeIOSparkMax;
@@ -24,16 +32,6 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 import frc.robot.util.OperatorDashboard;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -217,7 +215,7 @@ public class RobotContainer {
     m_defaultDriveCommand = m_superstructureSubsystem.DefaultDriveCommand(
         () -> -m_driverController.getLeftY() * 0.5,
         () -> -m_driverController.getLeftX() * 0.5,
-        () -> -m_driverController.getRightX() * 0.5,
+        () -> -m_driverController.getRightX() * 0.8,
         () -> m_driverController.getHID().getXButton());
     // m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
     m_swerveBrakeCommand = m_superstructureSubsystem.SwerveBrake();
@@ -330,7 +328,10 @@ public class RobotContainer {
     // m_driverController.pov(90)
     //     .whileTrue(m_elevatorManualUpCommand)
     //     .onFalse(m_elevatorStopCommand); // Elevator Manual Up
-    // m_driverController.pov(270)
+    m_driverController.pov(270)
+            .whileTrue(m_intakeAlgaeCommand)
+            .onFalse(m_holdAlgaeCommand);
+
     //     .whileTrue(m_elevatorManualDownCommand)
     //     .onFalse(m_elevatorStopCommand); // Elevator Manual Down
     // m_driverController.pov(180)
