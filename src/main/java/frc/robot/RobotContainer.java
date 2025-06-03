@@ -19,6 +19,8 @@ import frc.robot.subsystems.coral.CoralIOSparkMax;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSparkMax;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.led.LedIORevBlinkin;
+import frc.robot.subsystems.led.LedSubsystem;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -49,6 +51,7 @@ public class RobotContainer {
   public final ElevatorSubsystem m_elevatorSubsystem;
   public final AlgaeSubsystem m_algaeSubsystem;
   public final VisionSubsystem m_visionSubsystem;
+  public final LedSubsystem m_ledSubsystem;
   public final Superstructure m_superstructureSubsystem;
 
   // Define Driver and Operator controllers //
@@ -131,6 +134,7 @@ public class RobotContainer {
                 APTAG_CAMERA_NAMES[1],
                 VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
                 () -> m_swerveDriveSubsystem.getState()));
+        m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
         break;
       case SIM:
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -166,6 +170,7 @@ public class RobotContainer {
             //     VisionConstants.APTAG_POSE_EST_CAM_BR_POS,
             //     () -> m_swerveDriveSubsystem.getState())
         );
+        m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
         break;
       case TEST:
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -182,6 +187,7 @@ public class RobotContainer {
 								APTAG_CAMERA_NAMES[1],
 								VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
 								() -> m_swerveDriveSubsystem.getState()));
+        m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());                                
         break;
       default: // Default should be in comp mode //
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -198,6 +204,7 @@ public class RobotContainer {
 								APTAG_CAMERA_NAMES[1],
 								VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
 								() -> m_swerveDriveSubsystem.getState()));
+        m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
         break;
     }
 
@@ -327,7 +334,7 @@ public class RobotContainer {
     
     m_driverController.pov(180).whileTrue(m_slowReverseCoralIntakeCommand);
 
-    m_driverController.pov(90)
+    m_driverController.pov(0)
         .whileTrue(m_driveToPoseCommand);
 
     // m_driverController.pov(90)

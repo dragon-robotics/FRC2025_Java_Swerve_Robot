@@ -9,6 +9,9 @@ import static frc.robot.Constants.VisionConstants.*;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import com.ctre.phoenix6.Utils;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,7 +22,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
@@ -221,7 +223,7 @@ public class VisionSubsystem extends SubsystemBase {
         // Send vision observation
         m_consumer.accept(
             observation.pose().toPose2d(),
-            observation.timestamp(),
+            Utils.fpgaToCurrentTime(observation.timestamp()),
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
       }
 

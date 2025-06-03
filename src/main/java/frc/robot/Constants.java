@@ -649,15 +649,15 @@ public final class Constants {
      * tuned later using absolute encoder)
      */
     public static final double ARM_HOME_GOAL = 0.24;
-    public static final double ARM_INTAKE_GOAL = 0.075;
+    public static final double ARM_INTAKE_GOAL = 0.01;
     public static final double ARM_DEALGAE_GOAL = 0.1;
     public static final double ARM_HOLD_GOAL = 0.13;
     public static final double ARM_PROCESSOR_OUTTAKE_GOAL = 0.13;
 
     /* Desired intake speed for intake and outtake */
-    public static final double INTAKE_SPEED = -1.0;
-    public static final double DEALGAE_SPEED = 0.8;
-    public static final double OUTTAKE_SPEED = 0.5;
+    public static final double INTAKE_SPEED = 1.0;
+    public static final double DEALGAE_SPEED = -0.8;
+    public static final double OUTTAKE_SPEED = -0.5;
   }
 
   /** Elevator Subsystem Constants */
@@ -665,7 +665,7 @@ public final class Constants {
     public static final int LEAD_MOTOR_ID = 6;
     public static final int FOLLOW_MOTOR_ID = 5;
 
-    public static final double NOMINAL_VOLTAGE = 12.0;
+    public static final double NOMINAL_VOLTAGE = 10.0;
     public static final int FREE_CURRENT_LIMIT = 40;
     public static final int STALL_CURRENT_LIMIT = 60;
     public static final double SECONDARY_CURRENT_LIMIT = 80.0;
@@ -676,7 +676,7 @@ public final class Constants {
 
     public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot1;
 
-    public static final double P = 0.4;
+    public static final double P = 0.5;
     public static final double I = 0.0;
     public static final double D = 0.1;
     public static final double F = 0.0;
