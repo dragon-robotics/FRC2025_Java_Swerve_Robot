@@ -19,8 +19,7 @@
   ],
   "autoFolders": [
     "LeaveAutos",
-    "MatchAutos",
-    "TestAutos"
+    "MatchAutos"
   ],
   "defaultMaxVel": 5.1,
   "defaultMaxAccel": 5.1,
