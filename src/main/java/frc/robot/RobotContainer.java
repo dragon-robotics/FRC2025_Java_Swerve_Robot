@@ -65,7 +65,8 @@ public class RobotContainer {
   // Swerve Commands //
   private Command m_defaultDriveCommand;
   // private Command m_aimAndAlignToReefApriltagCommand;
-  private Command m_driveToPoseCommand;
+  private Command m_driveToClosestReefPoseCommand;
+  private Command m_driveToClosestCoralStationPoseCommand;
   private Command m_swerveBrakeCommand;
   private Command m_seedFieldCentricCommand;
 
@@ -221,12 +222,13 @@ public class RobotContainer {
 
     // Instantiate Swerve Commands //
     m_defaultDriveCommand = m_superstructureSubsystem.DefaultDriveCommand(
-        () -> -m_driverController.getLeftY(),
+        () -> m_driverController.getLeftY(),
         () -> -m_driverController.getLeftX(),
         () -> -m_driverController.getRightX(),
-        () -> m_driverController.getHID().getXButton());
+        () -> m_driverController.getHID().getPOV() == 0);
     // m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
-    m_driveToPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand();
+    m_driveToClosestReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand();
+    m_driveToClosestCoralStationPoseCommand = m_superstructureSubsystem.DriveToClosestCoralStationPoseCommand();
     m_swerveBrakeCommand = m_superstructureSubsystem.SwerveBrake();
     m_seedFieldCentricCommand = m_superstructureSubsystem.SeedFieldCentric();
 
@@ -319,24 +321,34 @@ public class RobotContainer {
     m_algaeSubsystem.setDefaultCommand(m_algaeHomeCommand);
     // m_elevatorSubsystem.setDefaultCommand(m_elevatorHomeCommand);
 
-    // Use the "A" button to reset the Gyro orientation //
-    m_driverController.a().onTrue(m_seedFieldCentricCommand);
-
-    // Use the "B" button to x-lock the wheels //
-    m_driverController.b().whileTrue(m_swerveBrakeCommand);
+    // Use the "Back" button to reset the Gyro orientation //
+    m_driverController.back().onTrue(m_seedFieldCentricCommand);
+    // Use the "Start" button to x-lock the wheels //
+    m_driverController.start().onTrue(m_swerveBrakeCommand);
 
     // Press the left bumper to trigger coral intake //
     m_driverController.leftBumper()
+        .whileTrue(m_driveToClosestCoralStationPoseCommand)
         .onTrue(m_intakeCoralCommand);
 
+    // Pres the right bumper to score the coral //
     m_driverController.rightBumper()
         .whileTrue(m_scoreCoralCommand);
     
-    m_driverController.pov(180).whileTrue(m_slowReverseCoralIntakeCommand);
+    // Press the left trigger to intake algae //
+    m_driverController.leftTrigger(0.2)
+        .whileTrue(m_intakeAlgaeCommand)
+        .onFalse(m_holdAlgaeCommand);
+    
+    // Press the right trigger to score algae //
+    m_driverController.rightTrigger(0.2)
+        .onTrue(m_scoreAlgaeCommand);
 
-    m_driverController.pov(0)
-        .whileTrue(m_driveToPoseCommand);
+    m_driverController.pov(180)
+        .whileTrue(m_driveToClosestReefPoseCommand);
 
+    // m_driverController.pov(180).whileTrue(m_slowReverseCoralIntakeCommand);
+        
     // m_driverController.pov(90)
     //     .whileTrue(m_elevatorManualUpCommand)
     //     .onFalse(m_elevatorStopCommand); // Elevator Manual Up
