@@ -9,35 +9,9 @@
           "data": {
             "commands": [
               {
-                "type": "deadline",
+                "type": "path",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "S2-R09-Path"
-                      }
-                    },
-                    {
-                      "type": "sequential",
-                      "data": {
-                        "commands": [
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 0.5
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "ElevatorL2"
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  ]
+                  "pathName": "S2-R09-Path"
                 }
               },
               {
