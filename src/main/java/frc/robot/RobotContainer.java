@@ -223,7 +223,7 @@ public class RobotContainer {
 
     // Instantiate Swerve Commands //
     m_defaultDriveCommand = m_superstructureSubsystem.DefaultDriveCommand(
-        () -> m_driverController.getLeftY(),
+        () -> -m_driverController.getLeftY(),
         () -> -m_driverController.getLeftX(),
         () -> -m_driverController.getRightX(),
         () -> m_driverController.getHID().getPOV() == 0);
