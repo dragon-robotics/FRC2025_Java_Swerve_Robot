@@ -80,16 +80,10 @@ public final class Constants {
   }
 
   public static class FieldConstants {
-    public static class ReefStationConstants {
-      public static final double REEF_STATION_X = 0.0; // Meters
-      public static final double REEF_STATION_Y = 0.0; // Meters
-      public static final double REEF_STATION_Z = 0.0; // Meters
-    }
-
 
     // Robot heading constants for different field elements //
-    public static final Rotation2d LEFT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(-54.011);
-    public static final Rotation2d RIGHT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(54.011);
+    public static final Rotation2d LEFT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(-54.011392);
+    public static final Rotation2d RIGHT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(54.011392);
     public static final Rotation2d ALGAE_PROCESSOR_STATION_ANGLE = Rotation2d.fromDegrees(-90);
 
     // Blue Reef Station ID Angle Constant //
@@ -210,101 +204,107 @@ public final class Constants {
     public static class CoralStation {
       public static final Pose2d CORAL_STATION_LEFT_1_BLUE =
           new Pose2d(
-            1.65,
-            7.5,
-            Rotation2d.fromDegrees(-54.011392)
+              1.65,
+              7.5,
+              LEFT_CORAL_STATION_INTAKE_ANGLE
           )
           .transformBy(
               new Transform2d(
                   0.02,
                   Units.inchesToMeters(-6),
-                  Rotation2d.kZero)); // Fudge Factor
+                  Rotation2d.kZero));
       public static final Pose2d CORAL_STATION_LEFT_2_BLUE =
           new Pose2d(
-            1.65,
-            7.5,
-            Rotation2d.fromDegrees(-54.011392)
+              1.65,
+              7.5,
+              LEFT_CORAL_STATION_INTAKE_ANGLE
           )
           .transformBy(
               new Transform2d(
                   0.02,
                   Units.inchesToMeters(-6) + Units.inchesToMeters(-11.25),
-                  Rotation2d.kZero)); // Fudge Factor
+                  Rotation2d.kZero));
       public static final Pose2d CORAL_STATION_LEFT_3_BLUE =
           new Pose2d(
-            1.65,
-            7.5,
-            Rotation2d.fromDegrees(-54.011392)
+              1.65,
+              7.5,
+              LEFT_CORAL_STATION_INTAKE_ANGLE
           )
           .transformBy(
               new Transform2d(
                   0.02,
                   Units.inchesToMeters(-6) + (2 * Units.inchesToMeters(-11.25)),
-                  Rotation2d.kZero)); // Fudge Factor
+                  Rotation2d.kZero));
 
       public static final Pose2d CORAL_STATION_RIGHT_1_BLUE =
           new Pose2d(
-            1.65,
-            0.645,
-            Rotation2d.fromDegrees(54.011392)
+              1.65,
+              0.645,
+              RIGHT_CORAL_STATION_INTAKE_ANGLE
           )
           .transformBy(
               new Transform2d(
                   0.02,
                   Units.inchesToMeters(6),
-                  Rotation2d.kZero)); // Fudge Factor
+                  Rotation2d.kZero));
       public static final Pose2d CORAL_STATION_RIGHT_2_BLUE =
           new Pose2d(
-            1.65,
-            0.645,
-            Rotation2d.fromDegrees(54.011392)
+              1.65,
+              0.645,
+              RIGHT_CORAL_STATION_INTAKE_ANGLE
           )
           .transformBy(
               new Transform2d(
                   0.02,
                   Units.inchesToMeters(6) + Units.inchesToMeters(11.25),
-                  Rotation2d.kZero)); // Fudge Factor
+                  Rotation2d.kZero));
       public static final Pose2d CORAL_STATION_RIGHT_3_BLUE =
           new Pose2d(
-            1.65,
-            0.645,
-            Rotation2d.fromDegrees(54.011392)
+              1.65,
+              0.645,
+              RIGHT_CORAL_STATION_INTAKE_ANGLE
           )
           .transformBy(
               new Transform2d(
                   0.02,
                   Units.inchesToMeters(6) + (2 * Units.inchesToMeters(11.25)),
-                  Rotation2d.kZero)); // Fudge Factor
+                  Rotation2d.kZero));
 
-      public static final Pose2d CORAL_STATION_LEFT_1_RED = new Pose2d(
-          FIELD_LENGTH - CORAL_STATION_LEFT_1_BLUE.getX(),
-          FIELD_WIDTH - CORAL_STATION_LEFT_1_BLUE.getY(),
-          CORAL_STATION_LEFT_1_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+      public static final Pose2d CORAL_STATION_LEFT_1_RED =
+          new Pose2d(
+              FIELD_LENGTH - CORAL_STATION_LEFT_1_BLUE.getX(),
+              FIELD_WIDTH - CORAL_STATION_LEFT_1_BLUE.getY(),
+              CORAL_STATION_LEFT_1_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
 
-      public static final Pose2d CORAL_STATION_LEFT_2_RED = new Pose2d(
-          FIELD_LENGTH - CORAL_STATION_LEFT_2_BLUE.getX(),
-          FIELD_WIDTH - CORAL_STATION_LEFT_2_BLUE.getY(),
-          CORAL_STATION_LEFT_2_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+      public static final Pose2d CORAL_STATION_LEFT_2_RED =
+          new Pose2d(
+              FIELD_LENGTH - CORAL_STATION_LEFT_2_BLUE.getX(),
+              FIELD_WIDTH - CORAL_STATION_LEFT_2_BLUE.getY(),
+              CORAL_STATION_LEFT_2_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
 
-      public static final Pose2d CORAL_STATION_LEFT_3_RED = new Pose2d(
-          FIELD_LENGTH - CORAL_STATION_LEFT_3_BLUE.getX(),
-          FIELD_WIDTH - CORAL_STATION_LEFT_3_BLUE.getY(),
-          CORAL_STATION_LEFT_3_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+      public static final Pose2d CORAL_STATION_LEFT_3_RED =
+          new Pose2d(
+              FIELD_LENGTH - CORAL_STATION_LEFT_3_BLUE.getX(),
+              FIELD_WIDTH - CORAL_STATION_LEFT_3_BLUE.getY(),
+              CORAL_STATION_LEFT_3_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
 
-      public static final Pose2d CORAL_STATION_RIGHT_1_RED = new Pose2d(
-          FIELD_LENGTH - CORAL_STATION_RIGHT_1_BLUE.getX(),
-          FIELD_WIDTH - CORAL_STATION_RIGHT_1_BLUE.getY(),
-          CORAL_STATION_RIGHT_1_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+      public static final Pose2d CORAL_STATION_RIGHT_1_RED =
+          new Pose2d(
+              FIELD_LENGTH - CORAL_STATION_RIGHT_1_BLUE.getX(),
+              FIELD_WIDTH - CORAL_STATION_RIGHT_1_BLUE.getY(),
+              CORAL_STATION_RIGHT_1_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
 
-      public static final Pose2d CORAL_STATION_RIGHT_2_RED = new Pose2d(
-          FIELD_LENGTH - CORAL_STATION_RIGHT_2_BLUE.getX(),
-          FIELD_WIDTH - CORAL_STATION_RIGHT_2_BLUE.getY(),
-          CORAL_STATION_RIGHT_2_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+      public static final Pose2d CORAL_STATION_RIGHT_2_RED =
+          new Pose2d(
+              FIELD_LENGTH - CORAL_STATION_RIGHT_2_BLUE.getX(),
+              FIELD_WIDTH - CORAL_STATION_RIGHT_2_BLUE.getY(),
+              CORAL_STATION_RIGHT_2_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
 
-      public static final Pose2d CORAL_STATION_RIGHT_3_RED = new Pose2d(
-          FIELD_LENGTH - CORAL_STATION_RIGHT_3_BLUE.getX(),
-          FIELD_WIDTH - CORAL_STATION_RIGHT_3_BLUE.getY(),
-          CORAL_STATION_RIGHT_3_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+      public static final Pose2d CORAL_STATION_RIGHT_3_RED =
+          new Pose2d(
+              FIELD_LENGTH - CORAL_STATION_RIGHT_3_BLUE.getX(),
+              FIELD_WIDTH - CORAL_STATION_RIGHT_3_BLUE.getY(),
+              CORAL_STATION_RIGHT_3_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
 
       // Blue Coral Station 2D Poses //
       public static final List<Pose2d> BLUE_CORAL_STATION_POSES = new ArrayList<>(List.of(
@@ -325,204 +325,191 @@ public final class Constants {
         CORAL_STATION_RIGHT_2_RED,
         CORAL_STATION_RIGHT_3_RED
       ));
-
     }
 
     public static class Reef {
 
       public static final Pose2d REEF_A_BLUE =
-          new Pose2d(3.1886031999999997, 4.1902126, Rotation2d.fromDegrees(0))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor
-      public static final Pose2d REEF_A_PREPOINT_BLUE =
-          new Pose2d(3.1886031999999997, 4.1902126, Rotation2d.fromDegrees(0))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              3.1886031999999997,
+              4.1902126,
+              Rotation2d.fromDegrees(0))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_B_BLUE =
-          new Pose2d(3.1886031999999997, 3.8615874000000003, Rotation2d.fromDegrees(0))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor;
-      public static final Pose2d REEF_B_PREPOINT_BLUE = 
-          new Pose2d(3.1886031999999997, 3.8615874000000003, Rotation2d.fromDegrees(0))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              3.1886031999999997,
+              3.8615874000000003,
+              Rotation2d.fromDegrees(0))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_C_BLUE =
-          new Pose2d(3.6966769142381293, 2.9815779129493296, Rotation2d.fromDegrees(60))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor;
-      public static final Pose2d REEF_C_PREPOINT_BLUE = 
-          new Pose2d(3.6966769142381293, 2.9815779129493296, Rotation2d.fromDegrees(60))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              3.6966769142381293,
+              2.9815779129493296,
+              Rotation2d.fromDegrees(60))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_D_BLUE =
-          new Pose2d(3.9812746857618713, 2.81726531294933, Rotation2d.fromDegrees(60))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor
-      public static final Pose2d REEF_D_PREPOINT_BLUE = 
-          new Pose2d(3.9812746857618713, 2.81726531294933, Rotation2d.fromDegrees(60))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              3.9812746857618713,
+              2.81726531294933,
+              Rotation2d.fromDegrees(60))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_E_BLUE =
-          new Pose2d(4.9974221142381285, 2.81726531294933, Rotation2d.fromDegrees(120))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor;
-      public static final Pose2d REEF_E_PREPOINT_BLUE = 
-          new Pose2d(4.9974221142381285, 2.81726531294933, Rotation2d.fromDegrees(120))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              4.9974221142381285,
+              2.81726531294933,
+              Rotation2d.fromDegrees(120))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_F_BLUE =
-          new Pose2d(5.282019885761871, 2.9815779129493296, Rotation2d.fromDegrees(120))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor;
-      public static final Pose2d REEF_F_PREPOINT_BLUE =
-          new Pose2d(5.282019885761871, 2.9815779129493296, Rotation2d.fromDegrees(120))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              5.282019885761871,
+              2.9815779129493296,
+              Rotation2d.fromDegrees(120))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_G_BLUE =
-          new Pose2d(5.7900936000000005, 3.8615874, Rotation2d.fromDegrees(360 - 180))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor;
-      public static final Pose2d REEF_G_PREPOINT_BLUE = 
-          new Pose2d(5.7900936000000005, 3.8615874, Rotation2d.fromDegrees(360 - 180))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              5.7900936000000005,
+              3.8615874,
+              Rotation2d.fromDegrees(360 - 180))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_H_BLUE =
-          new Pose2d(5.7900936000000005, 4.1902126, Rotation2d.fromDegrees(360 - 180))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor;
-      public static final Pose2d REEF_H_PREPOINT_BLUE =
-          new Pose2d(5.7900936000000005, 4.1902126, Rotation2d.fromDegrees(360 - 180))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              5.7900936000000005,
+              4.1902126,
+              Rotation2d.fromDegrees(360 - 180))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_I_BLUE =
-          new Pose2d(5.282019885761871, 5.070222087050671, Rotation2d.fromDegrees(360 - 120))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor;
-      public static final Pose2d REEF_I_PREPOINT_BLUE = 
-          new Pose2d(5.282019885761871, 5.070222087050671, Rotation2d.fromDegrees(360 - 120))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              5.282019885761871,
+              5.070222087050671,
+              Rotation2d.fromDegrees(360 - 120))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_J_BLUE =
-          new Pose2d(4.9974221142381285, 5.234534687050671, Rotation2d.fromDegrees(360 - 120))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor;
-      public static final Pose2d REEF_J_PREPOINT_BLUE = 
-          new Pose2d(4.9974221142381285, 5.234534687050671, Rotation2d.fromDegrees(360 - 120))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              4.9974221142381285,
+              5.234534687050671,
+              Rotation2d.fromDegrees(360 - 120))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_K_BLUE =
-          new Pose2d(3.9812746857618713, 5.234534687050671, Rotation2d.fromDegrees(360 - 60))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor;
-      public static final Pose2d REEF_K_PREPOINT_BLUE = 
-          new Pose2d(3.9812746857618713, 5.234534687050671, Rotation2d.fromDegrees(360 - 60))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              3.9812746857618713,
+              5.234534687050671,
+              Rotation2d.fromDegrees(360 - 60))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_L_BLUE =
-          new Pose2d(3.6966769142381293, 5.070222087050671, Rotation2d.fromDegrees(360 - 60))
-          .transformBy(new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Fudge Factor;
-      public static final Pose2d REEF_L_PREPOINT_BLUE = 
-          new Pose2d(3.6966769142381293, 5.070222087050671, Rotation2d.fromDegrees(360 - 60))
-          .transformBy(new Transform2d(-0.5, 0.0, Rotation2d.kZero)); // Prepoint before final alignment
+          new Pose2d(
+              3.6966769142381293,
+              5.070222087050671,
+              Rotation2d.fromDegrees(360 - 60))
+          .transformBy(
+              new Transform2d(
+                  -0.02,
+                  0.0,
+                  Rotation2d.kZero)); // Adjust for bumper width
 
 
       public static final Pose2d REEF_A_RED = new Pose2d(
           FIELD_LENGTH - REEF_A_BLUE.getX(),
           FIELD_WIDTH - REEF_A_BLUE.getY(),
-          REEF_A_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
-
-      public static final Pose2d REEF_A_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_A_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_A_PREPOINT_BLUE.getY(),
-          REEF_A_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
+          REEF_A_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
       public static final Pose2d REEF_B_RED = new Pose2d(
           FIELD_LENGTH - REEF_B_BLUE.getX(),
           FIELD_WIDTH - REEF_B_BLUE.getY(),
-          REEF_B_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
-
-      public static final Pose2d REEF_B_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_B_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_B_PREPOINT_BLUE.getY(),
-          REEF_B_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
+          REEF_B_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
       public static final Pose2d REEF_C_RED = new Pose2d(
           FIELD_LENGTH - REEF_C_BLUE.getX(),
           FIELD_WIDTH - REEF_C_BLUE.getY(),
-          REEF_C_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+          REEF_C_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_C_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_C_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_C_PREPOINT_BLUE.getY(),
-          REEF_C_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
-            
       public static final Pose2d REEF_D_RED = new Pose2d(
           FIELD_LENGTH - REEF_D_BLUE.getX(),
           FIELD_WIDTH - REEF_D_BLUE.getY(),
-          REEF_D_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
-
-      public static final Pose2d REEF_D_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_D_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_D_PREPOINT_BLUE.getY(),
-          REEF_D_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
+          REEF_D_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
       public static final Pose2d REEF_E_RED = new Pose2d(
           FIELD_LENGTH - REEF_E_BLUE.getX(),
           FIELD_WIDTH - REEF_E_BLUE.getY(),
-          REEF_E_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
-
-      public static final Pose2d REEF_E_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_E_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_E_PREPOINT_BLUE.getY(),
-          REEF_E_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
+          REEF_E_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
       public static final Pose2d REEF_F_RED = new Pose2d(
           FIELD_LENGTH - REEF_F_BLUE.getX(),
           FIELD_WIDTH - REEF_F_BLUE.getY(),
-          REEF_F_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
-
-      public static final Pose2d REEF_F_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_F_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_F_PREPOINT_BLUE.getY(),
-          REEF_F_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
+          REEF_F_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
       public static final Pose2d REEF_G_RED = new Pose2d(
           FIELD_LENGTH - REEF_G_BLUE.getX(),
           FIELD_WIDTH - REEF_G_BLUE.getY(),
-          REEF_G_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
-
-      public static final Pose2d REEF_G_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_G_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_G_PREPOINT_BLUE.getY(),
-          REEF_G_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
+          REEF_G_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
       public static final Pose2d REEF_H_RED = new Pose2d(
           FIELD_LENGTH - REEF_H_BLUE.getX(),
           FIELD_WIDTH - REEF_H_BLUE.getY(),
-          REEF_H_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+          REEF_H_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_H_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_H_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_H_PREPOINT_BLUE.getY(),
-          REEF_H_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
-                
       public static final Pose2d REEF_I_RED = new Pose2d(
           FIELD_LENGTH - REEF_I_BLUE.getX(),
           FIELD_WIDTH - REEF_I_BLUE.getY(),
-          REEF_I_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
+          REEF_I_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_I_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_I_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_I_PREPOINT_BLUE.getY(),
-          REEF_I_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
-  
       public static final Pose2d REEF_J_RED = new Pose2d(
           FIELD_LENGTH - REEF_J_BLUE.getX(),
           FIELD_WIDTH - REEF_J_BLUE.getY(),
-          REEF_J_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
-
-      public static final Pose2d REEF_J_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_J_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_J_PREPOINT_BLUE.getY(),
-          REEF_J_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
+          REEF_J_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
       public static final Pose2d REEF_K_RED = new Pose2d(
           FIELD_LENGTH - REEF_K_BLUE.getX(),
           FIELD_WIDTH - REEF_K_BLUE.getY(),
-          REEF_K_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
-
-      public static final Pose2d REEF_K_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_K_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_K_PREPOINT_BLUE.getY(),
-          REEF_K_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
+          REEF_K_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
       public static final Pose2d REEF_L_RED = new Pose2d(
           FIELD_LENGTH - REEF_L_BLUE.getX(),
           FIELD_WIDTH - REEF_L_BLUE.getY(),
-          REEF_L_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
-
-      public static final Pose2d REEF_L_PREPOINT_RED = new Pose2d(
-          FIELD_LENGTH - REEF_L_PREPOINT_BLUE.getX(),
-          FIELD_WIDTH - REEF_L_PREPOINT_BLUE.getY(),
-          REEF_L_PREPOINT_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Prepoint before final alignment
+          REEF_L_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
       // Blue Reef Station 2D Poses //
       public static final List<Pose2d> BLUE_REEF_STATION_POSES = new ArrayList<>(List.of(
@@ -540,22 +527,6 @@ public final class Constants {
         REEF_L_BLUE
       ));
 
-      // Red Reef Station Prepoint 2D Poses //
-      public static final List<Pose2d> BLUE_REEF_STATION_PREPOINT_POSES = new ArrayList<>(List.of(
-        REEF_A_PREPOINT_BLUE,
-        REEF_B_PREPOINT_BLUE,
-        REEF_C_PREPOINT_BLUE,
-        REEF_D_PREPOINT_BLUE,
-        REEF_E_PREPOINT_BLUE,
-        REEF_F_PREPOINT_BLUE,
-        REEF_G_PREPOINT_BLUE,
-        REEF_H_PREPOINT_BLUE,
-        REEF_I_PREPOINT_BLUE,
-        REEF_J_PREPOINT_BLUE,
-        REEF_K_PREPOINT_BLUE,
-        REEF_L_PREPOINT_BLUE
-      ));      
-
       // Red Reef Station 2D Poses //
       public static final List<Pose2d> RED_REEF_STATION_POSES = new ArrayList<>(List.of(
         REEF_A_RED,
@@ -569,23 +540,7 @@ public final class Constants {
         REEF_I_RED,
         REEF_J_RED,
         REEF_K_RED,
-        REEF_L_RED            
-      ));
-
-      // Red Reef Station Prepoint 2D Poses //
-      public static final List<Pose2d> RED_REEF_STATION_PREPOINT_POSES = new ArrayList<>(List.of(
-        REEF_A_PREPOINT_RED,
-        REEF_B_PREPOINT_RED,
-        REEF_C_PREPOINT_RED,
-        REEF_D_PREPOINT_RED,
-        REEF_E_PREPOINT_RED,
-        REEF_F_PREPOINT_RED,
-        REEF_G_PREPOINT_RED,
-        REEF_H_PREPOINT_RED,
-        REEF_I_PREPOINT_RED,
-        REEF_J_PREPOINT_RED,
-        REEF_K_PREPOINT_RED,
-        REEF_L_PREPOINT_RED
+        REEF_L_RED
       ));
     }
   }
@@ -744,7 +699,7 @@ public final class Constants {
 
         // Calculate VFOV in radians and then convert to degrees
         return Math.toDegrees(vFOV_half_rad * 2.0);
-    }    
+    }
 
     // Standard deviation multipliers for each camera
     // (Adjust to trust some cameras more than others)
