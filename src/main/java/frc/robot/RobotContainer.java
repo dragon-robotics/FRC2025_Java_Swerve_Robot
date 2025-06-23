@@ -347,6 +347,15 @@ public class RobotContainer {
     m_driverController.pov(180)
         .whileTrue(m_driveToClosestReefPoseCommand);
 
+    // pov 90 = toggle left or right branch
+
+    // pov 270 = auto-align to nearest coral station
+
+    // A = L1, toggle = Home / L1
+    // X = L2, toggle = Home / L2
+    // B = L3, toggle = Home / L3
+    // Y = L4, toggle = Home / L4
+
     // m_driverController.pov(180).whileTrue(m_slowReverseCoralIntakeCommand);
         
     // m_driverController.pov(90)
@@ -357,14 +366,6 @@ public class RobotContainer {
     //     .onFalse(m_elevatorStopCommand); // Elevator Manual Down
     // m_driverController.pov(180)
     //     .onTrue(m_elevatorSeedCommand); // Elevator Rezero
-
-    // Operator button box controls //
-    // // Set to intake left or right
-    // m_operatorButtonBoxController.button(5)
-    //     .onTrue(m_intakeFromLeftCoralStationCommand);
-
-    // m_operatorButtonBoxController.button(6)
-    //     .onTrue(m_intakeFromRightCoralStationCommand);
 
     // Elevator Triggers //
     m_operatorButtonBoxController
