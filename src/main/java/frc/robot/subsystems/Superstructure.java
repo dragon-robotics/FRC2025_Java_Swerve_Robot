@@ -316,11 +316,90 @@ public class Superstructure extends SubsystemBase {
     }, m_swerve);
   }
 
+  // public Command DriveToClosestReefPoseCommand() {
+  //   // Define Path-Finding PathConstraints (adjust values as needed)
+  //   PathConstraints pathFindingConstraints = new PathConstraints(
+  //       3.0,                  // Max velocity (m/s)
+  //       3.5,            // Max acceleration (m/s^2)
+  //       Units.degreesToRadians(540), // Max angular velocity (rad/s)
+  //       Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
+  //   );
+
+  //   // Define Path-Following PathConstraints (adjust values as needed)
+  //   PathConstraints pathFollowingConstraints = new PathConstraints(
+  //       1.0,                  // Max velocity (m/s)
+  //       3.5,            // Max acceleration (m/s^2)
+  //       Units.degreesToRadians(540), // Max angular velocity (rad/s)
+  //       Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
+  //   );
+
+  //   return new DeferredCommand(() -> {
+  //     // Grab the robot's current alliance
+  //     Optional<Alliance> alliance = DriverStation.getAlliance();
+
+  //     // Grab the robot's current pose
+  //     Pose2d currentPose = m_swerve.getState().Pose;
+
+  //     List<Pose2d> targetPoses =
+  //         alliance.isPresent() && alliance.get() == Alliance.Red ?
+  //             FieldConstants.Reef.RED_REEF_STATION_POSES :
+  //             FieldConstants.Reef.BLUE_REEF_STATION_POSES;
+
+  //     // Calculate the pose closest to the current pose
+  //     Pose2d closestPose = null;
+  //     double minDistanceSq = Double.MAX_VALUE; // Use squared distance to avoid sqrt
+  
+  //     // Iterate through the list of target poses
+  //     for (Pose2d targetPose : targetPoses) {
+  //         Transform2d translationDelta = targetPose.minus(currentPose);
+
+  //         // Calculate the squared distance between the translations
+  //         double distanceSq = translationDelta.getTranslation().getNorm();
+
+  //         // If this pose is closer than the current minimum, update
+  //         if (distanceSq < minDistanceSq) {
+  //             minDistanceSq = distanceSq;
+  //             closestPose = targetPose;
+  //         }
+  //     }
+
+  //     // Create waypoint list
+  //     List<Pose2d> waypoints = new ArrayList<>();
+      
+  //     // Add intermediate waypoint (1 meter back from target)
+  //     Transform2d backwardOffset = new Transform2d(-0.375, 0.0, Rotation2d.kZero);
+  //     waypoints.add(closestPose.transformBy(backwardOffset));
+      
+  //     // Add final destination
+  //     waypoints.add(closestPose);
+
+  //     List<Waypoint> waypointList = PathPlannerPath.waypointsFromPoses(waypoints);
+      
+  //     // Create PathPlannerPath from waypoints
+  //     PathPlannerPath path = new PathPlannerPath(
+  //         waypointList,
+  //         pathFollowingConstraints,
+  //         null,
+  //         new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
+  //     );
+
+  //     // Use pathfindThenFollowPath with different constraints
+  //     return AutoBuilder.pathfindToPose(
+  //               waypoints.get(0),
+  //               pathFindingConstraints,
+  //               1)
+  //           .andThen(AutoBuilder.followPath(path));
+
+  //     // return AutoBuilder.pathfindToPose(closestPose, constraints);
+  //   }, Set.of(m_swerve))
+  //   .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
+  // }
+
   public Command DriveToClosestReefPoseCommand() {
     // Define Path-Finding PathConstraints (adjust values as needed)
     PathConstraints pathFindingConstraints = new PathConstraints(
         3.0,                  // Max velocity (m/s)
-        3.5,            // Max acceleration (m/s^2)
+        5,            // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
@@ -328,7 +407,7 @@ public class Superstructure extends SubsystemBase {
     // Define Path-Following PathConstraints (adjust values as needed)
     PathConstraints pathFollowingConstraints = new PathConstraints(
         1.0,                  // Max velocity (m/s)
-        3.5,            // Max acceleration (m/s^2)
+        5,            // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
@@ -363,37 +442,18 @@ public class Superstructure extends SubsystemBase {
           }
       }
 
-      // Create waypoint list
-      List<Pose2d> waypoints = new ArrayList<>();
-      
-      // Add intermediate waypoint (1 meter back from target)
-      Transform2d backwardOffset = new Transform2d(-0.375, 0.0, Rotation2d.kZero);
-      waypoints.add(closestPose.transformBy(backwardOffset));
-      
-      // Add final destination
-      waypoints.add(closestPose);
+      // Calculate intermediate waypoint (1 meter back from target)
+      Transform2d backwardOffset = new Transform2d(-0.5, 0.0, Rotation2d.kZero);
+      Pose2d intermediatePose = closestPose.transformBy(backwardOffset);
 
-      List<Waypoint> waypointList = PathPlannerPath.waypointsFromPoses(waypoints);
-      
-      // Create PathPlannerPath from waypoints
-      PathPlannerPath path = new PathPlannerPath(
-          waypointList,
-          pathFollowingConstraints,
-          null,
-          new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
-      );
-
-      // Use pathfindThenFollowPath with different constraints
-      return AutoBuilder.pathfindToPose(
-                waypoints.get(0),
-                pathFindingConstraints,
-                1)
-            .andThen(AutoBuilder.followPath(path));
+      // Chain two pathfinding commands: waypoint -> final destination
+      return AutoBuilder.pathfindToPose(intermediatePose, pathFindingConstraints, 1)
+          .andThen(AutoBuilder.pathfindToPose(closestPose, pathFollowingConstraints));
 
       // return AutoBuilder.pathfindToPose(closestPose, constraints);
     }, Set.of(m_swerve))
     .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
-  }
+  }  
 
   public Command DriveToClosestCoralStationPoseCommand() {
     // Define Path-Finding PathConstraints (adjust values as needed)

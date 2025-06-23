@@ -8,7 +8,6 @@
     "LC3",
     "LC4",
     "LeavePath",
-    "Tests",
     "S1",
     "S2",
     "S3",
@@ -19,8 +18,7 @@
   ],
   "autoFolders": [
     "LeaveAutos",
-    "MatchAutos",
-    "TestAutos"
+    "MatchAutos"
   ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 3.0,
