@@ -67,6 +67,7 @@ public class RobotContainer {
   // private Command m_aimAndAlignToReefApriltagCommand;
   private Command m_driveToClosestReefPoseCommand;
   private Command m_driveToClosestCoralStationPoseCommand;
+  private Command m_toggleReefBranchCommand;
   private Command m_swerveBrakeCommand;
   private Command m_seedFieldCentricCommand;
 
@@ -229,6 +230,7 @@ public class RobotContainer {
     // m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
     m_driveToClosestReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand();
     m_driveToClosestCoralStationPoseCommand = m_superstructureSubsystem.DriveToClosestCoralStationPoseCommand();
+    m_toggleReefBranchCommand = m_superstructureSubsystem.ToggleReefBranchCommand();
     m_swerveBrakeCommand = m_superstructureSubsystem.SwerveBrake();
     m_seedFieldCentricCommand = m_superstructureSubsystem.SeedFieldCentric();
 
@@ -328,7 +330,6 @@ public class RobotContainer {
 
     // Press the left bumper to trigger coral intake //
     m_driverController.leftBumper()
-        .whileTrue(m_driveToClosestCoralStationPoseCommand)
         .onTrue(m_intakeCoralCommand);
 
     // Pres the right bumper to score the coral //
@@ -348,8 +349,12 @@ public class RobotContainer {
         .whileTrue(m_driveToClosestReefPoseCommand);
 
     // pov 90 = toggle left or right branch
+    m_driverController.pov(90)
+        .whileTrue(m_toggleReefBranchCommand);
 
     // pov 270 = auto-align to nearest coral station
+    m_driverController.pov(270)
+        .whileTrue(m_driveToClosestCoralStationPoseCommand);
 
     // A = L1, toggle = Home / L1
     // X = L2, toggle = Home / L2
