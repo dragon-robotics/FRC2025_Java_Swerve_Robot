@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "S4R-R12-Path"
+            "pathName": "S4-R11-Path"
           }
         },
         {
@@ -17,7 +17,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 1.0
+                  "waitTime": 1.2
                 }
               },
               {
