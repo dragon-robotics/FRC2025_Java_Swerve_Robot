@@ -365,9 +365,21 @@ public class RobotContainer {
         .onTrue(m_elevatorHomeCommand);
 
     // A = L1, toggle = Home / L1
+    m_driverController.a()
+        .toggleOnTrue(m_elevatorL1Command)
+        .toggleOnFalse(m_elevatorHomeCommand);
     // X = L2, toggle = Home / L2
+    m_driverController.x()
+        .toggleOnTrue(m_elevatorL2Command)
+        .toggleOnFalse(m_elevatorHomeCommand);
     // B = L3, toggle = Home / L3
+    m_driverController.b()
+        .toggleOnTrue(m_elevatorL3Command)
+        .toggleOnFalse(m_elevatorHomeCommand);
     // Y = L4, toggle = Home / L4
+    m_driverController.y()
+        .toggleOnTrue(m_elevatorL4Command)
+        .toggleOnFalse(m_elevatorHomeCommand);
 
     // m_driverController.pov(180).whileTrue(m_slowReverseCoralIntakeCommand);
         
