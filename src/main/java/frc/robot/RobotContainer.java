@@ -359,6 +359,11 @@ public class RobotContainer {
     // Right stick button = Dealgae
     m_driverController.rightStick()
         .whileTrue(m_deAlgaeCommand);
+
+    // Left stick button = Elevator Home
+    m_driverController.leftStick()
+        .onTrue(m_elevatorHomeCommand);
+
     // A = L1, toggle = Home / L1
     // X = L2, toggle = Home / L2
     // B = L3, toggle = Home / L3
