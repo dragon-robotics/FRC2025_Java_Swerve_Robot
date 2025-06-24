@@ -327,7 +327,7 @@ public class Superstructure extends SubsystemBase {
 
     // Define Path-Following PathConstraints (adjust values as needed)
     PathConstraints pathFollowingConstraints = new PathConstraints(
-        1.0,                  // Max velocity (m/s)
+        1.5,                  // Max velocity (m/s)
         4,            // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
@@ -367,7 +367,7 @@ public class Superstructure extends SubsystemBase {
       List<Pose2d> waypoints = new ArrayList<>();
       
       // Add intermediate waypoint (1 meter back from target)
-      Transform2d backwardOffset = new Transform2d(-0.375, 0.0, Rotation2d.kZero);
+      Transform2d backwardOffset = new Transform2d(-0.5, 0.0, Rotation2d.kZero);
       waypoints.add(closestPose.transformBy(backwardOffset));
       
       // Add final destination
@@ -387,7 +387,7 @@ public class Superstructure extends SubsystemBase {
       return AutoBuilder.pathfindToPose(
                 waypoints.get(0),
                 pathFindingConstraints,
-                1)
+                1.5)
             .andThen(AutoBuilder.followPath(path));
 
     }, Set.of(m_swerve))
@@ -395,13 +395,6 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command ToggleReefBranchCommand() {
-    // Define PathConstraints
-    PathConstraints constraints = new PathConstraints(
-        1.0,                  // Max velocity (m/s)
-        2.0,            // Max acceleration (m/s^2)
-        Units.degreesToRadians(540), // Max angular velocity (rad/s)
-        Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
-    );
   
     return new DeferredCommand(() -> {
       // Grab the robot's current alliance
@@ -463,15 +456,15 @@ public class Superstructure extends SubsystemBase {
     // Define Path-Finding PathConstraints (adjust values as needed)
     PathConstraints pathFindingConstraints = new PathConstraints(
         3.0,                  // Max velocity (m/s)
-        3.5,            // Max acceleration (m/s^2)
+        4,            // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
 
     // Define Path-Following PathConstraints (adjust values as needed)
     PathConstraints pathFollowingConstraints = new PathConstraints(
-        1.0,                  // Max velocity (m/s)
-        3.5,            // Max acceleration (m/s^2)
+        1.5,                  // Max velocity (m/s)
+        4,            // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
@@ -510,7 +503,7 @@ public class Superstructure extends SubsystemBase {
       List<Pose2d> waypoints = new ArrayList<>();
       
       // Add intermediate waypoint (1 meter back from target)
-      Transform2d backwardOffset = new Transform2d(0.375, 0.0, Rotation2d.kZero);
+      Transform2d backwardOffset = new Transform2d(0.5, 0.0, Rotation2d.kZero);
       waypoints.add(closestPose.transformBy(backwardOffset));
       
       // Add final destination
