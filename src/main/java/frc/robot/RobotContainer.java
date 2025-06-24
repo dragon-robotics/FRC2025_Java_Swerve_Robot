@@ -356,6 +356,9 @@ public class RobotContainer {
     m_driverController.pov(270)
         .whileTrue(m_driveToClosestCoralStationPoseCommand);
 
+    // Right stick button = Dealgae
+    m_driverController.rightStick()
+        .whileTrue(m_deAlgaeCommand);
     // A = L1, toggle = Home / L1
     // X = L2, toggle = Home / L2
     // B = L3, toggle = Home / L3
