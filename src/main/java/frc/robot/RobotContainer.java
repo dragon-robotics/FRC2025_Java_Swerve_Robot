@@ -346,11 +346,11 @@ public class RobotContainer {
         .onTrue(m_scoreAlgaeCommand);
 
     m_driverController.pov(180)
-        .whileTrue(m_driveToClosestReefPoseCommand);
+        .whileTrue(m_toggleReefBranchCommand);
 
     // pov 90 = toggle left or right branch
     m_driverController.pov(90)
-        .whileTrue(m_toggleReefBranchCommand);
+        .whileTrue(m_driveToClosestReefPoseCommand);
 
     // pov 270 = auto-align to nearest coral station
     m_driverController.pov(270)
