@@ -367,7 +367,7 @@ public class Superstructure extends SubsystemBase {
       List<Pose2d> waypoints = new ArrayList<>();
       
       // Add intermediate waypoint (1 meter back from target)
-      Transform2d backwardOffset = new Transform2d(-0.5, 0.0, Rotation2d.kZero);
+      Transform2d backwardOffset = new Transform2d(-0.75, 0.0, Rotation2d.kZero);
       waypoints.add(closestPose.transformBy(backwardOffset));
       
       // Add final destination
@@ -387,7 +387,7 @@ public class Superstructure extends SubsystemBase {
       return AutoBuilder.pathfindToPose(
                 waypoints.get(0),
                 pathFindingConstraints,
-                1.5)
+                0.5)
             .andThen(AutoBuilder.followPath(path));
 
     }, Set.of(m_swerve))
@@ -416,7 +416,9 @@ public class Superstructure extends SubsystemBase {
       List<Pose2d> filteredPoses = new ArrayList<>();
       for (Pose2d targetPose : targetPoses) {
         // Check if the heading of the target pose is close to the current heading
-        if (Math.abs(targetPose.getRotation().getRadians() - currentHeading.getRadians()) < Math.toRadians(5)) {
+        Rotation2d angleDifference = targetPose.getRotation().minus(currentHeading);
+        double angleDifferenceDegrees = angleDifference.getDegrees();
+        if (Math.abs(angleDifferenceDegrees) < 5) {
           filteredPoses.add(targetPose);
         }
       }
@@ -523,7 +525,7 @@ public class Superstructure extends SubsystemBase {
       return AutoBuilder.pathfindToPose(
                 waypoints.get(0),
                 pathFindingConstraints,
-                1)
+                0.5)
             .andThen(AutoBuilder.followPath(path));
 
     }, Set.of(m_swerve))
