@@ -320,15 +320,15 @@ public class Superstructure extends SubsystemBase {
     // Define Path-Finding PathConstraints (adjust values as needed)
     PathConstraints pathFindingConstraints = new PathConstraints(
         3.0,                  // Max velocity (m/s)
-        4,            // Max acceleration (m/s^2)
+        4,              // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
 
     // Define Path-Following PathConstraints (adjust values as needed)
     PathConstraints pathFollowingConstraints = new PathConstraints(
-        1.5,                  // Max velocity (m/s)
-        4,            // Max acceleration (m/s^2)
+        1.0,                  // Max velocity (m/s)
+        4,              // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
