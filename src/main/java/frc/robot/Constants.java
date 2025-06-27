@@ -706,10 +706,10 @@ public final class Constants {
     public static double[] CAMERA_STDDEV_FACTORS = new double[] {
         1.0, // APTAG_LEFT_CAM
         1.0, // APTAG_RIGHT_CAM
-        1.0, // APTAG_POSE_EST_CAM_FL_POS
-        1.0, // APTAG_POSE_EST_CAM_FR_POS
-        1.0, // APTAG_POSE_EST_CAM_BL_POS
-        1.0 // APTAG_POSE_EST_CAM_BR_POS
+        // 1.0, // APTAG_POSE_EST_CAM_FL_POS
+        // 1.0, // APTAG_POSE_EST_CAM_FR_POS
+        // 1.0, // APTAG_POSE_EST_CAM_BL_POS
+        // 1.0 // APTAG_POSE_EST_CAM_BR_POS
     };
 
     // Multipliers to apply for MegaTag 2 observations
