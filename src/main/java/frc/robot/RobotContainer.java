@@ -33,6 +33,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -367,24 +368,55 @@ public class RobotContainer {
 
     // Left stick button = Elevator Home
     m_driverController.leftStick()
-        .onTrue(m_slowReverseCoralIntakeCommand);
+        .whileTrue(m_slowReverseCoralIntakeCommand);
 
-    // // A = L1, toggle = Home / L1
-    // m_driverController.a()
-    //     .toggleOnTrue(m_elevatorL1Command)
-    //     .toggleOnFalse(m_elevatorHomeCommand);
-    // // X = L2, toggle = Home / L2
-    // m_driverController.x()
-    //     .toggleOnTrue(m_elevatorL2Command)
-    //     .toggleOnFalse(m_elevatorHomeCommand);
-    // // B = L3, toggle = Home / L3
-    // m_driverController.b()
-    //     .toggleOnTrue(m_elevatorL3Command)
-    //     .toggleOnFalse(m_elevatorHomeCommand);
-    // // Y = L4, toggle = Home / L4
-    // m_driverController.y()
-    //     .toggleOnTrue(m_elevatorL4Command)
-    //     .toggleOnFalse(m_elevatorHomeCommand);
+    // A = L1, toggle = Home / L1
+    m_driverController.a().toggleOnTrue(
+        Commands.either(
+            // If currently at L1, go to home
+            m_elevatorHomeCommand,
+            // If not at L1, go to L1
+            m_elevatorL1Command,
+            // Condition: check if elevator is currently at L1
+            () -> m_elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L1
+        )
+    );
+
+    // X = L2, toggle = Home / L2
+    m_driverController.x().toggleOnTrue(
+        Commands.either(
+            // If currently at L2, go to home
+            m_elevatorHomeCommand,
+            // If not at L2, go to L2
+            m_elevatorL2Command,
+            // Condition: check if elevator is currently at L2
+            () -> m_elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L2
+        )
+    );
+
+    // B = L3, toggle = Home / L3
+    m_driverController.b().toggleOnTrue(
+        Commands.either(
+            // If currently at L3, go to home
+            m_elevatorHomeCommand,
+            // If not at L3, go to L3
+            m_elevatorL3Command,
+            // Condition: check if elevator is currently at L3
+            () -> m_elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L3
+        )
+    );
+
+    // Y = L4, toggle = Home / L4
+    m_driverController.y().toggleOnTrue(
+        Commands.either(
+            // If currently at L4, go to home
+            m_elevatorHomeCommand,
+            // If not at L4, go to L4
+            m_elevatorL4Command,
+            // Condition: check if elevator is currently at L4
+            () -> m_elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L4
+        )
+    );
         
     // m_driverController.pov(90)
     //     .whileTrue(m_elevatorManualUpCommand)

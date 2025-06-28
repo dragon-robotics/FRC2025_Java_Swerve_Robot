@@ -102,6 +102,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
   }
 
+  /**
+   * Get the elevator state
+   */
+  public ElevatorState getElevatorState() {
+    return m_elevatorState;
+  }
+
   public void setElevatorMotorSpeed(double speed) {
     m_elevatorIO.setElevatorMotorPercentage(speed);
   }
