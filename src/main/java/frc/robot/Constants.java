@@ -148,12 +148,12 @@ public final class Constants {
           Filesystem.getDeployDirectory().getPath(),
           "apriltags",
           "welded",
-          "2025-red-no-barge.json");
+          "2025-red-reef.json");
       Path bluePath = Path.of(
           Filesystem.getDeployDirectory().getPath(),
           "apriltags",
           "welded",
-          "2025-blue-no-barge.json");
+          "2025-blue-reef.json");
 
       // Try loading layouts from file paths - THESE can throw IOException
       try {
@@ -738,9 +738,9 @@ public final class Constants {
     public static final int MOTOR_ID = 1;
 
     public static final double NOMINAL_VOLTAGE = 10.0;
-    public static final int FREE_CURRENT_LIMIT = 30;
-    public static final int STALL_CURRENT_LIMIT = 50;
-    public static final double SECONDARY_CURRENT_LIMIT = 60.0;
+    public static final int FREE_CURRENT_LIMIT = 40;
+    public static final int STALL_CURRENT_LIMIT = 60;
+    public static final double SECONDARY_CURRENT_LIMIT = 70.0;
     public static final double RAMP_RATE_IN_SEC = 0.25; // Ramp rate in seconds
 
     public static final int BEAM_BREAK_1_DIGITAL_CHANNEL = 0;
