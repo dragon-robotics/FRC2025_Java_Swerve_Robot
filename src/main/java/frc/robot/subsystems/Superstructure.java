@@ -319,16 +319,16 @@ public class Superstructure extends SubsystemBase {
   public Command DriveToClosestReefPoseCommand() {
     // Define Path-Finding PathConstraints (adjust values as needed)
     PathConstraints pathFindingConstraints = new PathConstraints(
-        3.0,                  // Max velocity (m/s)
-        4,              // Max acceleration (m/s^2)
+        2.5,                  // Max velocity (m/s)
+        3.5,              // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
 
     // Define Path-Following PathConstraints (adjust values as needed)
     PathConstraints pathFollowingConstraints = new PathConstraints(
-        1.0,                  // Max velocity (m/s)
-        4,              // Max acceleration (m/s^2)
+        1.5,                  // Max velocity (m/s)
+        3.5,              // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
@@ -383,12 +383,14 @@ public class Superstructure extends SubsystemBase {
           new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
       );
 
-      // Use pathfindThenFollowPath with different constraints
-      return AutoBuilder.pathfindToPose(
-                waypoints.get(0),
-                pathFindingConstraints,
-                0.5)
-            .andThen(AutoBuilder.followPath(path));
+      // // Use pathfindThenFollowPath with different constraints
+      // return AutoBuilder.pathfindToPose(
+      //           waypoints.get(0),
+      //           pathFindingConstraints,
+      //           0.5)
+      //       .andThen(AutoBuilder.followPath(path));
+
+      return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
 
     }, Set.of(m_swerve))
     .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
@@ -457,8 +459,8 @@ public class Superstructure extends SubsystemBase {
   public Command DriveToClosestCoralStationPoseCommand() {
     // Define Path-Finding PathConstraints (adjust values as needed)
     PathConstraints pathFindingConstraints = new PathConstraints(
-        3.0,                  // Max velocity (m/s)
-        4,            // Max acceleration (m/s^2)
+        2.5,                  // Max velocity (m/s)
+        3.5,            // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
@@ -466,7 +468,7 @@ public class Superstructure extends SubsystemBase {
     // Define Path-Following PathConstraints (adjust values as needed)
     PathConstraints pathFollowingConstraints = new PathConstraints(
         1.5,                  // Max velocity (m/s)
-        4,            // Max acceleration (m/s^2)
+        3.5,            // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
@@ -521,12 +523,14 @@ public class Superstructure extends SubsystemBase {
           new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
       );
 
-      // Use pathfindThenFollowPath with different constraints
-      return AutoBuilder.pathfindToPose(
-                waypoints.get(0),
-                pathFindingConstraints,
-                0.5)
-            .andThen(AutoBuilder.followPath(path));
+      // // Use pathfindThenFollowPath with different constraints
+      // return AutoBuilder.pathfindToPose(
+      //           waypoints.get(0),
+      //           pathFindingConstraints,
+      //           0.5)
+      //       .andThen(AutoBuilder.followPath(path));
+
+      return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
 
     }, Set.of(m_swerve))
     .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
