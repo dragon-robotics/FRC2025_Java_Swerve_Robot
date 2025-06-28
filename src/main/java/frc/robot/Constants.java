@@ -132,11 +132,22 @@ public final class Constants {
       // Load default layout - this does NOT throw IOException
       // It might return null if the resource is missing, though kDefaultField should
       // be safe.
-      AprilTagFieldLayout defaultLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-      if (defaultLayout == null) {
+      // Construct paths for welded layouts
+      Path defaultPath = Path.of(
+          Filesystem.getDeployDirectory().getPath(),
+          "apriltags",
+          "welded",
+          "2025-reef-only.json");
+      AprilTagFieldLayout defaultLayout = null;
+      try {
+        defaultLayout = new AprilTagFieldLayout(defaultPath);
+      } catch (IOException e) {
         System.err.println("!!! CRITICAL: Failed to load default AprilTag field resource!");
-        DriverStation.reportError("CRITICAL: Failed to load default AprilTag field resource!", true);
-        // defaultLayout remains null
+        DriverStation.reportError("CRITICAL: Failed to load default AprilTag field resource: " + e.getMessage(), true);
+
+        // If loading from file fails, we will use the static kDefaultField layout
+        // as a fallback.
+        defaultLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
       }
 
       // Initialize temporary variables for welded layouts
