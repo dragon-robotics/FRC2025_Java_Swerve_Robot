@@ -527,6 +527,26 @@ public final class Constants {
         REEF_L_BLUE
       ));
 
+      // Blue Reef Station Left 2D Poses //
+      public static final List<Pose2d> BLUE_REEF_STATION_LEFT_POSES = new ArrayList<>(List.of(
+        REEF_A_BLUE,
+        REEF_C_BLUE,
+        REEF_E_BLUE,
+        REEF_G_BLUE,
+        REEF_I_BLUE,
+        REEF_K_BLUE
+      ));
+
+      // Blue Reef Station Right 2D Poses //
+      public static final List<Pose2d> BLUE_REEF_STATION_RIGHT_POSES = new ArrayList<>(List.of(
+        REEF_B_BLUE,
+        REEF_D_BLUE,
+        REEF_F_BLUE,
+        REEF_H_BLUE,
+        REEF_J_BLUE,
+        REEF_L_BLUE
+      ));
+
       // Red Reef Station 2D Poses //
       public static final List<Pose2d> RED_REEF_STATION_POSES = new ArrayList<>(List.of(
         REEF_A_RED,
@@ -542,6 +562,26 @@ public final class Constants {
         REEF_K_RED,
         REEF_L_RED
       ));
+
+      // Blue Reef Station Left 2D Poses //
+      public static final List<Pose2d> RED_REEF_STATION_LEFT_POSES = new ArrayList<>(List.of(
+        REEF_A_RED,
+        REEF_C_RED,
+        REEF_E_RED,
+        REEF_G_RED,
+        REEF_I_RED,
+        REEF_K_RED
+      ));
+
+      // Blue Reef Station Right 2D Poses //
+      public static final List<Pose2d> RED_REEF_STATION_RIGHT_POSES = new ArrayList<>(List.of(
+        REEF_B_RED,
+        REEF_D_RED,
+        REEF_F_RED,
+        REEF_H_RED,
+        REEF_J_RED,
+        REEF_L_RED
+      ));      
     }
   }
 
