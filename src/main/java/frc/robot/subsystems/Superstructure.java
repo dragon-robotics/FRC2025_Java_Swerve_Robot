@@ -316,11 +316,11 @@ public class Superstructure extends SubsystemBase {
     }, m_swerve);
   }
 
-  public Command DriveToClosestReefPoseCommand() {
+  public Command DriveToClosestReefPoseCommand(boolean left) {
     // Define Path-Finding PathConstraints (adjust values as needed)
     PathConstraints pathFindingConstraints = new PathConstraints(
         2.5,                  // Max velocity (m/s)
-        3.5,              // Max acceleration (m/s^2)
+        3.5,            // Max acceleration (m/s^2)
         Units.degreesToRadians(540), // Max angular velocity (rad/s)
         Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
     );
@@ -340,10 +340,11 @@ public class Superstructure extends SubsystemBase {
       // Grab the robot's current pose
       Pose2d currentPose = m_swerve.getState().Pose;
 
-      List<Pose2d> targetPoses =
+      // Initialize the target poses based on the alliance and whether we are left or right //
+      List<Pose2d> targetPoses = 
           alliance.isPresent() && alliance.get() == Alliance.Red ?
-              FieldConstants.Reef.RED_REEF_STATION_POSES :
-              FieldConstants.Reef.BLUE_REEF_STATION_POSES;
+              (left ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES) :
+              (left ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES);
 
       // Calculate the pose closest to the current pose
       Pose2d closestPose = null;

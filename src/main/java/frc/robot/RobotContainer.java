@@ -65,7 +65,9 @@ public class RobotContainer {
   // Swerve Commands //
   private Command m_defaultDriveCommand;
   // private Command m_aimAndAlignToReefApriltagCommand;
-  private Command m_driveToClosestReefPoseCommand;
+//   private Command m_driveToClosestReefPoseCommand;
+  private Command m_driveToClosestLeftReefPoseCommand;
+  private Command m_driveToClosestRightReefPoseCommand;
   private Command m_driveToClosestCoralStationPoseCommand;
   private Command m_toggleReefBranchCommand;
   private Command m_swerveBrakeCommand;
@@ -228,7 +230,9 @@ public class RobotContainer {
         () -> -m_driverController.getRightX(),
         () -> m_driverController.getHID().getPOV() == 0);
     // m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
-    m_driveToClosestReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand();
+    // m_driveToClosestReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand();
+    m_driveToClosestLeftReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand(true);
+    m_driveToClosestRightReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand(false);;
     m_driveToClosestCoralStationPoseCommand = m_superstructureSubsystem.DriveToClosestCoralStationPoseCommand();
     m_toggleReefBranchCommand = m_superstructureSubsystem.ToggleReefBranchCommand();
     m_swerveBrakeCommand = m_superstructureSubsystem.SwerveBrake();
@@ -343,14 +347,15 @@ public class RobotContainer {
     
     // Press the right trigger to score algae //
     m_driverController.rightTrigger(0.2)
-        .onTrue(m_scoreAlgaeCommand);
+        .whileTrue(m_scoreAlgaeCommand);
 
+    // pov 180 = align left branch
     m_driverController.pov(180)
-        .whileTrue(m_toggleReefBranchCommand);
+        .whileTrue(m_driveToClosestLeftReefPoseCommand);
 
-    // pov 90 = toggle left or right branch
+    // pov 90 = align right branch
     m_driverController.pov(90)
-        .whileTrue(m_driveToClosestReefPoseCommand);
+        .whileTrue(m_driveToClosestRightReefPoseCommand);
 
     // pov 270 = auto-align to nearest coral station
     m_driverController.pov(270)
@@ -362,7 +367,7 @@ public class RobotContainer {
 
     // Left stick button = Elevator Home
     m_driverController.leftStick()
-        .onTrue(m_elevatorHomeCommand);
+        .onTrue(m_slowReverseCoralIntakeCommand);
 
     // // A = L1, toggle = Home / L1
     // m_driverController.a()
@@ -380,8 +385,6 @@ public class RobotContainer {
     // m_driverController.y()
     //     .toggleOnTrue(m_elevatorL4Command)
     //     .toggleOnFalse(m_elevatorHomeCommand);
-
-    // m_driverController.pov(180).whileTrue(m_slowReverseCoralIntakeCommand);
         
     // m_driverController.pov(90)
     //     .whileTrue(m_elevatorManualUpCommand)
