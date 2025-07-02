@@ -798,7 +798,7 @@ public final class Constants {
     public static final int BEAM_BREAK_2_DIGITAL_CHANNEL = 1;
     public static final double CORAL_DETECT_CURRENT_THRESHOLD = 30.0;
     public static final double CORAL_DETECT_CANRANGE_THRESHOLD = 0.18;
-    public static final double CORAL_DETECT_CANRANGE_HYSTERESIS = 0.0381;
+    public static final double CORAL_DETECT_CANRANGE_HYSTERESIS = 0.015;
 
     /* Desired intake speed for intake and outtake */
     public static final double INTAKE_SPEED = 0.7;
