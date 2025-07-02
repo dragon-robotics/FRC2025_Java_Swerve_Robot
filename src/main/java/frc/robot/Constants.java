@@ -870,7 +870,7 @@ public final class Constants {
 
     public static final double ALGAE_DETECT_CURRENT_THRESHOLD = 40.0;
 
-    public static final double ABS_ENC_OFFSET_VAL = 0.8810048; // @TODO: To be tuned later
+    public static final double ABS_ENC_OFFSET_VAL = 0.8810048 + 0.1; // @TODO: To be tuned later
 
     public static final ClosedLoopSlot PID_SLOT = ClosedLoopSlot.kSlot0;
 
@@ -903,11 +903,11 @@ public final class Constants {
      * Desired absolute encoder setpoint for moving shooter and amp mechanism (to be
      * tuned later using absolute encoder)
      */
-    public static final double ARM_HOME_GOAL = 0.24;
-    public static final double ARM_INTAKE_GOAL = 0.01;
-    public static final double ARM_DEALGAE_GOAL = 0.1;
-    public static final double ARM_HOLD_GOAL = 0.13;
-    public static final double ARM_PROCESSOR_OUTTAKE_GOAL = 0.13;
+    public static final double ARM_HOME_GOAL = 0.24 + 0.1;
+    public static final double ARM_INTAKE_GOAL = 0.01 + 0.1;
+    public static final double ARM_DEALGAE_GOAL = 0.1 + 0.1;
+    public static final double ARM_HOLD_GOAL = 0.13 + 0.1;
+    public static final double ARM_PROCESSOR_OUTTAKE_GOAL = 0.13 + 0.1;
 
     /* Desired intake speed for intake and outtake */
     public static final double INTAKE_SPEED = 1.0;
