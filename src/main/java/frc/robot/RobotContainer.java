@@ -350,16 +350,16 @@ public class RobotContainer {
     m_driverController.rightTrigger(0.2)
         .whileTrue(m_scoreAlgaeCommand);
 
-    // pov 180 = align left branch
-    m_driverController.pov(180)
+    // pov 270 = align left branch
+    m_driverController.pov(270)
         .whileTrue(m_driveToClosestLeftReefPoseCommand);
 
     // pov 90 = align right branch
     m_driverController.pov(90)
         .whileTrue(m_driveToClosestRightReefPoseCommand);
 
-    // pov 270 = auto-align to nearest coral station
-    m_driverController.pov(270)
+    // pov 180 = auto-align to nearest coral station
+    m_driverController.pov(180)
         .whileTrue(m_driveToClosestCoralStationPoseCommand);
 
     // Right stick button = Dealgae
