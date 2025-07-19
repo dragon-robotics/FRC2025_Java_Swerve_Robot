@@ -803,7 +803,7 @@ public final class Constants {
     /* Desired intake speed for intake and outtake */
     public static final double INTAKE_SPEED = 0.7;
     public static final double SLOW_INTAKE_SPEED = 0.15;
-    public static final double OUTTAKE_SPEED = 0.65;
+    public static final double OUTTAKE_SPEED = 0.5;
     public static final double REVERSE_SPEED = -0.5;
     public static final double SLOW_REVERSE_SPEED = -0.1;
   }
