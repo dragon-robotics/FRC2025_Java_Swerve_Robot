@@ -1088,7 +1088,7 @@ public final class Constants {
     public static final double DRIVE_KV = 0.124;
     public static final double DRIVE_KA = 0;
 
-    public static final double HEADING_KP = 3.5;
+    public static final double HEADING_KP = 5;
     public static final double HEADING_KI = 0;
     public static final double HEADING_KD = 0.5;
     public static final double HEADING_TOLERANCE = 0.01;
