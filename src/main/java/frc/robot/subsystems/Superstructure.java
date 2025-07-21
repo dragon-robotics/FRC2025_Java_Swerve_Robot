@@ -23,6 +23,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.IdealStartingState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
@@ -53,6 +54,7 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.FieldConstants.ReefLevel;
 import frc.robot.commands.Teleop.DriveToPosePID;
+import frc.robot.commands.Teleop.DriveToPoseTrajPID;
 // import frc.robot.commands.Teleop.AutoAlignToReefTag;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
 import frc.robot.subsystems.coral.CoralSubsystem;
@@ -368,21 +370,23 @@ public class Superstructure extends SubsystemBase {
       List<Pose2d> waypoints = new ArrayList<>();
       
       // Add intermediate waypoint (1 meter back from target)
-      Transform2d backwardOffset = new Transform2d(-0.75, 0.0, Rotation2d.kZero);
+      Transform2d backwardOffset = new Transform2d(-0.5, 0.0, Rotation2d.kZero);
       waypoints.add(closestPose.transformBy(backwardOffset));
       
       // Add final destination
       waypoints.add(closestPose);
 
-      List<Waypoint> waypointList = PathPlannerPath.waypointsFromPoses(waypoints);
+      // List<Waypoint> waypointList = PathPlannerPath.waypointsFromPoses(waypoints);
       
-      // Create PathPlannerPath from waypoints
-      PathPlannerPath path = new PathPlannerPath(
-          waypointList,
-          pathFollowingConstraints,
-          null,
-          new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
-      );
+      // // Create PathPlannerPath from waypoints
+      // PathPlannerPath path = new PathPlannerPath(
+      //     waypointList,
+      //     pathFollowingConstraints,
+      //     new IdealStartingState(pathFindingConstraints.maxVelocityMPS(), waypoints.get(0).getRotation()),
+      //     new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
+      // );
+
+      // return AutoBuilder.followPath(path);
 
       // // Use pathfindThenFollowPath with different constraints
       // return AutoBuilder.pathfindToPose(
@@ -391,7 +395,9 @@ public class Superstructure extends SubsystemBase {
       //           0.5)
       //       .andThen(AutoBuilder.followPath(path));
 
-      return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
+      // return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
+
+      return new DriveToPoseTrajPID(m_swerve, applyRobotSpeeds, waypoints, false);
 
     }, Set.of(m_swerve))
     .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
@@ -531,7 +537,8 @@ public class Superstructure extends SubsystemBase {
       //           0.5)
       //       .andThen(AutoBuilder.followPath(path));
 
-      return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
+      // return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
+      return new DriveToPoseTrajPID(m_swerve, applyRobotSpeeds, waypoints, true);
 
     }, Set.of(m_swerve))
     .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
