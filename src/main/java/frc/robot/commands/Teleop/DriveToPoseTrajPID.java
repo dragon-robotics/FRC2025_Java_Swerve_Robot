@@ -54,7 +54,7 @@ public class DriveToPoseTrajPID extends Command {
       5.0, 0, 0, // Rotation controller
       new TrapezoidProfile.Constraints(
           Units.degreesToRadians(540),
-          Units.degreesToRadians(540)
+          Units.degreesToRadians(720)
       ));
 
   /** Creates a new DriveToPoseTrajPID. */
