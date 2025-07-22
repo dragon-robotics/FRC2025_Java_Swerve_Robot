@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "S6-R02-Path"
+                  "pathName": "S6-R02-ParElev-Path"
                 }
               },
               {
@@ -21,51 +21,13 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.2
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "ElevatorL4"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "deadline",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.5
+                        "waitTime": 1.0
                       }
                     },
                     {
                       "type": "named",
                       "data": {
                         "name": "ScoreCoral"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "deadline",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.02
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "ElevatorHome"
                       }
                     }
                   ]
@@ -111,9 +73,15 @@
                 }
               },
               {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorHome"
+                }
+              },
+              {
                 "type": "path",
                 "data": {
-                  "pathName": "R02-LC3-Path"
+                  "pathName": "R02-LC3-Fast-Path"
                 }
               }
             ]
@@ -126,7 +94,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "LC3-R03-Path"
+                  "pathName": "LC3-R03-ParElev-Path"
                 }
               },
               {
@@ -136,51 +104,13 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.2
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "ElevatorL4"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "deadline",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.5
+                        "waitTime": 1.0
                       }
                     },
                     {
                       "type": "named",
                       "data": {
                         "name": "ScoreCoral"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "deadline",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.02
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "ElevatorHome"
                       }
                     }
                   ]
@@ -226,9 +156,15 @@
                 }
               },
               {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorHome"
+                }
+              },
+              {
                 "type": "path",
                 "data": {
-                  "pathName": "R03-LC3-Path"
+                  "pathName": "R03-LC3-Fast-Path"
                 }
               }
             ]
@@ -241,7 +177,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "LC3-R04-Path"
+                  "pathName": "LC3-R04-ParElev-Path"
                 }
               },
               {
@@ -251,26 +187,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.2
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "ElevatorL4"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "deadline",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.5
+                        "waitTime": 1.0
                       }
                     },
                     {
@@ -281,6 +198,70 @@
                     }
                   ]
                 }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IntakeCoral"
+                      }
+                    },
+                    {
+                      "type": "deadline",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.1
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "HoldCoral"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorHome"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R04-LC3-Fast-Path"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LC3-R05-ParElev-Path"
+                }
               },
               {
                 "type": "deadline",
@@ -289,13 +270,13 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.02
+                        "waitTime": 1.0
                       }
                     },
                     {
                       "type": "named",
                       "data": {
-                        "name": "ElevatorHome"
+                        "name": "ScoreCoral"
                       }
                     }
                   ]

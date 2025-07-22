@@ -113,7 +113,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "R02-LC3-Path"
+                  "pathName": "R02-LC3-Fast-Path"
                 }
               }
             ]
@@ -228,7 +228,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "R03-LC3-Path"
+                  "pathName": "R03-LC3-Fast-Path"
                 }
               }
             ]
