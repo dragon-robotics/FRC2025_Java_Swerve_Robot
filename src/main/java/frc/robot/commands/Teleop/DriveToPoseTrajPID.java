@@ -42,7 +42,6 @@ public class DriveToPoseTrajPID extends Command {
           8.0  // Max acceleration in X (m/s²)
       ));
 
-
   private final ProfiledPIDController yController = new ProfiledPIDController(
       4.0, 0, 0, // X controller with profiling
       new TrapezoidProfile.Constraints(

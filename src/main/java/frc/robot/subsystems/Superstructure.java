@@ -54,6 +54,7 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.FieldConstants.ReefLevel;
 import frc.robot.commands.Teleop.DriveToPosePID;
+import frc.robot.commands.Teleop.DriveToPoseProfPID;
 import frc.robot.commands.Teleop.DriveToPoseTrajPID;
 // import frc.robot.commands.Teleop.AutoAlignToReefTag;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
@@ -397,7 +398,10 @@ public class Superstructure extends SubsystemBase {
 
       // return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
 
-      return new DriveToPoseTrajPID(m_swerve, applyRobotSpeeds, waypoints, false);
+      // return new DriveToPoseTrajPID(m_swerve, applyRobotSpeeds, waypoints, false);
+      return
+        new DriveToPoseProfPID(m_swerve, applyRobotSpeeds, waypoints.get(0))
+        .andThen(new DriveToPoseProfPID(m_swerve, applyRobotSpeeds, waypoints.get(1)));
 
     }, Set.of(m_swerve))
     .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
@@ -538,8 +542,10 @@ public class Superstructure extends SubsystemBase {
       //       .andThen(AutoBuilder.followPath(path));
 
       // return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
-      return new DriveToPoseTrajPID(m_swerve, applyRobotSpeeds, waypoints, true);
-
+      // return new DriveToPoseTrajPID(m_swerve, applyRobotSpeeds, waypoints, true);
+      return
+        new DriveToPoseProfPID(m_swerve, applyRobotSpeeds, waypoints.get(0))
+        .andThen(new DriveToPoseProfPID(m_swerve, applyRobotSpeeds, waypoints.get(1)));
     }, Set.of(m_swerve))
     .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
   }
