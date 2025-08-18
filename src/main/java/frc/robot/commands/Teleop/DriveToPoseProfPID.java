@@ -29,14 +29,14 @@ public class DriveToPoseProfPID extends Command {
   // Tune these gains carefully!
   // Profiled-PID controllers for X, Y, and rotation //
   private final ProfiledPIDController m_xController = new ProfiledPIDController(
-      4.0, 0, 0, // X controller with profiling
+      5.0, 0, 0, // X controller with profiling
       new TrapezoidProfile.Constraints(
           4.0, // Max velocity in X (m/s)
           8.0 // Max acceleration in X (m/s²)
       ));
 
   private final ProfiledPIDController m_yController = new ProfiledPIDController(
-      4.0, 0, 0, // X controller with profiling
+      5.0, 0, 0, // X controller with profiling
       new TrapezoidProfile.Constraints(
           4.0, // Max velocity in X (m/s)
           8.0 // Max acceleration in X (m/s²)
@@ -130,7 +130,7 @@ public class DriveToPoseProfPID extends Command {
   @Override
   public void end(boolean interrupted) {
     // Stop the robot when the command finishes or is interrupted
-    m_swerve.setControl(m_robotSpeeds.withSpeeds(new ChassisSpeeds())); // Send zero speeds
+    m_swerve.setControl(m_robotSpeeds.withSpeeds(new ChassisSpeeds(0, 0, 0))); // Send zero speeds
   }
 
   // Returns true when the command should end.
