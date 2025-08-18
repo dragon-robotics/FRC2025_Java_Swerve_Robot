@@ -240,7 +240,6 @@ public class Superstructure extends SubsystemBase {
       double rawRotation = rotationSup.getAsDouble();
 
       // Apply deadband to joystick inputs //
-      MathUtil.applyDeadband(rawTranslation, SwerveConstants.SWERVE_DEADBAND, 0.1);
       double translation = MathUtil.applyDeadband(
           rawTranslation,
           SwerveConstants.SWERVE_DEADBAND,
@@ -371,7 +370,7 @@ public class Superstructure extends SubsystemBase {
       List<Pose2d> waypoints = new ArrayList<>();
       
       // Add intermediate waypoint (1 meter back from target)
-      Transform2d backwardOffset = new Transform2d(-0.5, 0.0, Rotation2d.kZero);
+      Transform2d backwardOffset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
       waypoints.add(closestPose.transformBy(backwardOffset));
       
       // Add final destination
@@ -543,9 +542,7 @@ public class Superstructure extends SubsystemBase {
 
       // return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
       // return new DriveToPoseTrajPID(m_swerve, applyRobotSpeeds, waypoints, true);
-      return
-        new DriveToPoseProfPID(m_swerve, applyRobotSpeeds, waypoints.get(0))
-        .andThen(new DriveToPoseProfPID(m_swerve, applyRobotSpeeds, waypoints.get(1)));
+      return new DriveToPoseProfPID(m_swerve, applyRobotSpeeds, closestPose);
     }, Set.of(m_swerve))
     .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
   }
