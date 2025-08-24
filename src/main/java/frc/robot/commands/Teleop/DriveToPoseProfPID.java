@@ -23,51 +23,54 @@ public class DriveToPoseProfPID extends Command {
   private final ApplyRobotSpeeds m_robotSpeeds;
   private final Pose2d m_targetPose;
 
-  private final Timer m_timer; // Used for ProfiledPIDController timing
-
-  // PID controllers for field-relative X, Y, and Theta
+  // Profiled-PID controllers for field-relative translate, strafe, and rotation
   // Tune these gains carefully!
-  // Profiled-PID controllers for X, Y, and rotation //
-  private final ProfiledPIDController m_xController = new ProfiledPIDController(
-      5.0, 0, 0, // X controller with profiling
-      new TrapezoidProfile.Constraints(
-          4.0, // Max velocity in X (m/s)
-          8.0 // Max acceleration in X (m/s²)
-      ));
+  private final ProfiledPIDController m_translateController;
+  private final ProfiledPIDController m_strafeController;
+  private final ProfiledPIDController m_rotationController;
 
-  private final ProfiledPIDController m_yController = new ProfiledPIDController(
-      5.0, 0, 0, // X controller with profiling
-      new TrapezoidProfile.Constraints(
-          4.0, // Max velocity in X (m/s)
-          8.0 // Max acceleration in X (m/s²)
-      ));
-
-  private final ProfiledPIDController m_rotController = new ProfiledPIDController(
-      5.0, 0, 0, // Rotation controller
-      new TrapezoidProfile.Constraints(
-          Units.degreesToRadians(540),
-          Units.degreesToRadians(720)));
+  // Linear and rotational Profiled-PID constraints //
+  private final TrapezoidProfile.Constraints m_linearConstraints;
+  private final TrapezoidProfile.Constraints m_rotationConstraints;
 
   // Tolerances - how close is close enough?
   private static final double m_positionTolerance = 0.05; // meters
-  private static final double m_angleTolerance = Math.toRadians(2.0); // radians
+  private static final double m_angleTolerance = Math.toRadians(5.0); // radians
 
   /** Creates a new DriveToPoseProfPID. */
-  public DriveToPoseProfPID(CommandSwerveDrivetrain swerve, ApplyRobotSpeeds robotSpeeds, Pose2d targetPose) {
+  public DriveToPoseProfPID(
+      CommandSwerveDrivetrain swerve,
+      ApplyRobotSpeeds robotSpeeds,
+      Pose2d targetPose,
+      TrapezoidProfile.Constraints linearConstraints,
+      TrapezoidProfile.Constraints rotationConstraints) {
     m_swerve = swerve;
     m_robotSpeeds = robotSpeeds;
     m_targetPose = targetPose;
 
-    // Allow rotation controller to wrap around (-pi to pi)
-    m_rotController.enableContinuousInput(-Math.PI, Math.PI);
+    m_linearConstraints = linearConstraints;
+    m_rotationConstraints = rotationConstraints;
+
+    // Initialize the PID controllers with constraints
+    m_translateController = new ProfiledPIDController(
+        4.0, 0, 0, // X controller with profiling
+        m_linearConstraints);
+
+    m_strafeController = new ProfiledPIDController(
+        4.0, 0, 0, // Y controller with profiling
+        m_linearConstraints);
+
+    m_rotationController = new ProfiledPIDController(
+        4.0, 0, 0, // Rotation controller
+        m_rotationConstraints);
 
     // Set tolerances
-    m_xController.setTolerance(m_positionTolerance);
-    m_yController.setTolerance(m_positionTolerance);
-    m_rotController.setTolerance(m_angleTolerance);
+    m_translateController.setTolerance(m_positionTolerance);
+    m_strafeController.setTolerance(m_positionTolerance);
+    m_rotationController.setTolerance(m_angleTolerance);
 
-    // Initialize timer
-    m_timer = new Timer();
+    // Allow rotation controller to wrap around (-pi to pi)
+    m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_swerve);
@@ -76,9 +79,6 @@ public class DriveToPoseProfPID extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
-    // Reset and start the timer
-    m_timer.restart();
 
     // Get the current pose and velocity of the swerve drive
     Pose2d currentPose = m_swerve.getState().Pose;
@@ -90,13 +90,13 @@ public class DriveToPoseProfPID extends Command {
     );
 
     // Reset ProfiledPIDControllers with current position AND velocity
-    m_xController.reset(
+    m_translateController.reset(
         new TrapezoidProfile.State(currentPose.getX(), fieldRelativeSpeeds.vxMetersPerSecond)
     );
-    m_yController.reset(
+    m_strafeController.reset(
         new TrapezoidProfile.State(currentPose.getY(), fieldRelativeSpeeds.vyMetersPerSecond)
     );
-    m_rotController.reset(
+    m_rotationController.reset(
         new TrapezoidProfile.State(
             currentPose.getRotation().getRadians(), 
             fieldRelativeSpeeds.omegaRadiansPerSecond
@@ -112,10 +112,14 @@ public class DriveToPoseProfPID extends Command {
     Pose2d currentPose = m_swerve.getState().Pose;
 
     // Calculate field-relative speeds using PID controllers
-    double xSpeed = m_xController.calculate(currentPose.getX(), m_targetPose.getX());
-    double ySpeed = m_yController.calculate(currentPose.getY(), m_targetPose.getY());
+    double xSpeed = m_translateController.calculate(currentPose.getX(), m_targetPose.getX());
+    double ySpeed = m_strafeController.calculate(currentPose.getY(), m_targetPose.getY());
     // Use current rotation for theta calculation's measurement
-    double thetaSpeed = m_rotController.calculate(currentPose.getRotation().getRadians(), m_targetPose.getRotation().getRadians());
+    double thetaSpeed = m_rotationController.calculate(currentPose.getRotation().getRadians(), m_targetPose.getRotation().getRadians());
+
+    // Debugging: Print the current pose and target pose
+    // System.out.printf("Current Pose: %s, Target Pose: %s%n", currentPose, m_targetPose);
+    // System.out.printf("X Speed: %.2f, Y Speed: %.2f, Theta Speed: %.2f%n", xSpeed, ySpeed, thetaSpeed);
 
     // Convert field-relative speeds to robot-relative ChassisSpeeds
     ChassisSpeeds targetSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -137,6 +141,6 @@ public class DriveToPoseProfPID extends Command {
   @Override
   public boolean isFinished() {
     // Check if all controllers are at their setpoints (within tolerance)
-    return m_xController.atGoal() && m_yController.atGoal() && m_rotController.atGoal();
+    return m_translateController.atGoal() && m_strafeController.atGoal() && m_rotationController.atGoal();
   }
 }
