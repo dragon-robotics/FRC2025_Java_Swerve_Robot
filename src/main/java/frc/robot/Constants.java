@@ -1114,7 +1114,8 @@ public final class Constants {
     public static final double SWERVE_DEADBAND = 0.1;
 
     // SWERVE MODULE ODOMETRY STANDARD DEVIATIONS //
-    public static final Matrix<N3, N1> ODOMETRY_STD = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(5));
+    // public static final Matrix<N3, N1> ODOMETRY_STD = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(5));
+    public static final Matrix<N3, N1> ODOMETRY_STD = VecBuilder.fill(0.2, 0.2, Units.degreesToRadians(3));
   }
 
   public static class OperatorControlNameConstants {
