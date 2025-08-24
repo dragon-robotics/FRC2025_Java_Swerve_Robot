@@ -319,21 +319,6 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command DriveToClosestReefPoseCommand(boolean left) {
-    // Define Path-Finding PathConstraints (adjust values as needed)
-    PathConstraints pathFindingConstraints = new PathConstraints(
-        2.5,                  // Max velocity (m/s)
-        3.5,            // Max acceleration (m/s^2)
-        Units.degreesToRadians(540), // Max angular velocity (rad/s)
-        Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
-    );
-
-    // Define Path-Following PathConstraints (adjust values as needed)
-    PathConstraints pathFollowingConstraints = new PathConstraints(
-        1.5,                  // Max velocity (m/s)
-        3.5,              // Max acceleration (m/s^2)
-        Units.degreesToRadians(540), // Max angular velocity (rad/s)
-        Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
-    );
 
     return new DeferredCommand(() -> {
       // Grab the robot's current alliance
@@ -349,58 +334,29 @@ public class Superstructure extends SubsystemBase {
               (left ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES);
 
       // Calculate the pose closest to the current pose
-      Pose2d closestPose = null;
-      double minDistanceSq = Double.MAX_VALUE; // Use squared distance to avoid sqrt
-  
-      // Iterate through the list of target poses
-      for (Pose2d targetPose : targetPoses) {
-          Transform2d translationDelta = targetPose.minus(currentPose);
+      Pose2d closestPose = findClosestPose(currentPose, targetPoses);
 
-          // Calculate the squared distance between the translations
-          double distanceSq = translationDelta.getTranslation().getNorm();
-
-          // If this pose is closer than the current minimum, update
-          if (distanceSq < minDistanceSq) {
-              minDistanceSq = distanceSq;
-              closestPose = targetPose;
-          }
-      }
-
-      // Create waypoint list
-      List<Pose2d> waypoints = new ArrayList<>();
-      
-      // Add intermediate waypoint (1 meter back from target)
+      // Add intermediate waypoint (0.25 meter back from target)
       Transform2d backwardOffset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
-      waypoints.add(closestPose.transformBy(backwardOffset));
-      
-      // Add final destination
-      waypoints.add(closestPose);
 
-      // List<Waypoint> waypointList = PathPlannerPath.waypointsFromPoses(waypoints);
-      
-      // // Create PathPlannerPath from waypoints
-      // PathPlannerPath path = new PathPlannerPath(
-      //     waypointList,
-      //     pathFollowingConstraints,
-      //     new IdealStartingState(pathFindingConstraints.maxVelocityMPS(), waypoints.get(0).getRotation()),
-      //     new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
-      // );
-
-      // return AutoBuilder.followPath(path);
-
-      // // Use pathfindThenFollowPath with different constraints
-      // return AutoBuilder.pathfindToPose(
-      //           waypoints.get(0),
-      //           pathFindingConstraints,
-      //           0.5)
-      //       .andThen(AutoBuilder.followPath(path));
-
-      // return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
-
-      // return new DriveToPoseTrajPID(m_swerve, applyRobotSpeeds, waypoints, false);
       return
-        new DriveToPoseProfPID(m_swerve, applyRobotSpeeds, waypoints.get(0))
-        .andThen(new DriveToPoseProfPID(m_swerve, applyRobotSpeeds, waypoints.get(1)));
+        new DriveToPoseProfPID(
+            m_swerve,
+            applyRobotSpeeds,
+            closestPose.transformBy(backwardOffset),
+            // Max velo 3 m/s and max accel 8 m/s²
+            new TrapezoidProfile.Constraints(3, 8.0),
+            // Max velo 540 deg/s and max accel 720 deg/s²
+            new TrapezoidProfile.Constraints(Units.degreesToRadians(540), Units.degreesToRadians(720)))
+        .andThen(
+            new DriveToPoseProfPID(
+                m_swerve,
+                applyRobotSpeeds,
+                closestPose,
+                // Max velo 1 m/s and max accel 8 m/s²
+                new TrapezoidProfile.Constraints(1.0, 8.0),
+                // Max velo 540 deg/s and max accel 720 deg/s²
+                new TrapezoidProfile.Constraints(Units.degreesToRadians(540), Units.degreesToRadians(720))));
 
     }, Set.of(m_swerve))
     .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
@@ -467,21 +423,6 @@ public class Superstructure extends SubsystemBase {
   }
   
   public Command DriveToClosestCoralStationPoseCommand() {
-    // Define Path-Finding PathConstraints (adjust values as needed)
-    PathConstraints pathFindingConstraints = new PathConstraints(
-        2.5,                  // Max velocity (m/s)
-        3.5,            // Max acceleration (m/s^2)
-        Units.degreesToRadians(540), // Max angular velocity (rad/s)
-        Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
-    );
-
-    // Define Path-Following PathConstraints (adjust values as needed)
-    PathConstraints pathFollowingConstraints = new PathConstraints(
-        1.5,                  // Max velocity (m/s)
-        3.5,            // Max acceleration (m/s^2)
-        Units.degreesToRadians(540), // Max angular velocity (rad/s)
-        Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
-    );
 
     return new DeferredCommand(() -> {
       // Grab the robot's current alliance
@@ -495,54 +436,16 @@ public class Superstructure extends SubsystemBase {
               FieldConstants.CoralStation.RED_CORAL_STATION_POSES :
               FieldConstants.CoralStation.BLUE_CORAL_STATION_POSES;
 
-      // Calculate the pose closest to the current pose
-      Pose2d closestPose = null;
-      double minDistanceSq = Double.MAX_VALUE; // Use squared distance to avoid sqrt
-  
-      // Iterate through the list of target poses
-      for (Pose2d targetPose : targetPoses) {
-          Transform2d translationDelta = targetPose.minus(currentPose);
+      Pose2d closestPose = findClosestPose(currentPose, targetPoses);
 
-          // Calculate the squared distance between the translations
-          double distanceSq = translationDelta.getTranslation().getNorm();
-
-          // If this pose is closer than the current minimum, update
-          if (distanceSq < minDistanceSq) {
-              minDistanceSq = distanceSq;
-              closestPose = targetPose;
-          }
-      }
-
-      // Create waypoint list
-      List<Pose2d> waypoints = new ArrayList<>();
-      
-      // Add intermediate waypoint (1 meter back from target)
-      Transform2d backwardOffset = new Transform2d(0.5, 0.0, Rotation2d.kZero);
-      waypoints.add(closestPose.transformBy(backwardOffset));
-      
-      // Add final destination
-      waypoints.add(closestPose);
-
-      List<Waypoint> waypointList = PathPlannerPath.waypointsFromPoses(waypoints);
-      
-      // Create PathPlannerPath from waypoints
-      PathPlannerPath path = new PathPlannerPath(
-          waypointList,
-          pathFollowingConstraints,
-          null,
-          new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
-      );
-
-      // // Use pathfindThenFollowPath with different constraints
-      // return AutoBuilder.pathfindToPose(
-      //           waypoints.get(0),
-      //           pathFindingConstraints,
-      //           0.5)
-      //       .andThen(AutoBuilder.followPath(path));
-
-      // return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
-      // return new DriveToPoseTrajPID(m_swerve, applyRobotSpeeds, waypoints, true);
-      return new DriveToPoseProfPID(m_swerve, applyRobotSpeeds, closestPose);
+      return new DriveToPoseProfPID(
+          m_swerve,
+          applyRobotSpeeds,
+          closestPose,
+          // Max velo 3 m/s and max accel 8 m/s²
+          new TrapezoidProfile.Constraints(3.0, 8.0),
+          // Max velo 540 deg/s and max accel 720 deg/s²
+          new TrapezoidProfile.Constraints(Units.degreesToRadians(540), Units.degreesToRadians(720)));
     }, Set.of(m_swerve))
     .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
   }
