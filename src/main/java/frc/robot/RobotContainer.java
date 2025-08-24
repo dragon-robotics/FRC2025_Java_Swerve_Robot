@@ -303,7 +303,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("DeAlgae", m_deAlgaeCommand);
 
     // Init Auto Chooser //
-    autoChooser = AutoBuilder.buildAutoChooser("LeaveAutoS3");
+    autoChooser = AutoBuilder.buildAutoChooser("S6-R02-R03-R04-SeqElev-Auto");
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     // Configure the trigger bindings
