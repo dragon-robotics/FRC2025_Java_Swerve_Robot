@@ -20,8 +20,6 @@ public class DriveToPosePID extends Command {
     private final ApplyRobotSpeeds m_robotSpeeds;
     private final Pose2d m_targetPose;
 
-    private final Timer m_timer; // Used for ProfiledPIDController timing
-
     // PID controllers for field-relative X, Y, and Theta
     // Tune these gains carefully!
     private final PIDController m_xController = new PIDController(4, 0, 0); // P_x
@@ -50,17 +48,11 @@ public class DriveToPosePID extends Command {
         m_yController.setTolerance(m_positionTolerance);
         m_rotController.setTolerance(m_angleTolerance);
 
-        // Initialize timer
-        m_timer = new Timer();
-
         addRequirements(m_swerve);
     }
 
     @Override
     public void initialize() {
-
-        // Start the timer for the profiled PID controller
-        m_timer.restart();
 
         // Get the current pose and velocity of the swerve drive
         Pose2d currentPose = m_swerve.getState().Pose;
