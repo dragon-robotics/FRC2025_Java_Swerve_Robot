@@ -7,7 +7,6 @@ package frc.robot.subsystems.vision;
 import static frc.robot.Constants.FieldConstants.*;
 import static frc.robot.Constants.VisionConstants.*;
 
-import java.util.LinkedList;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -22,6 +21,7 @@ import frc.robot.subsystems.vision.VisionIO.VisionIOInputs;
 import frc.robot.util.vision.AcceptedPose;
 import frc.robot.util.vision.RejectedPose;
 import frc.robot.util.vision.VisionPoseValidator;
+import java.util.LinkedList;
 
 public class VisionSubsystem extends SubsystemBase {
 
@@ -29,9 +29,6 @@ public class VisionSubsystem extends SubsystemBase {
   private final VisionIO[] m_io;
   private final VisionIOInputs[] m_inputs;
   private final Alert[] m_disconnectedAlerts;
-
-  // Threshold for what constitutes a "slow" loop (in milliseconds)
-  private static final double SLOW_LOOP_THRESHOLD_MS = 10.0;
 
   // Check for odometry initialization and use about //
   private int m_stablePoseCounter = 5;
@@ -41,9 +38,7 @@ public class VisionSubsystem extends SubsystemBase {
   private final VisionPoseValidator m_poseValidator = new VisionPoseValidator();
 
   /** Creates a new VisionSubsystem. */
-  public VisionSubsystem(
-      VisionConsumer consumer,
-      VisionIO... io) {
+  public VisionSubsystem(VisionConsumer consumer, VisionIO... io) {
     m_consumer = consumer;
     m_io = io;
 
@@ -53,8 +48,9 @@ public class VisionSubsystem extends SubsystemBase {
 
     for (int i = 0; i < m_inputs.length; i++) {
       m_inputs[i] = new VisionIOInputs();
-      m_disconnectedAlerts[i] = new Alert(
-          "Vision camera " + io[i].getCameraName() + " is disconnected.", AlertType.kWarning);
+      m_disconnectedAlerts[i] =
+          new Alert(
+              "Vision camera " + io[i].getCameraName() + " is disconnected.", AlertType.kWarning);
     }
   }
 
@@ -66,18 +62,13 @@ public class VisionSubsystem extends SubsystemBase {
         Matrix<N3, N1> visionMeasurementStdDevs);
   }
 
-  private sealed interface VisionResult
-      permits ValidPose, InvalidPose, NoTargets {
-  }
+  private sealed interface VisionResult permits ValidPose, InvalidPose, NoTargets {}
 
-  private record ValidPose(Pose2d pose, double confidence) implements VisionResult {
-  }
+  private record ValidPose(Pose2d pose, double confidence) implements VisionResult {}
 
-  private record InvalidPose(String reason) implements VisionResult {
-  }
+  private record InvalidPose(String reason) implements VisionResult {}
 
-  private record NoTargets() implements VisionResult {
-  }
+  private record NoTargets() implements VisionResult {}
 
   @Override
   public void periodic() {
@@ -118,8 +109,7 @@ public class VisionSubsystem extends SubsystemBase {
       LinkedList<Pose3d> tagPoses,
       LinkedList<Pose3d> robotPoses,
       LinkedList<Pose3d> acceptedPoses,
-      LinkedList<Pose3d> rejectedPoses) {
-  }
+      LinkedList<Pose3d> rejectedPoses) {}
 
   private CameraProcessingResult processCameraData(int cameraIndex, VisionIOInputs inputs) {
     // Update disconnected alert
@@ -166,7 +156,8 @@ public class VisionSubsystem extends SubsystemBase {
         }
 
         // Log acceptance
-        DogLog.log("Vision/Camera" + cameraIndex + "/AcceptedPose", accepted.poseObservation().pose());
+        DogLog.log(
+            "Vision/Camera" + cameraIndex + "/AcceptedPose", accepted.poseObservation().pose());
       } else if (validationResult instanceof RejectedPose rejected) {
 
         // If odometry not initialized, count down stable poses
@@ -177,12 +168,13 @@ public class VisionSubsystem extends SubsystemBase {
         rejectedPoses.add(rejected.poseObservation().pose());
 
         // Log rejection with reason
-        System.out.printf("Camera %d: Rejected pose - %s: %s%n",
+        System.out.printf(
+            "Camera %d: Rejected pose - %s: %s%n",
             cameraIndex, rejected.reason().getDescription(), rejected.details());
 
-        DogLog.log("Vision/Camera" + cameraIndex + "/RejectionReason",
-            rejected.reason().name());
-        DogLog.log("Vision/Camera" + cameraIndex + "/RejectedPose", rejected.poseObservation().pose());
+        DogLog.log("Vision/Camera" + cameraIndex + "/RejectionReason", rejected.reason().name());
+        DogLog.log(
+            "Vision/Camera" + cameraIndex + "/RejectedPose", rejected.poseObservation().pose());
       }
     }
 
@@ -191,9 +183,10 @@ public class VisionSubsystem extends SubsystemBase {
 
   private Matrix<N3, N1> calculateStandardDeviations(AcceptedPose accepted) {
     // Your existing standard deviation calculation logic
-    double stdDevFactor = (1 + accepted.poseObservation().averageTagDistance())
-        * (1 + accepted.poseObservation().ambiguity()) /
-        Math.sqrt(Math.max(accepted.poseObservation().tagCount(), 1));
+    double stdDevFactor =
+        (1 + accepted.poseObservation().averageTagDistance())
+            * (1 + accepted.poseObservation().ambiguity())
+            / Math.sqrt(Math.max(accepted.poseObservation().tagCount(), 1));
     double linearStdDev = LINEAR_STDDEV_BASELINE * stdDevFactor;
     double angularStdDev = ANGULAR_STDDEV_BASELINE * stdDevFactor;
 

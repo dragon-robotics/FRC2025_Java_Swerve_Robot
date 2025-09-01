@@ -8,27 +8,27 @@ import edu.wpi.first.wpilibj.motorcontrol.Spark;
 
 /** Add your docs here. */
 public class LedIORevBlinkin implements LedIO {
-    // Create a Spark motor controller instance for the Rev Blinkin
-    private Spark m_ledController;
+  // Create a Spark motor controller instance for the Rev Blinkin
+  private Spark m_ledController;
 
-    // The current LED value
-    public double m_curLedValue;
+  // The current LED value
+  public double m_curLedValue;
 
-    public LedIORevBlinkin() {
-        // Initialize the Spark motor controller
-        int ledChannel = 9; // Example channel number, change as needed
-        m_ledController = new Spark(ledChannel);
-    }
+  public LedIORevBlinkin() {
+    // Initialize the Spark motor controller
+    int ledChannel = 9; // Example channel number, change as needed
+    m_ledController = new Spark(ledChannel);
+  }
 
-    @Override
-    public void setLedColor(double ledValue) {
-        m_curLedValue = ledValue;
-        m_ledController.set(ledValue);
-    }
+  @Override
+  public void setLedColor(double ledValue) {
+    m_curLedValue = ledValue;
+    m_ledController.set(ledValue);
+  }
 
-    @Override
-    public void updateInputs(LedIOInputs inputs) {
-        inputs.ledControllerConnected = m_ledController.isAlive();
-        inputs.curLedValue = m_curLedValue;
-    }
+  @Override
+  public void updateInputs(LedIOInputs inputs) {
+    inputs.ledControllerConnected = m_ledController.isAlive();
+    inputs.curLedValue = m_curLedValue;
+  }
 }

@@ -4,26 +4,16 @@
 
 package frc.robot;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.revrobotics.spark.ClosedLoopSlot;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -31,19 +21,18 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc.robot.FieldConstants.AprilTagLayoutType;
-import frc.robot.FieldConstants.ReefLevel;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide
- * numerical or boolean
- * constants. This class should not be used for any other purpose. All constants
- * should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>
- * It is advised to statically import this class (or one of its inner classes)
- * wherever the
+ * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
@@ -65,7 +54,8 @@ public final class Constants {
   public static final class GeneralConstants {
 
     // Robot mode
-    public static final RobotMode CURRENT_MODE = RobotBase.isReal() ? RobotMode.COMP : RobotMode.SIM;
+    public static final RobotMode CURRENT_MODE =
+        RobotBase.isReal() ? RobotMode.COMP : RobotMode.SIM;
 
     public static enum RobotMode {
       /** Running on test mode */
@@ -82,8 +72,10 @@ public final class Constants {
   public static class FieldConstants {
 
     // Robot heading constants for different field elements //
-    public static final Rotation2d LEFT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(-54.011392);
-    public static final Rotation2d RIGHT_CORAL_STATION_INTAKE_ANGLE = Rotation2d.fromDegrees(54.011392);
+    public static final Rotation2d LEFT_CORAL_STATION_INTAKE_ANGLE =
+        Rotation2d.fromDegrees(-54.011392);
+    public static final Rotation2d RIGHT_CORAL_STATION_INTAKE_ANGLE =
+        Rotation2d.fromDegrees(54.011392);
     public static final Rotation2d ALGAE_PROCESSOR_STATION_ANGLE = Rotation2d.fromDegrees(-90);
 
     // Blue Reef Station ID Angle Constant //
@@ -102,24 +94,25 @@ public final class Constants {
     public static final Rotation2d REEF_STATION_ID_10_ANGLE = Rotation2d.fromDegrees(180);
     public static final Rotation2d REEF_STATION_ID_11_ANGLE = Rotation2d.fromDegrees(-120);
 
-    public static final Map<Integer, Rotation2d> REEF_STATION_ID_ANGLE_MAP = Map.ofEntries(
-        Map.entry(6, REEF_STATION_ID_6_ANGLE),
-        Map.entry(7, REEF_STATION_ID_7_ANGLE),
-        Map.entry(8, REEF_STATION_ID_8_ANGLE),
-        Map.entry(9, REEF_STATION_ID_9_ANGLE),
-        Map.entry(10, REEF_STATION_ID_10_ANGLE),
-        Map.entry(11, REEF_STATION_ID_11_ANGLE),
-        Map.entry(17, REEF_STATION_ID_17_ANGLE),
-        Map.entry(18, REEF_STATION_ID_18_ANGLE),
-        Map.entry(19, REEF_STATION_ID_19_ANGLE),
-        Map.entry(20, REEF_STATION_ID_20_ANGLE),
-        Map.entry(21, REEF_STATION_ID_21_ANGLE),
-        Map.entry(22, REEF_STATION_ID_22_ANGLE));
+    public static final Map<Integer, Rotation2d> REEF_STATION_ID_ANGLE_MAP =
+        Map.ofEntries(
+            Map.entry(6, REEF_STATION_ID_6_ANGLE),
+            Map.entry(7, REEF_STATION_ID_7_ANGLE),
+            Map.entry(8, REEF_STATION_ID_8_ANGLE),
+            Map.entry(9, REEF_STATION_ID_9_ANGLE),
+            Map.entry(10, REEF_STATION_ID_10_ANGLE),
+            Map.entry(11, REEF_STATION_ID_11_ANGLE),
+            Map.entry(17, REEF_STATION_ID_17_ANGLE),
+            Map.entry(18, REEF_STATION_ID_18_ANGLE),
+            Map.entry(19, REEF_STATION_ID_19_ANGLE),
+            Map.entry(20, REEF_STATION_ID_20_ANGLE),
+            Map.entry(21, REEF_STATION_ID_21_ANGLE),
+            Map.entry(22, REEF_STATION_ID_22_ANGLE));
 
     // Reef station tag ID array //
-    public static final int[] REEF_STATION_TAG_IDS = { 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 };
-    public static final int[] BLUE_REEF_STATION_TAG_IDS = { 17, 18, 19, 20, 21, 22 };
-    public static final int[] RED_REEF_STATION_TAG_IDS = { 6, 7, 8, 9, 10, 11 };
+    public static final int[] REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
+    public static final int[] BLUE_REEF_STATION_TAG_IDS = {17, 18, 19, 20, 21, 22};
+    public static final int[] RED_REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11};
 
     // The different layouts of the AprilTags on the field
     public static final AprilTagFieldLayout DEFAULT_APTAG_FIELD_LAYOUT;
@@ -133,17 +126,19 @@ public final class Constants {
       // It might return null if the resource is missing, though kDefaultField should
       // be safe.
       // Construct paths for welded layouts
-      Path defaultPath = Path.of(
-          Filesystem.getDeployDirectory().getPath(),
-          "apriltags",
-          "welded",
-          "2025-reef-only.json");
+      Path defaultPath =
+          Path.of(
+              Filesystem.getDeployDirectory().getPath(),
+              "apriltags",
+              "welded",
+              "2025-reef-only.json");
       AprilTagFieldLayout defaultLayout = null;
       try {
         defaultLayout = new AprilTagFieldLayout(defaultPath);
       } catch (IOException e) {
         System.err.println("!!! CRITICAL: Failed to load default AprilTag field resource!");
-        DriverStation.reportError("CRITICAL: Failed to load default AprilTag field resource: " + e.getMessage(), true);
+        DriverStation.reportError(
+            "CRITICAL: Failed to load default AprilTag field resource: " + e.getMessage(), true);
 
         // If loading from file fails, we will use the static kDefaultField layout
         // as a fallback.
@@ -155,16 +150,18 @@ public final class Constants {
       AprilTagFieldLayout blueLayout = null;
 
       // Construct paths for welded layouts
-      Path redPath = Path.of(
-          Filesystem.getDeployDirectory().getPath(),
-          "apriltags",
-          "welded",
-          "2025-red-reef.json");
-      Path bluePath = Path.of(
-          Filesystem.getDeployDirectory().getPath(),
-          "apriltags",
-          "welded",
-          "2025-blue-reef.json");
+      Path redPath =
+          Path.of(
+              Filesystem.getDeployDirectory().getPath(),
+              "apriltags",
+              "welded",
+              "2025-red-reef.json");
+      Path bluePath =
+          Path.of(
+              Filesystem.getDeployDirectory().getPath(),
+              "apriltags",
+              "welded",
+              "2025-blue-reef.json");
 
       // Try loading layouts from file paths - THESE can throw IOException
       try {
@@ -174,7 +171,8 @@ public final class Constants {
         // Handle the error if loading from files fails
         System.err.println("!!! Failed to load welded AprilTag field layout files!");
         e.printStackTrace();
-        DriverStation.reportError("Failed to load welded AprilTag layouts: " + e.getMessage(), true);
+        DriverStation.reportError(
+            "Failed to load welded AprilTag layouts: " + e.getMessage(), true);
         // redLayout and blueLayout will remain null if they failed
       } finally {
         // Assign the loaded layouts to the final fields
@@ -214,72 +212,40 @@ public final class Constants {
 
     public static class CoralStation {
       public static final Pose2d CORAL_STATION_LEFT_1_BLUE =
-          new Pose2d(
-              1.65,
-              7.5,
-              LEFT_CORAL_STATION_INTAKE_ANGLE
-          )
-          .transformBy(
-              new Transform2d(
-                  0.02,
-                  Units.inchesToMeters(-6),
-                  Rotation2d.kZero));
+          new Pose2d(1.65, 7.5, LEFT_CORAL_STATION_INTAKE_ANGLE)
+              .transformBy(new Transform2d(0.02, Units.inchesToMeters(-6), Rotation2d.kZero));
       public static final Pose2d CORAL_STATION_LEFT_2_BLUE =
-          new Pose2d(
-              1.65,
-              7.5,
-              LEFT_CORAL_STATION_INTAKE_ANGLE
-          )
-          .transformBy(
-              new Transform2d(
-                  0.02,
-                  Units.inchesToMeters(-6) + Units.inchesToMeters(-11.25),
-                  Rotation2d.kZero));
+          new Pose2d(1.65, 7.5, LEFT_CORAL_STATION_INTAKE_ANGLE)
+              .transformBy(
+                  new Transform2d(
+                      0.02,
+                      Units.inchesToMeters(-6) + Units.inchesToMeters(-11.25),
+                      Rotation2d.kZero));
       public static final Pose2d CORAL_STATION_LEFT_3_BLUE =
-          new Pose2d(
-              1.65,
-              7.5,
-              LEFT_CORAL_STATION_INTAKE_ANGLE
-          )
-          .transformBy(
-              new Transform2d(
-                  0.02,
-                  Units.inchesToMeters(-6) + (2 * Units.inchesToMeters(-11.25)),
-                  Rotation2d.kZero));
+          new Pose2d(1.65, 7.5, LEFT_CORAL_STATION_INTAKE_ANGLE)
+              .transformBy(
+                  new Transform2d(
+                      0.02,
+                      Units.inchesToMeters(-6) + (2 * Units.inchesToMeters(-11.25)),
+                      Rotation2d.kZero));
 
       public static final Pose2d CORAL_STATION_RIGHT_1_BLUE =
-          new Pose2d(
-              1.65,
-              0.645,
-              RIGHT_CORAL_STATION_INTAKE_ANGLE
-          )
-          .transformBy(
-              new Transform2d(
-                  0.02,
-                  Units.inchesToMeters(6),
-                  Rotation2d.kZero));
+          new Pose2d(1.65, 0.645, RIGHT_CORAL_STATION_INTAKE_ANGLE)
+              .transformBy(new Transform2d(0.02, Units.inchesToMeters(6), Rotation2d.kZero));
       public static final Pose2d CORAL_STATION_RIGHT_2_BLUE =
-          new Pose2d(
-              1.65,
-              0.645,
-              RIGHT_CORAL_STATION_INTAKE_ANGLE
-          )
-          .transformBy(
-              new Transform2d(
-                  0.02,
-                  Units.inchesToMeters(6) + Units.inchesToMeters(11.25),
-                  Rotation2d.kZero));
+          new Pose2d(1.65, 0.645, RIGHT_CORAL_STATION_INTAKE_ANGLE)
+              .transformBy(
+                  new Transform2d(
+                      0.02,
+                      Units.inchesToMeters(6) + Units.inchesToMeters(11.25),
+                      Rotation2d.kZero));
       public static final Pose2d CORAL_STATION_RIGHT_3_BLUE =
-          new Pose2d(
-              1.65,
-              0.645,
-              RIGHT_CORAL_STATION_INTAKE_ANGLE
-          )
-          .transformBy(
-              new Transform2d(
-                  0.02,
-                  Units.inchesToMeters(6) + (2 * Units.inchesToMeters(11.25)),
-                  Rotation2d.kZero));
+          new Pose2d(1.65, 0.645, RIGHT_CORAL_STATION_INTAKE_ANGLE)
+              .transformBy(
+                  new Transform2d(
+                      0.02,
+                      Units.inchesToMeters(6) + (2 * Units.inchesToMeters(11.25)),
+                      Rotation2d.kZero));
 
       public static final Pose2d CORAL_STATION_LEFT_1_RED =
           new Pose2d(
@@ -318,385 +284,284 @@ public final class Constants {
               CORAL_STATION_RIGHT_3_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Fudge Factor
 
       // Blue Coral Station 2D Poses //
-      public static final List<Pose2d> BLUE_CORAL_STATION_POSES = new ArrayList<>(List.of(
-        CORAL_STATION_LEFT_1_BLUE,
-        CORAL_STATION_LEFT_2_BLUE,
-        CORAL_STATION_LEFT_3_BLUE,
-        CORAL_STATION_RIGHT_1_BLUE,
-        CORAL_STATION_RIGHT_2_BLUE,
-        CORAL_STATION_RIGHT_3_BLUE
-      ));
+      public static final List<Pose2d> BLUE_CORAL_STATION_POSES =
+          new ArrayList<>(
+              List.of(
+                  CORAL_STATION_LEFT_1_BLUE,
+                  CORAL_STATION_LEFT_2_BLUE,
+                  CORAL_STATION_LEFT_3_BLUE,
+                  CORAL_STATION_RIGHT_1_BLUE,
+                  CORAL_STATION_RIGHT_2_BLUE,
+                  CORAL_STATION_RIGHT_3_BLUE));
 
       // Red Coral Station 2D Poses //
-      public static final List<Pose2d> RED_CORAL_STATION_POSES = new ArrayList<>(List.of(
-        CORAL_STATION_LEFT_1_RED,
-        CORAL_STATION_LEFT_2_RED,
-        CORAL_STATION_LEFT_3_RED,
-        CORAL_STATION_RIGHT_1_RED,
-        CORAL_STATION_RIGHT_2_RED,
-        CORAL_STATION_RIGHT_3_RED
-      ));
+      public static final List<Pose2d> RED_CORAL_STATION_POSES =
+          new ArrayList<>(
+              List.of(
+                  CORAL_STATION_LEFT_1_RED,
+                  CORAL_STATION_LEFT_2_RED,
+                  CORAL_STATION_LEFT_3_RED,
+                  CORAL_STATION_RIGHT_1_RED,
+                  CORAL_STATION_RIGHT_2_RED,
+                  CORAL_STATION_RIGHT_3_RED));
     }
 
     public static class Reef {
 
       public static final Pose2d REEF_A_BLUE =
-          new Pose2d(
-              3.1886031999999997,
-              4.1902126,
-              Rotation2d.fromDegrees(0))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(3.1886031999999997, 4.1902126, Rotation2d.fromDegrees(0))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_B_BLUE =
-          new Pose2d(
-              3.1886031999999997,
-              3.8615874000000003,
-              Rotation2d.fromDegrees(0))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(3.1886031999999997, 3.8615874000000003, Rotation2d.fromDegrees(0))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_C_BLUE =
-          new Pose2d(
-              3.6966769142381293,
-              2.9815779129493296,
-              Rotation2d.fromDegrees(60))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(3.6966769142381293, 2.9815779129493296, Rotation2d.fromDegrees(60))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_D_BLUE =
-          new Pose2d(
-              3.9812746857618713,
-              2.81726531294933,
-              Rotation2d.fromDegrees(60))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(3.9812746857618713, 2.81726531294933, Rotation2d.fromDegrees(60))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_E_BLUE =
-          new Pose2d(
-              4.9974221142381285,
-              2.81726531294933,
-              Rotation2d.fromDegrees(120))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(4.9974221142381285, 2.81726531294933, Rotation2d.fromDegrees(120))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_F_BLUE =
-          new Pose2d(
-              5.282019885761871,
-              2.9815779129493296,
-              Rotation2d.fromDegrees(120))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(5.282019885761871, 2.9815779129493296, Rotation2d.fromDegrees(120))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_G_BLUE =
-          new Pose2d(
-              5.7900936000000005,
-              3.8615874,
-              Rotation2d.fromDegrees(360 - 180))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(5.7900936000000005, 3.8615874, Rotation2d.fromDegrees(360 - 180))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_H_BLUE =
-          new Pose2d(
-              5.7900936000000005,
-              4.1902126,
-              Rotation2d.fromDegrees(360 - 180))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(5.7900936000000005, 4.1902126, Rotation2d.fromDegrees(360 - 180))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_I_BLUE =
-          new Pose2d(
-              5.282019885761871,
-              5.070222087050671,
-              Rotation2d.fromDegrees(360 - 120))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(5.282019885761871, 5.070222087050671, Rotation2d.fromDegrees(360 - 120))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_J_BLUE =
-          new Pose2d(
-              4.9974221142381285,
-              5.234534687050671,
-              Rotation2d.fromDegrees(360 - 120))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(4.9974221142381285, 5.234534687050671, Rotation2d.fromDegrees(360 - 120))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_K_BLUE =
-          new Pose2d(
-              3.9812746857618713,
-              5.234534687050671,
-              Rotation2d.fromDegrees(360 - 60))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+          new Pose2d(3.9812746857618713, 5.234534687050671, Rotation2d.fromDegrees(360 - 60))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
       public static final Pose2d REEF_L_BLUE =
+          new Pose2d(3.6966769142381293, 5.070222087050671, Rotation2d.fromDegrees(360 - 60))
+              .transformBy(
+                  new Transform2d(-0.02, 0.0, Rotation2d.kZero)); // Adjust for bumper width
+
+      public static final Pose2d REEF_A_RED =
           new Pose2d(
-              3.6966769142381293,
-              5.070222087050671,
-              Rotation2d.fromDegrees(360 - 60))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
+              FIELD_LENGTH - REEF_A_BLUE.getX(),
+              FIELD_WIDTH - REEF_A_BLUE.getY(),
+              REEF_A_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
+      public static final Pose2d REEF_B_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_B_BLUE.getX(),
+              FIELD_WIDTH - REEF_B_BLUE.getY(),
+              REEF_B_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_A_RED = new Pose2d(
-          FIELD_LENGTH - REEF_A_BLUE.getX(),
-          FIELD_WIDTH - REEF_A_BLUE.getY(),
-          REEF_A_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
+      public static final Pose2d REEF_C_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_C_BLUE.getX(),
+              FIELD_WIDTH - REEF_C_BLUE.getY(),
+              REEF_C_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_B_RED = new Pose2d(
-          FIELD_LENGTH - REEF_B_BLUE.getX(),
-          FIELD_WIDTH - REEF_B_BLUE.getY(),
-          REEF_B_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
+      public static final Pose2d REEF_D_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_D_BLUE.getX(),
+              FIELD_WIDTH - REEF_D_BLUE.getY(),
+              REEF_D_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_C_RED = new Pose2d(
-          FIELD_LENGTH - REEF_C_BLUE.getX(),
-          FIELD_WIDTH - REEF_C_BLUE.getY(),
-          REEF_C_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
+      public static final Pose2d REEF_E_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_E_BLUE.getX(),
+              FIELD_WIDTH - REEF_E_BLUE.getY(),
+              REEF_E_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_D_RED = new Pose2d(
-          FIELD_LENGTH - REEF_D_BLUE.getX(),
-          FIELD_WIDTH - REEF_D_BLUE.getY(),
-          REEF_D_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
+      public static final Pose2d REEF_F_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_F_BLUE.getX(),
+              FIELD_WIDTH - REEF_F_BLUE.getY(),
+              REEF_F_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_E_RED = new Pose2d(
-          FIELD_LENGTH - REEF_E_BLUE.getX(),
-          FIELD_WIDTH - REEF_E_BLUE.getY(),
-          REEF_E_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
+      public static final Pose2d REEF_G_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_G_BLUE.getX(),
+              FIELD_WIDTH - REEF_G_BLUE.getY(),
+              REEF_G_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_F_RED = new Pose2d(
-          FIELD_LENGTH - REEF_F_BLUE.getX(),
-          FIELD_WIDTH - REEF_F_BLUE.getY(),
-          REEF_F_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
+      public static final Pose2d REEF_H_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_H_BLUE.getX(),
+              FIELD_WIDTH - REEF_H_BLUE.getY(),
+              REEF_H_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_G_RED = new Pose2d(
-          FIELD_LENGTH - REEF_G_BLUE.getX(),
-          FIELD_WIDTH - REEF_G_BLUE.getY(),
-          REEF_G_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
+      public static final Pose2d REEF_I_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_I_BLUE.getX(),
+              FIELD_WIDTH - REEF_I_BLUE.getY(),
+              REEF_I_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_H_RED = new Pose2d(
-          FIELD_LENGTH - REEF_H_BLUE.getX(),
-          FIELD_WIDTH - REEF_H_BLUE.getY(),
-          REEF_H_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
+      public static final Pose2d REEF_J_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_J_BLUE.getX(),
+              FIELD_WIDTH - REEF_J_BLUE.getY(),
+              REEF_J_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_I_RED = new Pose2d(
-          FIELD_LENGTH - REEF_I_BLUE.getX(),
-          FIELD_WIDTH - REEF_I_BLUE.getY(),
-          REEF_I_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
+      public static final Pose2d REEF_K_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_K_BLUE.getX(),
+              FIELD_WIDTH - REEF_K_BLUE.getY(),
+              REEF_K_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
-      public static final Pose2d REEF_J_RED = new Pose2d(
-          FIELD_LENGTH - REEF_J_BLUE.getX(),
-          FIELD_WIDTH - REEF_J_BLUE.getY(),
-          REEF_J_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
-
-      public static final Pose2d REEF_K_RED = new Pose2d(
-          FIELD_LENGTH - REEF_K_BLUE.getX(),
-          FIELD_WIDTH - REEF_K_BLUE.getY(),
-          REEF_K_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
-
-      public static final Pose2d REEF_L_RED = new Pose2d(
-          FIELD_LENGTH - REEF_L_BLUE.getX(),
-          FIELD_WIDTH - REEF_L_BLUE.getY(),
-          REEF_L_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
+      public static final Pose2d REEF_L_RED =
+          new Pose2d(
+              FIELD_LENGTH - REEF_L_BLUE.getX(),
+              FIELD_WIDTH - REEF_L_BLUE.getY(),
+              REEF_L_BLUE.getRotation().rotateBy(Rotation2d.kPi)); // Flip by 180 degrees
 
       // Blue Reef Station 2D Poses //
-      public static final List<Pose2d> BLUE_REEF_STATION_POSES = new ArrayList<>(List.of(
-        REEF_A_BLUE,
-        REEF_B_BLUE,
-        REEF_C_BLUE,
-        REEF_D_BLUE,
-        REEF_E_BLUE,
-        REEF_F_BLUE,
-        REEF_G_BLUE,
-        REEF_H_BLUE,
-        REEF_I_BLUE,
-        REEF_J_BLUE,
-        REEF_K_BLUE,
-        REEF_L_BLUE
-      ));
+      public static final List<Pose2d> BLUE_REEF_STATION_POSES =
+          new ArrayList<>(
+              List.of(
+                  REEF_A_BLUE,
+                  REEF_B_BLUE,
+                  REEF_C_BLUE,
+                  REEF_D_BLUE,
+                  REEF_E_BLUE,
+                  REEF_F_BLUE,
+                  REEF_G_BLUE,
+                  REEF_H_BLUE,
+                  REEF_I_BLUE,
+                  REEF_J_BLUE,
+                  REEF_K_BLUE,
+                  REEF_L_BLUE));
 
       // Blue Reef Station Left 2D Poses //
-      public static final List<Pose2d> BLUE_REEF_STATION_LEFT_POSES = new ArrayList<>(List.of(
-        REEF_A_BLUE,
-        REEF_C_BLUE,
-        REEF_E_BLUE,
-        REEF_G_BLUE,
-        REEF_I_BLUE,
-        REEF_K_BLUE
-      ));
+      public static final List<Pose2d> BLUE_REEF_STATION_LEFT_POSES =
+          new ArrayList<>(
+              List.of(
+                  REEF_A_BLUE, REEF_C_BLUE, REEF_E_BLUE, REEF_G_BLUE, REEF_I_BLUE, REEF_K_BLUE));
 
       // Blue Reef Station Right 2D Poses //
-      public static final List<Pose2d> BLUE_REEF_STATION_RIGHT_POSES = new ArrayList<>(List.of(
-        REEF_B_BLUE,
-        REEF_D_BLUE,
-        REEF_F_BLUE,
-        REEF_H_BLUE,
-        REEF_J_BLUE,
-        REEF_L_BLUE
-      ));
+      public static final List<Pose2d> BLUE_REEF_STATION_RIGHT_POSES =
+          new ArrayList<>(
+              List.of(
+                  REEF_B_BLUE, REEF_D_BLUE, REEF_F_BLUE, REEF_H_BLUE, REEF_J_BLUE, REEF_L_BLUE));
 
       // Red Reef Station 2D Poses //
-      public static final List<Pose2d> RED_REEF_STATION_POSES = new ArrayList<>(List.of(
-        REEF_A_RED,
-        REEF_B_RED,
-        REEF_C_RED,
-        REEF_D_RED,
-        REEF_E_RED,
-        REEF_F_RED,
-        REEF_G_RED,
-        REEF_H_RED,
-        REEF_I_RED,
-        REEF_J_RED,
-        REEF_K_RED,
-        REEF_L_RED
-      ));
+      public static final List<Pose2d> RED_REEF_STATION_POSES =
+          new ArrayList<>(
+              List.of(
+                  REEF_A_RED,
+                  REEF_B_RED,
+                  REEF_C_RED,
+                  REEF_D_RED,
+                  REEF_E_RED,
+                  REEF_F_RED,
+                  REEF_G_RED,
+                  REEF_H_RED,
+                  REEF_I_RED,
+                  REEF_J_RED,
+                  REEF_K_RED,
+                  REEF_L_RED));
 
       // Blue Reef Station Left 2D Poses //
-      public static final List<Pose2d> RED_REEF_STATION_LEFT_POSES = new ArrayList<>(List.of(
-        REEF_A_RED,
-        REEF_C_RED,
-        REEF_E_RED,
-        REEF_G_RED,
-        REEF_I_RED,
-        REEF_K_RED
-      ));
+      public static final List<Pose2d> RED_REEF_STATION_LEFT_POSES =
+          new ArrayList<>(
+              List.of(REEF_A_RED, REEF_C_RED, REEF_E_RED, REEF_G_RED, REEF_I_RED, REEF_K_RED));
 
       // Blue Reef Station Right 2D Poses //
-      public static final List<Pose2d> RED_REEF_STATION_RIGHT_POSES = new ArrayList<>(List.of(
-        REEF_B_RED,
-        REEF_D_RED,
-        REEF_F_RED,
-        REEF_H_RED,
-        REEF_J_RED,
-        REEF_L_RED
-      ));      
+      public static final List<Pose2d> RED_REEF_STATION_RIGHT_POSES =
+          new ArrayList<>(
+              List.of(REEF_B_RED, REEF_D_RED, REEF_F_RED, REEF_H_RED, REEF_J_RED, REEF_L_RED));
     }
   }
 
   public static class VisionConstants {
     public static final String[] APTAG_CAMERA_NAMES = {
-        "AprilTagAlignLeftCamera",
-        "AprilTagAlignRightCamera",
-        "AprilTagPoseEstCameraFL",
-        "AprilTagPoseEstCameraFR",
-        "AprilTagPoseEstCameraBL",
-        "AprilTagPoseEstCameraBR"
+      "AprilTagAlignLeftCamera",
+      "AprilTagAlignRightCamera",
+      "AprilTagPoseEstCameraFL",
+      "AprilTagPoseEstCameraFR",
+      "AprilTagPoseEstCameraBL",
+      "AprilTagPoseEstCameraBR"
     };
 
     // Main Apriltag alignment cam mounted facing forward, half a meter forward of
     // center, half a meter up from center.
-    public static final Transform3d APTAG_ALIGN_LEFT_CAM_POS = new Transform3d(
-        new Translation3d(
-            Units.inchesToMeters(9.249),
-            Units.inchesToMeters(4.910),
-            Units.inchesToMeters(8.3885)),
-        new Rotation3d(
-            0,
-            Units.degreesToRadians(-20),
-            0)
-    );
+    public static final Transform3d APTAG_ALIGN_LEFT_CAM_POS =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(9.249),
+                Units.inchesToMeters(4.910),
+                Units.inchesToMeters(8.3885)),
+            new Rotation3d(0, Units.degreesToRadians(-20), 0));
 
     // Main Apriltag alignment cam mounted facing forward, half a meter forward of
     // center, half a meter up from center.
-    public static final Transform3d APTAG_ALIGN_RIGHT_CAM_POS = new Transform3d(
-        new Translation3d(
-            Units.inchesToMeters(9.249),
-            Units.inchesToMeters(-4.910),
-            Units.inchesToMeters(8.3885)),
-        new Rotation3d(
-            0,
-            Units.degreesToRadians(-20),
-            0)
-    );
+    public static final Transform3d APTAG_ALIGN_RIGHT_CAM_POS =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(9.249),
+                Units.inchesToMeters(-4.910),
+                Units.inchesToMeters(8.3885)),
+            new Rotation3d(0, Units.degreesToRadians(-20), 0));
 
     // Front-Left Camera: Mounted at front-left corner, pointing outward at 30
     // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_FL_POS = new Transform3d(
-        new Translation3d(
-            Units.inchesToMeters(17.125),
-            Units.inchesToMeters(17.125),
-            Units.inchesToMeters(6.825)
-        ),
-        new Rotation3d(
-            0,
-            Units.degreesToRadians(-20),
-            Units.degreesToRadians(45)
-        )
-    );
+    public static final Transform3d APTAG_POSE_EST_CAM_FL_POS =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(17.125),
+                Units.inchesToMeters(17.125),
+                Units.inchesToMeters(6.825)),
+            new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(45)));
 
     // Front-Right Camera: Mounted at front-right corner, pointing outward at -30
     // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_FR_POS = new Transform3d(
-        new Translation3d(
-          Units.inchesToMeters(17.125),
-          Units.inchesToMeters(-17.125),
-          Units.inchesToMeters(6.825)
-      ),
-      new Rotation3d(
-            0,
-            Units.degreesToRadians(-20),
-            Units.degreesToRadians(-45)
-        )
-    );
+    public static final Transform3d APTAG_POSE_EST_CAM_FR_POS =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(17.125),
+                Units.inchesToMeters(-17.125),
+                Units.inchesToMeters(6.825)),
+            new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(-45)));
 
     // Back-Left Camera: Mounted at back-left corner, pointing outward at 135
     // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_BL_POS = new Transform3d(
-        new Translation3d(
-            Units.inchesToMeters(-17.125),
-            Units.inchesToMeters(17.125),
-            Units.inchesToMeters(6.825)
-        ),
-        new Rotation3d(
-            0,
-            Units.degreesToRadians(-20),
-            Units.degreesToRadians(135)
-        )
-    );
+    public static final Transform3d APTAG_POSE_EST_CAM_BL_POS =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(-17.125),
+                Units.inchesToMeters(17.125),
+                Units.inchesToMeters(6.825)),
+            new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(135)));
 
     // Back-Right Camera: Mounted at back-right corner, pointing outward at -135
     // degrees
-    public static final Transform3d APTAG_POSE_EST_CAM_BR_POS = new Transform3d(
-        new Translation3d(
-            Units.inchesToMeters(-17.125),
-            Units.inchesToMeters(-17.125),
-            Units.inchesToMeters(6.825)
-        ),
-        new Rotation3d(
-            0,
-            Units.degreesToRadians(-20),
-            Units.degreesToRadians(-135)
-        )
-    );
+    public static final Transform3d APTAG_POSE_EST_CAM_BR_POS =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(-17.125),
+                Units.inchesToMeters(-17.125),
+                Units.inchesToMeters(6.825)),
+            new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(-135)));
 
     public static final Transform3d[] APTAG_POSE_EST_CAM_POSITIONS = {
-        APTAG_POSE_EST_CAM_FL_POS,
-        APTAG_POSE_EST_CAM_FR_POS,
-        APTAG_POSE_EST_CAM_BL_POS,
-        APTAG_POSE_EST_CAM_BR_POS
+      APTAG_POSE_EST_CAM_FL_POS,
+      APTAG_POSE_EST_CAM_FR_POS,
+      APTAG_POSE_EST_CAM_BL_POS,
+      APTAG_POSE_EST_CAM_BR_POS
     };
 
     // The standard deviations of our vision estimated poses, which affect
@@ -721,11 +586,9 @@ public final class Constants {
     public static final double CAMERA_ASPECT_RATIO_HEIGHT = 3.0;
 
     // Calculated value
-    public static final double CAMERA_FOV_VERTICAL_DEGREES = calculateVerticalFOV(
-        CAMERA_FOV_HORIZONTAL_DEGREES,
-        CAMERA_ASPECT_RATIO_WIDTH,
-        CAMERA_ASPECT_RATIO_HEIGHT
-    );
+    public static final double CAMERA_FOV_VERTICAL_DEGREES =
+        calculateVerticalFOV(
+            CAMERA_FOV_HORIZONTAL_DEGREES, CAMERA_ASPECT_RATIO_WIDTH, CAMERA_ASPECT_RATIO_HEIGHT);
 
     /**
      * Calculates the vertical Field of View (FOV) from the horizontal FOV and aspect ratio.
@@ -735,38 +598,41 @@ public final class Constants {
      * @param aspectRatioHeight Height component of the aspect ratio.
      * @return Vertical FOV in degrees.
      */
-    private static double calculateVerticalFOV(double horizontalFOV, double aspectRatioWidth, double aspectRatioHeight) {
-        // Convert horizontal FOV to radians for Math functions
-        double horizontalFOV_rad = Math.toRadians(horizontalFOV);
+    private static double calculateVerticalFOV(
+        double horizontalFOV, double aspectRatioWidth, double aspectRatioHeight) {
+      // Convert horizontal FOV to radians for Math functions
+      double horizontalFOV_rad = Math.toRadians(horizontalFOV);
 
-        // Calculate tan(HFOV / 2)
-        double tan_hFOV_half = Math.tan(horizontalFOV_rad / 2.0);
+      // Calculate tan(HFOV / 2)
+      double tan_hFOV_half = Math.tan(horizontalFOV_rad / 2.0);
 
-        // Calculate tan(VFOV / 2) using the aspect ratio
-        double tan_vFOV_half = tan_hFOV_half * (aspectRatioHeight / aspectRatioWidth);
+      // Calculate tan(VFOV / 2) using the aspect ratio
+      double tan_vFOV_half = tan_hFOV_half * (aspectRatioHeight / aspectRatioWidth);
 
-        // Calculate VFOV / 2 in radians
-        double vFOV_half_rad = Math.atan(tan_vFOV_half);
+      // Calculate VFOV / 2 in radians
+      double vFOV_half_rad = Math.atan(tan_vFOV_half);
 
-        // Calculate VFOV in radians and then convert to degrees
-        return Math.toDegrees(vFOV_half_rad * 2.0);
+      // Calculate VFOV in radians and then convert to degrees
+      return Math.toDegrees(vFOV_half_rad * 2.0);
     }
 
     // Standard deviation multipliers for each camera
     // (Adjust to trust some cameras more than others)
-    public static double[] CAMERA_STDDEV_FACTORS = new double[] {
-        1.0, // APTAG_LEFT_CAM
-        1.0, // APTAG_RIGHT_CAM
-        // 1.0, // APTAG_POSE_EST_CAM_FL_POS
-        // 1.0, // APTAG_POSE_EST_CAM_FR_POS
-        // 1.0, // APTAG_POSE_EST_CAM_BL_POS
-        // 1.0 // APTAG_POSE_EST_CAM_BR_POS
-    };
+    public static double[] CAMERA_STDDEV_FACTORS =
+        new double[] {
+          1.0, // APTAG_LEFT_CAM
+          1.0, // APTAG_RIGHT_CAM
+          // 1.0, // APTAG_POSE_EST_CAM_FL_POS
+          // 1.0, // APTAG_POSE_EST_CAM_FR_POS
+          // 1.0, // APTAG_POSE_EST_CAM_BL_POS
+          // 1.0 // APTAG_POSE_EST_CAM_BR_POS
+        };
 
     // Multipliers to apply for MegaTag 2 observations
     public static double LINEAR_STDDEV_MEGATAG2_FACTOR = 0.5; // More stable than full 3D solve
-    public static double ANGULAR_STDDEV_MEGATAG2_ANGLE_FACTOR = Double.POSITIVE_INFINITY;; // More stable than full 3D
-                                                                                           // solve
+    public static double ANGULAR_STDDEV_MEGATAG2_ANGLE_FACTOR = Double.POSITIVE_INFINITY;
+    ; // More stable than full 3D
+    // solve
 
     // Vision range and aim PID constants //
     public static final double RANGE_P = 2;
@@ -1099,9 +965,10 @@ public final class Constants {
     public static final double WHEEL_DIAMETER_INCHES = 4.0;
     public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(WHEEL_DIAMETER_INCHES);
     public static final double MAX_SPEED_FEET_PER_SECOND = 18.2; // 18.2 feet per second
-    public static final double MAX_SPEED_METERS_PER_SECOND = Units.feetToMeters(MAX_SPEED_FEET_PER_SECOND); // 18.2 feet
-                                                                                                            // per
-                                                                                                            // second
+    public static final double MAX_SPEED_METERS_PER_SECOND =
+        Units.feetToMeters(MAX_SPEED_FEET_PER_SECOND); // 18.2 feet
+    // per
+    // second
 
     public static final double ROBOT_MASS = (148 - 20.3) * 0.453592;
     public static final double CHASSIS_MASS = ROBOT_MASS;
@@ -1114,8 +981,10 @@ public final class Constants {
     public static final double SWERVE_DEADBAND = 0.1;
 
     // SWERVE MODULE ODOMETRY STANDARD DEVIATIONS //
-    // public static final Matrix<N3, N1> ODOMETRY_STD = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(5));
-    public static final Matrix<N3, N1> ODOMETRY_STD = VecBuilder.fill(0.2, 0.2, Units.degreesToRadians(3));
+    // public static final Matrix<N3, N1> ODOMETRY_STD = VecBuilder.fill(0.1, 0.1,
+    // Units.degreesToRadians(5));
+    public static final Matrix<N3, N1> ODOMETRY_STD =
+        VecBuilder.fill(0.2, 0.2, Units.degreesToRadians(3));
   }
 
   public static class OperatorControlNameConstants {

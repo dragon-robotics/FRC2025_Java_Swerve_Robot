@@ -5,14 +5,11 @@
 package frc.robot.commands.Teleop;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
-
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -52,17 +49,26 @@ public class DriveToPoseProfPID extends Command {
     m_rotationConstraints = rotationConstraints;
 
     // Initialize the PID controllers with constraints
-    m_translateController = new ProfiledPIDController(
-        4.0, 0, 0, // X controller with profiling
-        m_linearConstraints);
+    m_translateController =
+        new ProfiledPIDController(
+            4.0,
+            0,
+            0, // X controller with profiling
+            m_linearConstraints);
 
-    m_strafeController = new ProfiledPIDController(
-        4.0, 0, 0, // Y controller with profiling
-        m_linearConstraints);
+    m_strafeController =
+        new ProfiledPIDController(
+            4.0,
+            0,
+            0, // Y controller with profiling
+            m_linearConstraints);
 
-    m_rotationController = new ProfiledPIDController(
-        4.0, 0, 0, // Rotation controller
-        m_rotationConstraints);
+    m_rotationController =
+        new ProfiledPIDController(
+            4.0,
+            0,
+            0, // Rotation controller
+            m_rotationConstraints);
 
     // Set tolerances
     m_translateController.setTolerance(m_positionTolerance);
@@ -83,26 +89,19 @@ public class DriveToPoseProfPID extends Command {
     // Get the current pose and velocity of the swerve drive
     Pose2d currentPose = m_swerve.getState().Pose;
     ChassisSpeeds currentSpeeds = m_swerve.getState().Speeds;
-    
+
     // Convert robot-relative speeds to field-relative
-    ChassisSpeeds fieldRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
-        currentSpeeds, currentPose.getRotation()
-    );
+    ChassisSpeeds fieldRelativeSpeeds =
+        ChassisSpeeds.fromRobotRelativeSpeeds(currentSpeeds, currentPose.getRotation());
 
     // Reset ProfiledPIDControllers with current position AND velocity
     m_translateController.reset(
-        new TrapezoidProfile.State(currentPose.getX(), fieldRelativeSpeeds.vxMetersPerSecond)
-    );
+        new TrapezoidProfile.State(currentPose.getX(), fieldRelativeSpeeds.vxMetersPerSecond));
     m_strafeController.reset(
-        new TrapezoidProfile.State(currentPose.getY(), fieldRelativeSpeeds.vyMetersPerSecond)
-    );
+        new TrapezoidProfile.State(currentPose.getY(), fieldRelativeSpeeds.vyMetersPerSecond));
     m_rotationController.reset(
         new TrapezoidProfile.State(
-            currentPose.getRotation().getRadians(), 
-            fieldRelativeSpeeds.omegaRadiansPerSecond
-        )
-    );
-
+            currentPose.getRotation().getRadians(), fieldRelativeSpeeds.omegaRadiansPerSecond));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -115,19 +114,22 @@ public class DriveToPoseProfPID extends Command {
     double xSpeed = m_translateController.calculate(currentPose.getX(), m_targetPose.getX());
     double ySpeed = m_strafeController.calculate(currentPose.getY(), m_targetPose.getY());
     // Use current rotation for theta calculation's measurement
-    double thetaSpeed = m_rotationController.calculate(currentPose.getRotation().getRadians(), m_targetPose.getRotation().getRadians());
+    double thetaSpeed =
+        m_rotationController.calculate(
+            currentPose.getRotation().getRadians(), m_targetPose.getRotation().getRadians());
 
     // Debugging: Print the current pose and target pose
     // System.out.printf("Current Pose: %s, Target Pose: %s%n", currentPose, m_targetPose);
-    // System.out.printf("X Speed: %.2f, Y Speed: %.2f, Theta Speed: %.2f%n", xSpeed, ySpeed, thetaSpeed);
+    // System.out.printf("X Speed: %.2f, Y Speed: %.2f, Theta Speed: %.2f%n", xSpeed, ySpeed,
+    // thetaSpeed);
 
     // Convert field-relative speeds to robot-relative ChassisSpeeds
-    ChassisSpeeds targetSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-        xSpeed, ySpeed, thetaSpeed, currentPose.getRotation()
-    );
+    ChassisSpeeds targetSpeeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            xSpeed, ySpeed, thetaSpeed, currentPose.getRotation());
 
     // Command the swerve drive
-    m_swerve.setControl(m_robotSpeeds.withSpeeds(targetSpeeds));    
+    m_swerve.setControl(m_robotSpeeds.withSpeeds(targetSpeeds));
   }
 
   // Called once the command ends or is interrupted.
@@ -141,6 +143,8 @@ public class DriveToPoseProfPID extends Command {
   @Override
   public boolean isFinished() {
     // Check if all controllers are at their setpoints (within tolerance)
-    return m_translateController.atGoal() && m_strafeController.atGoal() && m_rotationController.atGoal();
+    return m_translateController.atGoal()
+        && m_strafeController.atGoal()
+        && m_rotationController.atGoal();
   }
 }

@@ -7,8 +7,9 @@ package frc.robot;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
-import com.pathplanner.lib.pathfinding.Pathfinder;
-import com.pathplanner.lib.pathfinding.Pathfinding;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 // import org.littletonrobotics.junction.LogFileUtil;
 // import org.littletonrobotics.junction.LoggedRobot;
@@ -20,10 +21,7 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 // import com.pathplanner.lib.pathfinding.Pathfinding;
 
 // import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.TimedRobot;
 // import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -95,8 +93,10 @@ public class Robot extends TimedRobot {
     //     break;
     // }
 
-    // // Logger.disableDeterministicTimestamps() // See "Deterministic Timestamps" in the "Understanding Data Flow" page
-    // Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.
+    // // Logger.disableDeterministicTimestamps() // See "Deterministic Timestamps" in the
+    // "Understanding Data Flow" page
+    // Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values
+    // may be added.
 
     // Warmup PathPlanner to avoid Java pauses
     PathfindingCommand.warmupCommand().schedule();
@@ -141,7 +141,7 @@ public class Robot extends TimedRobot {
     m_robotContainer.m_swerveDriveSubsystem.configNeutralMode(NeutralModeValue.Brake);
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-   
+
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();

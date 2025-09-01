@@ -4,11 +4,10 @@
 
 package frc.robot.commands.Teleop;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
+import java.util.function.DoubleSupplier;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class MoveAlgaeManually extends Command {
@@ -19,13 +18,11 @@ public class MoveAlgaeManually extends Command {
 
   /** Creates a new MoveAlgaeArmManually. */
   public MoveAlgaeManually(
-      AlgaeSubsystem algae,
-      DoubleSupplier armSpeed,
-      DoubleSupplier intakeSpeed) {
+      AlgaeSubsystem algae, DoubleSupplier armSpeed, DoubleSupplier intakeSpeed) {
     m_algae = algae;
     m_armSpeed = armSpeed;
     m_intakeSpeed = intakeSpeed;
-    
+
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(algae);
   }

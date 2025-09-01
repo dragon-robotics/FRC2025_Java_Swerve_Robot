@@ -1,26 +1,25 @@
 package frc.robot.subsystems.algae;
 
+import static frc.robot.Constants.AlgaeSubsystemConstants.*;
+
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkClosedLoopController;
-
-import static frc.robot.Constants.AlgaeSubsystemConstants.*;
 
 public class AlgaeIOSparkMax implements AlgaeIO {
   private final SparkMax m_intakeMotor;
@@ -31,7 +30,8 @@ public class AlgaeIOSparkMax implements AlgaeIO {
   private final ProfiledPIDController m_armPidController;
 
   // Feedforward for arm motor //
-  private final ArmFeedforward m_armFeedforward = new ArmFeedforward(ARM_KS, ARM_KG, ARM_KV, ARM_KA);
+  private final ArmFeedforward m_armFeedforward =
+      new ArmFeedforward(ARM_KS, ARM_KG, ARM_KV, ARM_KA);
 
   private int m_ntUpdateCounter = 0; // Counter to track loops for NT updates
 
@@ -46,29 +46,26 @@ public class AlgaeIOSparkMax implements AlgaeIO {
     m_armAbsEncoder = m_armMotor.getAbsoluteEncoder();
 
     // Instantiate the armPidController //
-    m_armPidController = new ProfiledPIDController(
-        ARM_P,
-        ARM_I,
-        ARM_D,
-        new Constraints(
-            ARM_MAX_MAXMOTION_VELOCITY,
-            ARM_MAX_MAXMOTION_ACCELERATION));
+    m_armPidController =
+        new ProfiledPIDController(
+            ARM_P,
+            ARM_I,
+            ARM_D,
+            new Constraints(ARM_MAX_MAXMOTION_VELOCITY, ARM_MAX_MAXMOTION_ACCELERATION));
 
     m_armPidController.setTolerance(ARM_MAXMOTION_ALLOWED_ERROR);
 
     // Intake Motor Configuration //
     SparkMaxConfig m_intakeMotorConfig = new SparkMaxConfig();
     m_intakeMotorConfig
-      .voltageCompensation(INTAKE_NOMINAL_VOLTAGE)
-      .smartCurrentLimit(INTAKE_STALL_CURRENT_LIMIT, INTAKE_FREE_CURRENT_LIMIT)
-      .secondaryCurrentLimit(INTAKE_STALL_CURRENT_LIMIT)
-      .idleMode(IdleMode.kBrake);
+        .voltageCompensation(INTAKE_NOMINAL_VOLTAGE)
+        .smartCurrentLimit(INTAKE_STALL_CURRENT_LIMIT, INTAKE_FREE_CURRENT_LIMIT)
+        .secondaryCurrentLimit(INTAKE_STALL_CURRENT_LIMIT)
+        .idleMode(IdleMode.kBrake);
 
     // Apply motor configurations //
     m_intakeMotor.configure(
-        m_intakeMotorConfig,
-        ResetMode.kNoResetSafeParameters,
-        PersistMode.kPersistParameters);
+        m_intakeMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
     // Left and Right Arm Motor Configuration //
     SparkMaxConfig m_armMotorConfig = new SparkMaxConfig();
@@ -76,26 +73,28 @@ public class AlgaeIOSparkMax implements AlgaeIO {
 
     // Left Motor Configuration //
     m_armMotorConfig
-      .voltageCompensation(ARM_NOMINAL_VOLTAGE)
-      .smartCurrentLimit(ARM_STALL_CURRENT_LIMIT)
-      .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
-      .openLoopRampRate(ARM_RAMP_RATE_IN_SEC)
-      .idleMode(IdleMode.kBrake);
+        .voltageCompensation(ARM_NOMINAL_VOLTAGE)
+        .smartCurrentLimit(ARM_STALL_CURRENT_LIMIT)
+        .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
+        .openLoopRampRate(ARM_RAMP_RATE_IN_SEC)
+        .idleMode(IdleMode.kBrake);
 
     // Left Motor Absolute Encoder Configuration //
-    m_armMotorConfig.absoluteEncoder
-      // .zeroCentered(true)
-      .zeroOffset(ABS_ENC_OFFSET_VAL)
-      .inverted(true);
+    m_armMotorConfig
+        .absoluteEncoder
+        // .zeroCentered(true)
+        .zeroOffset(ABS_ENC_OFFSET_VAL)
+        .inverted(true);
 
     // Left Motor Closed Loop Configuration //
-    m_armMotorConfig.closedLoop
-      .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-      .pidf(ARM_P, ARM_I, ARM_D, ARM_F, PID_SLOT)
-      .minOutput(-0.5, PID_SLOT)
-      .maxOutput(0.5, PID_SLOT)
-      .outputRange(-1, 1)
-      .maxMotion
+    m_armMotorConfig
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+        .pidf(ARM_P, ARM_I, ARM_D, ARM_F, PID_SLOT)
+        .minOutput(-0.5, PID_SLOT)
+        .maxOutput(0.5, PID_SLOT)
+        .outputRange(-1, 1)
+        .maxMotion
         .maxVelocity(ARM_MAX_MAXMOTION_VELOCITY)
         .maxAcceleration(ARM_MAX_MAXMOTION_ACCELERATION)
         .allowedClosedLoopError(ARM_MAXMOTION_ALLOWED_ERROR, PID_SLOT)
@@ -103,17 +102,15 @@ public class AlgaeIOSparkMax implements AlgaeIO {
 
     // Right Motor Configuration //
     m_armFollowMotorConfig
-      .voltageCompensation(ARM_NOMINAL_VOLTAGE)
-      .smartCurrentLimit(ARM_STALL_CURRENT_LIMIT)
-      .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
-      .openLoopRampRate(ARM_RAMP_RATE_IN_SEC)
-      .idleMode(IdleMode.kBrake)
-      .follow(ARM_LEAD_MOTOR_ID, true);
+        .voltageCompensation(ARM_NOMINAL_VOLTAGE)
+        .smartCurrentLimit(ARM_STALL_CURRENT_LIMIT)
+        .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
+        .openLoopRampRate(ARM_RAMP_RATE_IN_SEC)
+        .idleMode(IdleMode.kBrake)
+        .follow(ARM_LEAD_MOTOR_ID, true);
 
     m_armMotor.configure(
-        m_armMotorConfig,
-        ResetMode.kNoResetSafeParameters,
-        PersistMode.kPersistParameters);
+        m_armMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
     // Set the motors to start at 0 //
     m_intakeMotor.set(0);
@@ -146,25 +143,23 @@ public class AlgaeIOSparkMax implements AlgaeIO {
 
   @Override
   public void setArmSetpoint(double setpoint) {
-    m_armController.setReference(
-      setpoint,
-      ControlType.kPosition,
-      PID_SLOT);
+    m_armController.setReference(setpoint, ControlType.kPosition, PID_SLOT);
   }
 
   @Override
   public void setArmSetpointFF(double setpoint) {
     m_armController.setReference(
-      setpoint,
-      ControlType.kMAXMotionPositionControl,
-      PID_SLOT,
-      calculateFeedforward(setpoint),
-      ArbFFUnits.kVoltage);
+        setpoint,
+        ControlType.kMAXMotionPositionControl,
+        PID_SLOT,
+        calculateFeedforward(setpoint),
+        ArbFFUnits.kVoltage);
   }
 
   @Override
   public void setIntakeMotorVoltage(double voltage) {
-    m_intakeMotor.setVoltage(MathUtil.clamp(voltage, -INTAKE_NOMINAL_VOLTAGE, INTAKE_NOMINAL_VOLTAGE));
+    m_intakeMotor.setVoltage(
+        MathUtil.clamp(voltage, -INTAKE_NOMINAL_VOLTAGE, INTAKE_NOMINAL_VOLTAGE));
   }
 
   @Override
@@ -174,7 +169,7 @@ public class AlgaeIOSparkMax implements AlgaeIO {
 
   @Override
   public void updateInputs(AlgaeIOInputs inputs) {
-    
+
     // Only update every 4 loops
     if (m_ntUpdateCounter % 4 == 0) {
       // Check if motors are connected //
@@ -194,9 +189,8 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       inputs.intakeMotorDutyCycle = m_intakeMotor.getAppliedOutput();
       inputs.intakeMotorTemperature = m_intakeMotor.getMotorTemperature();
     }
-    
-    m_ntUpdateCounter++;
 
+    m_ntUpdateCounter++;
 
     inputs.intakeMotorCurrent = m_intakeMotor.getOutputCurrent();
 

@@ -1,16 +1,14 @@
 package frc.robot.subsystems.vision;
 
+import static frc.robot.Constants.FieldConstants.*;
+
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import java.util.function.Supplier;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
-
-import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
-
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import static frc.robot.Constants.FieldConstants.*;
-
-import java.util.function.Supplier;
 
 public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
 
@@ -26,9 +24,7 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
    * @param poseSupplier Supplier for the robot pose to use in simulation.
    */
   public VisionIOPhotonVisionSim(
-      String name,
-      Transform3d robotToCamera,
-      Supplier<SwerveDriveState> swerveDriveStateSupplier) {
+      String name, Transform3d robotToCamera, Supplier<SwerveDriveState> swerveDriveStateSupplier) {
     super(name, robotToCamera, swerveDriveStateSupplier);
     m_swerveDriveStateSupplier = swerveDriveStateSupplier;
 
@@ -45,7 +41,7 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
     cameraProperties.setFPS(60);
     cameraProperties.setAvgLatencyMs(10);
     cameraProperties.setLatencyStdDevMs(5);
-    
+
     m_cameraSim = new PhotonCameraSim(m_camera, cameraProperties, APTAG_FIELD_LAYOUT);
 
     m_visionSim.addCamera(m_cameraSim, robotToCamera);
@@ -64,5 +60,4 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
     m_visionSim.update(m_swerveDriveStateSupplier.get().Pose);
     super.updateInputs(inputs);
   }
-
 }

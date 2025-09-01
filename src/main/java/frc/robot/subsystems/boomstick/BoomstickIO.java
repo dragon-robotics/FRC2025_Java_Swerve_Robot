@@ -27,6 +27,5 @@ public interface BoomstickIO {
     public double armMotorVelocity;
   }
 
-  default void updateInputs(BoomstickIOInputs inputs) {
-  }
+  default void updateInputs(BoomstickIOInputs inputs) {}
 }

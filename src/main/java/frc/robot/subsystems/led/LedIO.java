@@ -7,18 +7,18 @@ package frc.robot.subsystems.led;
 /** Add your docs here. */
 public interface LedIO {
 
-    default void setLedColor(double ledValue) {
-        throw new UnsupportedOperationException("setLedColor is not implemented");
-    }
+  default void setLedColor(double ledValue) {
+    throw new UnsupportedOperationException("setLedColor is not implemented");
+  }
 
-    class LedIOInputs {
-        
-        // Is the LED Controller connected? //
-        public boolean ledControllerConnected;
+  class LedIOInputs {
 
-        // LED controller data //
-        public double curLedValue;
-    }
+    // Is the LED Controller connected? //
+    public boolean ledControllerConnected;
 
-    default void updateInputs(LedIOInputs inputs) {}
+    // LED controller data //
+    public double curLedValue;
+  }
+
+  default void updateInputs(LedIOInputs inputs) {}
 }

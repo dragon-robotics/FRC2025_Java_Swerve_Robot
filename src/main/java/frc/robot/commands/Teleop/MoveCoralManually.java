@@ -4,11 +4,10 @@
 
 package frc.robot.commands.Teleop;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.coral.CoralSubsystem;
+import java.util.function.DoubleSupplier;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class MoveCoralManually extends Command {
@@ -20,7 +19,7 @@ public class MoveCoralManually extends Command {
   public MoveCoralManually(CoralSubsystem coral, DoubleSupplier speed) {
     m_coral = coral;
     m_speed = speed;
-    
+
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(coral);
   }

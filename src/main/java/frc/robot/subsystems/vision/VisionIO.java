@@ -20,7 +20,7 @@ public interface VisionIO {
   /** Represents a robot pose sample used for pose estimation. */
   public static record PoseObservation(
       double timestamp, // seconds since of the pose observation
-      Pose3d pose,  // pose of the robot in the camera frame
+      Pose3d pose, // pose of the robot in the camera frame
       double ambiguity, // ambiguity of the pose estimate
       int tagCount, // number of tags used to estimate the pose
       double averageTagDistance, // average distance to the tags used to estimate the pose
@@ -36,5 +36,7 @@ public interface VisionIO {
 
   public default void updateInputs(VisionIOInputs inputs) {}
 
-  public default String getCameraName() {return "";}
+  public default String getCameraName() {
+    return "";
+  }
 }

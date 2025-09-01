@@ -4,10 +4,10 @@
 
 package frc.robot.subsystems.boomstick;
 
+import static frc.robot.Constants.BoomstickSubsystemConstants.*;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.boomstick.BoomstickIO.BoomstickIOInputs;
-
-import static frc.robot.Constants.BoomstickSubsystemConstants.*;
 
 public class BoomstickSubsystem extends SubsystemBase {
   /** Creates a new BoomstickSubsystem. */
@@ -32,10 +32,11 @@ public class BoomstickSubsystem extends SubsystemBase {
 
   /**
    * Set the wanted state of the boomstick arm
+   *
    * @param wantedState
    */
   public void setBoomstickState(BoomstickState wantedState) {
-    
+
     m_boomstickState = wantedState;
 
     switch (m_boomstickState) {
