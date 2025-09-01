@@ -34,8 +34,8 @@ public class DriveToPoseProfPID extends Command {
   private final TrapezoidProfile.Constraints m_rotationConstraints;
 
   // Tolerances - how close is close enough?
-  private static final double m_positionTolerance = 0.05; // meters
-  private static final double m_angleTolerance = Math.toRadians(5.0); // radians
+  private static final double m_positionTolerance = Units.inchesToMeters(1); // inches to meters
+  private static final double m_angleTolerance = Math.toRadians(5.0); // degrees to radians
 
   /** Creates a new DriveToPoseProfPID. */
   public DriveToPoseProfPID(
