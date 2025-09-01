@@ -1,12 +1,14 @@
 package frc.robot.util.vision;
 
+import static frc.robot.Constants.FieldConstants.APTAG_FIELD_LAYOUT;
+import static frc.robot.Constants.VisionConstants.MAX_AMBIGUITY;
+import static frc.robot.Constants.VisionConstants.MAX_Z_ERROR;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 
 public class VisionPoseValidator {
-  private static final double MAX_AMBIGUITY = 0.3;
-  private static final double MAX_Z_ERROR = 0.5;
   private static final double MAX_TAG_DISTANCE = 8.0;
   private static final double MAX_POSE_CHANGE = 3.0;
   
@@ -35,8 +37,8 @@ public class VisionPoseValidator {
       
       // Check field boundaries
       var pose2d = pose.toPose2d();
-      if (pose2d.getX() < 0.0 || pose2d.getX() > 16.54 || 
-          pose2d.getY() < 0.0 || pose2d.getY() > 8.02) {
+      if (pose2d.getX() < 0.0 || pose2d.getX() > APTAG_FIELD_LAYOUT.getFieldLength() || 
+          pose2d.getY() < 0.0 || pose2d.getY() > APTAG_FIELD_LAYOUT.getFieldWidth()) {
           return new RejectedPose(observation, RejectionReason.OUT_OF_FIELD_BOUNDS,
               "Position: (%.2f, %.2f)".formatted(pose2d.getX(), pose2d.getY()));
       }
