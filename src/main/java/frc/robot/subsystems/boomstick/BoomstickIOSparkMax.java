@@ -11,6 +11,7 @@ import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -22,6 +23,8 @@ public class BoomstickIOSparkMax implements BoomstickIO {
 
   private final SparkClosedLoopController m_armController;
   private final AbsoluteEncoder m_armAbsEncoder;
+
+  private int m_ntUpdateCounter = 0; // Counter to track loops for NT updates
 
   public BoomstickIOSparkMax() {
     // Instantiate the Motors //
@@ -88,15 +91,28 @@ public class BoomstickIOSparkMax implements BoomstickIO {
   @Override
   public void updateInputs(BoomstickIOInputs inputs) {
 
-    // Check if motors are connected //
-    inputs.armMotorConnected = m_armMotor.getDeviceId() == ARM_MOTOR_ID;
+    // Only update every 4 loops
+    if (m_ntUpdateCounter % 4 == 0) {
+      // Check if motors are connected //
+      inputs.armMotorConnected = m_armMotor.getDeviceId() == ARM_MOTOR_ID;
+      
+      // Get arm motor data //
+      inputs.armMotorVoltage = m_armMotor.getBusVoltage();
+      inputs.armMotorDutyCycle = m_armMotor.getAppliedOutput();
+      inputs.armMotorCurrent = m_armMotor.getOutputCurrent();
+      inputs.armMotorTemperature = m_armMotor.getMotorTemperature();
+      inputs.armMotorPosition = m_armAbsEncoder.getPosition();
+      inputs.armMotorVelocity = m_armAbsEncoder.getVelocity();      
+    }
 
-    // Get left arm motor data //
-    inputs.armMotorVoltage = m_armMotor.getBusVoltage();
-    inputs.armMotorDutyCycle = m_armMotor.getAppliedOutput();
-    inputs.armMotorCurrent = m_armMotor.getOutputCurrent();
-    inputs.armMotorTemperature = m_armMotor.getMotorTemperature();
-    inputs.armMotorPosition = m_armAbsEncoder.getPosition();
-    inputs.armMotorVelocity = m_armAbsEncoder.getVelocity();
-  }  
+    m_ntUpdateCounter++;
+
+    DogLog.log("Boomstick/ArmMotor/Connected", inputs.armMotorConnected);
+    DogLog.log("Boomstick/ArmMotor/Voltage", inputs.armMotorVoltage);
+    DogLog.log("Boomstick/ArmMotor/DutyCycle", inputs.armMotorDutyCycle);
+    DogLog.log("Boomstick/ArmMotor/Current", inputs.armMotorCurrent);
+    DogLog.log("Boomstick/ArmMotor/Temperature", inputs.armMotorTemperature);
+    DogLog.log("Boomstick/ArmMotor/Position", inputs.armMotorPosition);
+    DogLog.log("Boomstick/ArmMotor/Velocity", inputs.armMotorVelocity);
+  }
 }

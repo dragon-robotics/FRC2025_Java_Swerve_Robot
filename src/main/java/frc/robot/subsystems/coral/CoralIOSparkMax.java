@@ -10,6 +10,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
 import static frc.robot.Constants.CoralSubsystemConstants.*;
@@ -18,6 +19,8 @@ public class CoralIOSparkMax implements CoralIO {
   private final SparkMax m_intakeMotor;
   private final CANrange m_canRange;
   private final CANrangeConfiguration m_canRangeConfigs;
+
+  private int m_ntUpdateCounter = 0; // Counter to track loops for NT updates
 
   public CoralIOSparkMax() {
 
@@ -62,18 +65,33 @@ public class CoralIOSparkMax implements CoralIO {
 
   @Override
   public void updateInputs(CoralIOInputs inputs) {
-    // Check if motors are connected //
-    inputs.intakeMotorConnected = m_intakeMotor.getDeviceId() == MOTOR_ID;
 
-    // Update motor data //
-    inputs.intakeMotorVoltage = m_intakeMotor.getAppliedOutput();
+    // Only update every 4 loops
+    if (m_ntUpdateCounter % 4 == 0) {
+      // Check if motors are connected //
+      inputs.intakeMotorConnected = m_intakeMotor.getDeviceId() == MOTOR_ID;
+
+      // Update motor data //
+      inputs.intakeMotorVoltage = m_intakeMotor.getAppliedOutput();
+      inputs.intakeMotorTemperature = m_intakeMotor.getMotorTemperature();
+    }
+    
+    m_ntUpdateCounter++;
+
     inputs.intakeMotorCurrent = m_intakeMotor.getOutputCurrent();
-    inputs.intakeMotorTemperature = m_intakeMotor.getMotorTemperature();
 
     // Check if the beam break is tripped //
     inputs.beamBreakTripped = m_canRange.getIsDetected().getValue();
 
     // Check if the current limit is tripped //
-    inputs.intakeCurrentLimitTripped = m_intakeMotor.getOutputCurrent() > CORAL_DETECT_CURRENT_THRESHOLD;
+    inputs.intakeCurrentLimitTripped = inputs.intakeMotorCurrent > CORAL_DETECT_CURRENT_THRESHOLD;
+
+    DogLog.log("Coral/IntakeMotor/Connected", inputs.intakeMotorConnected);
+    DogLog.log("Coral/IntakeMotor/Voltage", inputs.intakeMotorVoltage);
+    DogLog.log("Coral/IntakeMotor/Current", inputs.intakeMotorCurrent);
+    DogLog.log("Coral/IntakeMotor/Temperature", inputs.intakeMotorTemperature);
+    
+    DogLog.log("Coral/CANRange/Tripped", inputs.beamBreakTripped);
+    DogLog.log("Coral/IntakeMotor/CurrentLimitTripped", inputs.intakeCurrentLimitTripped);
   }
 }

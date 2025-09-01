@@ -16,6 +16,7 @@ import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -34,6 +35,8 @@ public class ElevatorIOSparkMax implements ElevatorIO {
 
   // Feedforward for elevator motor //
   private final ElevatorFeedforward m_elevatorLeadFeedforward = new ElevatorFeedforward(ELEVATOR_KS, ELEVATOR_KG, ELEVATOR_KV, ELEVATOR_KA);
+
+  private int m_ntUpdateCounter = 0; // Counter to track loops for NT updates
 
   public ElevatorIOSparkMax() {
     // Lead and Follow Elevator Motor Configuration //
@@ -156,27 +159,52 @@ public class ElevatorIOSparkMax implements ElevatorIO {
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
-    // Check if motors are connected //
-    inputs.elevatorLeadMotorConnected = m_elevatorLeadMotor.getDeviceId() == LEAD_MOTOR_ID;
-    inputs.elevatorFollowMotorConnected = m_elevatorFollowMotor.getDeviceId() == FOLLOW_MOTOR_ID;
 
-    // Update motor data //
-    inputs.elevatorLeadMotorVoltage = m_elevatorLeadMotor.getBusVoltage();
-    inputs.elevatorLeadMotorDutyCycle = m_elevatorLeadMotor.getAppliedOutput();
-    inputs.elevatorLeadMotorCurrent = m_elevatorLeadMotor.getOutputCurrent();
-    inputs.elevatorLeadMotorTemperature = m_elevatorLeadMotor.getMotorTemperature();
-    inputs.elevatorLeadMotorPosition = m_elevatorLeadMotor.getAlternateEncoder().getPosition();
-    inputs.elevatorLeadMotorVelocity = m_elevatorLeadMotor.getAlternateEncoder().getVelocity();
+    // Only update every 4 loops
+    if (m_ntUpdateCounter % 4 == 0) {
+      // Check if motors are connected //
+      inputs.elevatorLeadMotorConnected = m_elevatorLeadMotor.getDeviceId() == LEAD_MOTOR_ID;
+      inputs.elevatorFollowMotorConnected = m_elevatorFollowMotor.getDeviceId() == FOLLOW_MOTOR_ID;
+  
+      // Update motor data //
+      inputs.elevatorLeadMotorVoltage = m_elevatorLeadMotor.getBusVoltage();
+      inputs.elevatorLeadMotorDutyCycle = m_elevatorLeadMotor.getAppliedOutput();
+      inputs.elevatorLeadMotorTemperature = m_elevatorLeadMotor.getMotorTemperature();
+      inputs.elevatorLeadMotorVelocity = m_elevatorLeadRelEncoder.getVelocity();
+      
+      inputs.elevatorFollowMotorVoltage = m_elevatorFollowMotor.getBusVoltage();
+      inputs.elevatorFollowMotorDutyCycle = m_elevatorFollowMotor.getAppliedOutput();
+      inputs.elevatorFollowMotorCurrent = m_elevatorFollowMotor.getOutputCurrent();
+      inputs.elevatorFollowMotorTemperature = m_elevatorFollowMotor.getMotorTemperature();
+    }
 
-    inputs.elevatorFollowMotorVoltage = m_elevatorFollowMotor.getBusVoltage();
-    inputs.elevatorFollowMotorDutyCycle = m_elevatorFollowMotor.getAppliedOutput();
-    inputs.elevatorFollowMotorCurrent = m_elevatorFollowMotor.getOutputCurrent();
-    inputs.elevatorFollowMotorTemperature = m_elevatorFollowMotor.getMotorTemperature();
-
+    m_ntUpdateCounter++;
+    
+    // Check the elevator position //
+    inputs.elevatorLeadMotorPosition = m_elevatorLeadRelEncoder.getPosition();
+    
     // Check if the current limit is tripped //
-    inputs.elevatorCurrentLimitTripped = m_elevatorLeadMotor.getOutputCurrent() >= STALL_CURRENT_LIMIT;
+    inputs.elevatorLeadMotorCurrent = m_elevatorLeadMotor.getOutputCurrent();
+    inputs.elevatorCurrentLimitTripped = inputs.elevatorLeadMotorCurrent >= STALL_CURRENT_LIMIT;
 
     // Check if the elevator is at the slow down threshold //
-    inputs.elevatorAtSlowDownThreshold = m_elevatorLeadMotor.getAlternateEncoder().getPosition() >= HOME;
+    inputs.elevatorAtSlowDownThreshold = inputs.elevatorLeadMotorPosition >= HOME;
+
+    DogLog.log("Elevator/LeadMotor/Connected", inputs.elevatorLeadMotorConnected);
+    DogLog.log("Elevator/LeadMotor/Voltage", inputs.elevatorLeadMotorVoltage);
+    DogLog.log("Elevator/LeadMotor/DutyCycle", inputs.elevatorLeadMotorDutyCycle);
+    DogLog.log("Elevator/LeadMotor/Current", inputs.elevatorLeadMotorCurrent);
+    DogLog.log("Elevator/LeadMotor/Temperature", inputs.elevatorLeadMotorTemperature);
+    DogLog.log("Elevator/LeadMotor/Position", inputs.elevatorLeadMotorPosition);
+    DogLog.log("Elevator/LeadMotor/Velocity", inputs.elevatorLeadMotorVelocity);
+
+    DogLog.log("Elevator/FollowMotor/Connected", inputs.elevatorFollowMotorConnected);
+    DogLog.log("Elevator/FollowMotor/Voltage", inputs.elevatorFollowMotorVoltage);
+    DogLog.log("Elevator/FollowMotor/DutyCycle", inputs.elevatorFollowMotorDutyCycle);
+    DogLog.log("Elevator/FollowMotor/Current", inputs.elevatorFollowMotorCurrent);
+    DogLog.log("Elevator/FollowMotor/Temperature", inputs.elevatorFollowMotorTemperature);
+
+    DogLog.log("Elevator/CurrentLimitTripped", inputs.elevatorCurrentLimitTripped);
+    DogLog.log("Elevator/AtSlowDownThreshold", inputs.elevatorAtSlowDownThreshold);
   }
 }
