@@ -5,6 +5,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -23,24 +24,26 @@ import static frc.robot.Constants.AlgaeSubsystemConstants.*;
 
 public class AlgaeIOSparkMax implements AlgaeIO {
   private final SparkMax m_intakeMotor;
-  private final SparkMax m_armLeadMotor;
+  private final SparkMax m_armMotor;
 
-  private final SparkClosedLoopController m_armLeadController;
-  private final AbsoluteEncoder m_armLeadAbsEncoder;
+  private final SparkClosedLoopController m_armController;
+  private final AbsoluteEncoder m_armAbsEncoder;
   private final ProfiledPIDController m_armPidController;
 
   // Feedforward for arm motor //
-  private final ArmFeedforward m_armLeadFeedforward = new ArmFeedforward(ARM_KS, ARM_KG, ARM_KV, ARM_KA);
+  private final ArmFeedforward m_armFeedforward = new ArmFeedforward(ARM_KS, ARM_KG, ARM_KV, ARM_KA);
+
+  private int m_ntUpdateCounter = 0; // Counter to track loops for NT updates
 
   public AlgaeIOSparkMax() {
 
     // Instantiate the motors //
     m_intakeMotor = new SparkMax(INTAKE_MOTOR_ID, MotorType.kBrushless);
-    m_armLeadMotor = new SparkMax(ARM_LEAD_MOTOR_ID, MotorType.kBrushless);
+    m_armMotor = new SparkMax(ARM_LEAD_MOTOR_ID, MotorType.kBrushless);
 
     // Instatiate the Sparkmax closed loop controller and the encoder //
-    m_armLeadController = m_armLeadMotor.getClosedLoopController();
-    m_armLeadAbsEncoder = m_armLeadMotor.getAbsoluteEncoder();
+    m_armController = m_armMotor.getClosedLoopController();
+    m_armAbsEncoder = m_armMotor.getAbsoluteEncoder();
 
     // Instantiate the armPidController //
     m_armPidController = new ProfiledPIDController(
@@ -68,11 +71,11 @@ public class AlgaeIOSparkMax implements AlgaeIO {
         PersistMode.kPersistParameters);
 
     // Left and Right Arm Motor Configuration //
-    SparkMaxConfig m_armLeadMotorConfig = new SparkMaxConfig();
+    SparkMaxConfig m_armMotorConfig = new SparkMaxConfig();
     SparkMaxConfig m_armFollowMotorConfig = new SparkMaxConfig();
 
     // Left Motor Configuration //
-    m_armLeadMotorConfig
+    m_armMotorConfig
       .voltageCompensation(ARM_NOMINAL_VOLTAGE)
       .smartCurrentLimit(ARM_STALL_CURRENT_LIMIT)
       .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
@@ -80,13 +83,13 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .idleMode(IdleMode.kBrake);
 
     // Left Motor Absolute Encoder Configuration //
-    m_armLeadMotorConfig.absoluteEncoder
+    m_armMotorConfig.absoluteEncoder
       // .zeroCentered(true)
       .zeroOffset(ABS_ENC_OFFSET_VAL)
       .inverted(true);
 
     // Left Motor Closed Loop Configuration //
-    m_armLeadMotorConfig.closedLoop
+    m_armMotorConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
       .pidf(ARM_P, ARM_I, ARM_D, ARM_F, PID_SLOT)
       .minOutput(-0.5, PID_SLOT)
@@ -107,14 +110,14 @@ public class AlgaeIOSparkMax implements AlgaeIO {
       .idleMode(IdleMode.kBrake)
       .follow(ARM_LEAD_MOTOR_ID, true);
 
-    m_armLeadMotor.configure(
-        m_armLeadMotorConfig,
+    m_armMotor.configure(
+        m_armMotorConfig,
         ResetMode.kNoResetSafeParameters,
         PersistMode.kPersistParameters);
 
     // Set the motors to start at 0 //
     m_intakeMotor.set(0);
-    m_armLeadMotor.set(0);
+    m_armMotor.set(0);
   }
 
   private double convertAngleToAbsEncoder(double angle) {
@@ -126,24 +129,24 @@ public class AlgaeIOSparkMax implements AlgaeIO {
   }
 
   private double calculateFeedforward(double setpoint) {
-    double pidOutput = m_armPidController.calculate(m_armLeadAbsEncoder.getPosition(), setpoint);
+    double pidOutput = m_armPidController.calculate(m_armAbsEncoder.getPosition(), setpoint);
     State setpointState = m_armPidController.getSetpoint();
-    return m_armLeadFeedforward.calculate(setpointState.position, setpointState.velocity);
+    return m_armFeedforward.calculate(setpointState.position, setpointState.velocity);
   }
 
   @Override
   public void setArmMotorVoltage(double voltage) {
-    m_armLeadMotor.setVoltage(MathUtil.clamp(voltage, -ARM_NOMINAL_VOLTAGE, ARM_NOMINAL_VOLTAGE));
+    m_armMotor.setVoltage(MathUtil.clamp(voltage, -ARM_NOMINAL_VOLTAGE, ARM_NOMINAL_VOLTAGE));
   }
 
   @Override
   public void setArmMotorPercentage(double percentage) {
-    m_armLeadMotor.set(MathUtil.clamp(percentage, -1, 1));
+    m_armMotor.set(MathUtil.clamp(percentage, -1, 1));
   }
 
   @Override
   public void setArmSetpoint(double setpoint) {
-    m_armLeadController.setReference(
+    m_armController.setReference(
       setpoint,
       ControlType.kPosition,
       PID_SLOT);
@@ -151,7 +154,7 @@ public class AlgaeIOSparkMax implements AlgaeIO {
 
   @Override
   public void setArmSetpointFF(double setpoint) {
-    m_armLeadController.setReference(
+    m_armController.setReference(
       setpoint,
       ControlType.kMAXMotionPositionControl,
       PID_SLOT,
@@ -171,26 +174,48 @@ public class AlgaeIOSparkMax implements AlgaeIO {
 
   @Override
   public void updateInputs(AlgaeIOInputs inputs) {
+    
+    // Only update every 4 loops
+    if (m_ntUpdateCounter % 4 == 0) {
+      // Check if motors are connected //
+      inputs.armMotorConnected = m_armMotor.getDeviceId() == ARM_LEAD_MOTOR_ID;
+      inputs.intakeMotorConnected = m_intakeMotor.getDeviceId() == INTAKE_MOTOR_ID;
 
-    // Check if motors are connected //
-    inputs.armLeadMotorConnected = m_armLeadMotor.getDeviceId() == ARM_LEAD_MOTOR_ID;
-    inputs.armLeadMotorConnected = m_intakeMotor.getDeviceId() == INTAKE_MOTOR_ID;
+      // Get arm motor data //
+      inputs.armMotorVoltage = m_armMotor.getBusVoltage();
+      inputs.armMotorDutyCycle = m_armMotor.getAppliedOutput();
+      inputs.armMotorCurrent = m_armMotor.getOutputCurrent();
+      inputs.armMotorTemperature = m_armMotor.getMotorTemperature();
+      inputs.armMotorPosition = m_armAbsEncoder.getPosition();
+      inputs.armMotorVelocity = m_armAbsEncoder.getVelocity();
 
-    // Get left arm motor data //
-    inputs.armLeadMotorVoltage = m_armLeadMotor.getBusVoltage();
-    inputs.armLeadMotorDutyCycle = m_armLeadMotor.getAppliedOutput();
-    inputs.armLeadMotorCurrent = m_armLeadMotor.getOutputCurrent();
-    inputs.armLeadMotorTemperature = m_armLeadMotor.getMotorTemperature();
-    inputs.armLeadMotorPosition = m_armLeadAbsEncoder.getPosition();
-    inputs.armLeadMotorVelocity = m_armLeadAbsEncoder.getVelocity();
+      // Get intake motor data //
+      inputs.intakeMotorVoltage = m_intakeMotor.getBusVoltage();
+      inputs.intakeMotorDutyCycle = m_intakeMotor.getAppliedOutput();
+      inputs.intakeMotorTemperature = m_intakeMotor.getMotorTemperature();
+    }
+    
+    m_ntUpdateCounter++;
 
-    // Get intake motor data //
-    inputs.intakeMotorVoltage = m_intakeMotor.getBusVoltage();
-    inputs.intakeMotorDutyCycle = m_intakeMotor.getAppliedOutput();
+
     inputs.intakeMotorCurrent = m_intakeMotor.getOutputCurrent();
-    inputs.intakeMotorTemperature = m_intakeMotor.getMotorTemperature();
 
     // Check if the current limit is tripped //
     inputs.intakeCurrentLimitTripped = inputs.intakeMotorCurrent > ALGAE_DETECT_CURRENT_THRESHOLD;
+
+    DogLog.log("Algae/ArmMotor/Connected", inputs.armMotorConnected);
+    DogLog.log("Algae/ArmMotor/Voltage", inputs.armMotorVoltage);
+    DogLog.log("Algae/ArmMotor/DutyCycle", inputs.armMotorDutyCycle);
+    DogLog.log("Algae/ArmMotor/Current", inputs.armMotorCurrent);
+    DogLog.log("Algae/ArmMotor/Temperature", inputs.armMotorTemperature);
+    DogLog.log("Algae/ArmMotor/Position", inputs.armMotorPosition);
+    DogLog.log("Algae/ArmMotor/Velocity", inputs.armMotorVelocity);
+
+    DogLog.log("Algae/IntakeMotor/Connected", inputs.intakeMotorConnected);
+    DogLog.log("Algae/IntakeMotor/Voltage", inputs.intakeMotorVoltage);
+    DogLog.log("Algae/IntakeMotor/DutyCycle", inputs.intakeMotorDutyCycle);
+    DogLog.log("Algae/IntakeMotor/Current", inputs.intakeMotorCurrent);
+    DogLog.log("Algae/IntakeMotor/Temperature", inputs.intakeMotorTemperature);
+    DogLog.log("Algae/IntakeMotor/CurrentLimitTripped", inputs.intakeCurrentLimitTripped);
   }
 }
