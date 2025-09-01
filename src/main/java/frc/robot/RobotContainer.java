@@ -30,6 +30,9 @@ import frc.robot.util.OperatorDashboard;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import dev.doglog.DogLog;
+import dev.doglog.DogLogOptions;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -108,6 +111,10 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
+    // Add DogLog //
+    DogLog.setOptions(new DogLogOptions().withCaptureDs(true));
+    DogLog.setPdh(new PowerDistribution());
+
     m_operatorDashboard = new OperatorDashboard();
 
     // Instantiate the joysticks //
@@ -128,8 +135,7 @@ public class RobotContainer {
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
         m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
-        m_visionSubsystem = new VisionSubsystem(          
-            m_swerveDriveSubsystem,
+        m_visionSubsystem = new VisionSubsystem(
             m_swerveDriveSubsystem::addVisionMeasurement,
             new VisionIOPhotonVision(
                 APTAG_CAMERA_NAMES[0],
@@ -146,7 +152,6 @@ public class RobotContainer {
         m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem = new VisionSubsystem(
-            m_swerveDriveSubsystem,
             m_swerveDriveSubsystem::addVisionMeasurement,
             // Auto-Align Cameras //
             new VisionIOPhotonVisionSim(
@@ -182,7 +187,6 @@ public class RobotContainer {
         m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem = new VisionSubsystem(
-						m_swerveDriveSubsystem,
 						m_swerveDriveSubsystem::addVisionMeasurement,
 						new VisionIOPhotonVision(
 								APTAG_CAMERA_NAMES[0],
@@ -199,7 +203,6 @@ public class RobotContainer {
         m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem = new VisionSubsystem(
-						m_swerveDriveSubsystem,
 						m_swerveDriveSubsystem::addVisionMeasurement,
 						new VisionIOPhotonVision(
 								APTAG_CAMERA_NAMES[0],
