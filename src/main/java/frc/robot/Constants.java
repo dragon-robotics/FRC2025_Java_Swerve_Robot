@@ -708,12 +708,12 @@ public final class Constants {
 
     // Basic filtering thresholds
     public static double MAX_AMBIGUITY = 0.1;
-    public static double MAX_Z_ERROR = 0.5;
+    public static double MAX_Z_ERROR = Units.inchesToMeters(0.5);
 
     // Standard deviation baselines, for 1 meter distance and 1 tag
     // (Adjusted automatically based on distance and # of tags)
-    public static double LINEAR_STDDEV_BASELINE = 0.02; // Meters
-    public static double ANGULAR_STDDEV_BASELINE = 0.06; // Radians
+    public static double LINEAR_STDDEV_BASELINE = Units.inchesToMeters(1); // Inches to Meters
+    public static double ANGULAR_STDDEV_BASELINE = Units.degreesToRadians(5); // Degrees to Radians
 
     // Known values
     public static final double CAMERA_FOV_HORIZONTAL_DEGREES = 73.0; // Your known horizontal FOV
