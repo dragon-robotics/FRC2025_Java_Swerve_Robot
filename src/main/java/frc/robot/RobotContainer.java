@@ -133,6 +133,7 @@ public class RobotContainer {
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem =
             new VisionSubsystem(
+                m_swerveDriveSubsystem,
                 m_swerveDriveSubsystem::addVisionMeasurement,
                 new VisionIOPhotonVision(
                     APTAG_CAMERA_NAMES[0],
@@ -150,6 +151,7 @@ public class RobotContainer {
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem =
             new VisionSubsystem(
+                m_swerveDriveSubsystem,
                 m_swerveDriveSubsystem::addVisionMeasurement,
                 // Auto-Align Cameras //
                 new VisionIOPhotonVisionSim(
@@ -186,6 +188,7 @@ public class RobotContainer {
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem =
             new VisionSubsystem(
+                m_swerveDriveSubsystem,
                 m_swerveDriveSubsystem::addVisionMeasurement,
                 new VisionIOPhotonVision(
                     APTAG_CAMERA_NAMES[0],
@@ -203,6 +206,7 @@ public class RobotContainer {
         m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
         m_visionSubsystem =
             new VisionSubsystem(
+                m_swerveDriveSubsystem,
                 m_swerveDriveSubsystem::addVisionMeasurement,
                 new VisionIOPhotonVision(
                     APTAG_CAMERA_NAMES[0],

@@ -17,14 +17,18 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.VisionIO.VisionIOInputs;
 import frc.robot.util.vision.AcceptedPose;
 import frc.robot.util.vision.RejectedPose;
 import frc.robot.util.vision.VisionPoseValidator;
 import java.util.LinkedList;
 
+import com.ctre.phoenix6.Utils;
+
 public class VisionSubsystem extends SubsystemBase {
 
+  private final CommandSwerveDrivetrain m_swerve;
   private final VisionConsumer m_consumer;
   private final VisionIO[] m_io;
   private final VisionIOInputs[] m_inputs;
@@ -38,7 +42,11 @@ public class VisionSubsystem extends SubsystemBase {
   private final VisionPoseValidator m_poseValidator = new VisionPoseValidator();
 
   /** Creates a new VisionSubsystem. */
-  public VisionSubsystem(VisionConsumer consumer, VisionIO... io) {
+  public VisionSubsystem(
+      CommandSwerveDrivetrain swerve,
+      VisionConsumer consumer,
+      VisionIO... io) {
+    m_swerve = swerve;
     m_consumer = consumer;
     m_io = io;
 
@@ -138,22 +146,23 @@ public class VisionSubsystem extends SubsystemBase {
       if (validationResult instanceof AcceptedPose accepted) {
         acceptedPoses.add(accepted.poseObservation().pose());
 
-        // Add to pose estimator
-        var stdDevs = calculateStandardDeviations(accepted);
-        m_consumer.accept(
-            accepted.poseObservation().pose().toPose2d(),
-            accepted.poseObservation().timestamp(),
-            stdDevs);
-
         // Check if odometry is initialized
         if (!m_odometryInitialized) {
           m_stablePoseCounter--;
           if (m_stablePoseCounter <= 0) {
+            m_swerve.resetPose(accepted.poseObservation().pose().toPose2d());
             m_odometryInitialized = true;
             // System.out.println("VisionSubsystem: Odometry initialized with vision.");
             DogLog.log("Vision/OdometryInitialized", true);
           }
         }
+
+        // Add to pose estimator
+        var stdDevs = calculateStandardDeviations(accepted);
+        m_consumer.accept(
+            accepted.poseObservation().pose().toPose2d(),
+            Utils.fpgaToCurrentTime(accepted.poseObservation().timestamp()),
+            stdDevs);
 
         // Log acceptance
         DogLog.log(
