@@ -176,11 +176,6 @@ public class VisionSubsystem extends SubsystemBase {
 
         rejectedPoses.add(rejected.poseObservation().pose());
 
-        // Log rejection with reason
-        System.out.printf(
-            "Camera %d: Rejected pose - %s: %s%n",
-            cameraIndex, rejected.reason().getDescription(), rejected.details());
-
         DogLog.log("Vision/Camera" + cameraIndex + "/RejectionReason", rejected.reason().name());
         DogLog.log(
             "Vision/Camera" + cameraIndex + "/RejectedPose", rejected.poseObservation().pose());
