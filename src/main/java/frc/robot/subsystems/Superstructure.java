@@ -339,25 +339,28 @@ public class Superstructure extends SubsystemBase {
               // Add intermediate waypoint (0.25 meter back from target)
               Transform2d backwardOffset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
 
-              return new DriveToPoseProfPID(
-                      m_swerve,
-                      applyRobotSpeeds,
-                      closestPose.transformBy(backwardOffset),
-                      // Max velo 3 m/s and max accel 8 m/s²
-                      new TrapezoidProfile.Constraints(3, 8.0),
-                      // Max velo 540 deg/s and max accel 720 deg/s²
-                      new TrapezoidProfile.Constraints(
-                          Units.degreesToRadians(540), Units.degreesToRadians(720)))
-                  .andThen(
-                      new DriveToPoseProfPID(
-                          m_swerve,
-                          applyRobotSpeeds,
-                          closestPose,
-                          // Max velo 1 m/s and max accel 8 m/s²
-                          new TrapezoidProfile.Constraints(1.0, 8.0),
-                          // Max velo 540 deg/s and max accel 720 deg/s²
-                          new TrapezoidProfile.Constraints(
-                              Units.degreesToRadians(540), Units.degreesToRadians(720))));
+              return new DriveToPosePID(m_swerve, applyRobotSpeeds, closestPose.transformBy(backwardOffset))
+              .andThen(new DriveToPosePID(m_swerve, applyRobotSpeeds, closestPose));
+
+              // return new DriveToPoseProfPID(
+              //         m_swerve,
+              //         applyRobotSpeeds,
+              //         closestPose.transformBy(backwardOffset),
+              //         // Max velo 3 m/s and max accel 8 m/s²
+              //         new TrapezoidProfile.Constraints(3, 8.0),
+              //         // Max velo 540 deg/s and max accel 720 deg/s²
+              //         new TrapezoidProfile.Constraints(
+              //             Units.degreesToRadians(540), Units.degreesToRadians(720)))
+              //     .andThen(
+              //         new DriveToPoseProfPID(
+              //             m_swerve,
+              //             applyRobotSpeeds,
+              //             closestPose,
+              //             // Max velo 3 m/s and max accel 8 m/s²
+              //             new TrapezoidProfile.Constraints(3.0, 8.0),
+              //             // Max velo 540 deg/s and max accel 720 deg/s²
+              //             new TrapezoidProfile.Constraints(
+              //                 Units.degreesToRadians(540), Units.degreesToRadians(720))));
             },
             Set.of(m_swerve))
         .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
