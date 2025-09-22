@@ -1,6 +1,10 @@
 package frc.robot.commands.Teleop;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -9,6 +13,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CommandSwerveDrivetrain; // Your swerve subsystem
+import frc.robot.swerve_constant.TunerConstants;
 
 /** Drives the robot to a specified pose on the field using PID controllers. */
 public class DriveToPosePID extends Command {
@@ -29,7 +34,7 @@ public class DriveToPosePID extends Command {
               Units.degreesToRadians(540), Units.degreesToRadians(720)));
 
   // Tolerances - how close is close enough?
-  private static final double m_positionTolerance = 0.05; // meters
+  private static final double m_positionTolerance = Units.inchesToMeters(2); // meters
   private static final double m_angleTolerance = Math.toRadians(2.0); // radians
 
   public DriveToPosePID(
@@ -80,6 +85,11 @@ public class DriveToPosePID extends Command {
     double thetaSpeed =
         m_rotController.calculate(
             currentPose.getRotation().getRadians(), m_targetPose.getRotation().getRadians());
+
+    // Clamp linear speeds to 75% of max speed for safety
+    double maxLinearSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);    
+    xSpeed = MathUtil.clamp(xSpeed, -0.5 * maxLinearSpeed, 0.5 * maxLinearSpeed);
+    ySpeed = MathUtil.clamp(ySpeed, -0.5 * maxLinearSpeed, 0.5 * maxLinearSpeed);
 
     // Convert field-relative speeds to robot-relative ChassisSpeeds
     ChassisSpeeds targetSpeeds =
