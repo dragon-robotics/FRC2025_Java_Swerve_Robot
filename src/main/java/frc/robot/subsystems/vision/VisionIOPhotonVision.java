@@ -44,6 +44,9 @@ public class VisionIOPhotonVision implements VisionIO {
         new PhotonPoseEstimator(
             APTAG_FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, m_robotToCamera);
     m_poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE);
+
+    // Reset heading data before pose initialization //
+    m_poseEstimator.resetHeadingData(Timer.getFPGATimestamp(), swerveDriveStateSupplier.get().Pose.getRotation());
   }
 
   @Override
