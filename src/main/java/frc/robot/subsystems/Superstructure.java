@@ -10,17 +10,11 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -28,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -37,8 +32,6 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.Teleop.DriveToPosePID;
-import frc.robot.commands.Teleop.DriveToPoseProfPID;
-// import frc.robot.commands.Teleop.AutoAlignToReefTag;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -46,7 +39,6 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorState;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 import frc.robot.util.Telemetry;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -55,12 +47,12 @@ import java.util.function.DoubleSupplier;
 
 public class Superstructure extends SubsystemBase {
 
-  private final CommandSwerveDrivetrain m_swerve;
-  private final CoralSubsystem m_coral;
-  private final ElevatorSubsystem m_elevator;
-  private final AlgaeSubsystem m_algae;
-  private final VisionSubsystem m_vision;
-  private final RobotContainer m_container;
+  private final CommandSwerveDrivetrain swerve;
+  private final CoralSubsystem coral;
+  private final ElevatorSubsystem elevator;
+  private final AlgaeSubsystem algae;
+  private final VisionSubsystem vision;
+  private final RobotContainer container;
   private final Telemetry logger;
 
   public enum ReefAlignmentStates {
@@ -74,7 +66,7 @@ public class Superstructure extends SubsystemBase {
     ALIGN_REEF_RIGHT_L4,
   }
 
-  private ReefAlignmentStates m_reefAlignmentState;
+  private ReefAlignmentStates reefAlignmentState;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive;
@@ -87,12 +79,6 @@ public class Superstructure extends SubsystemBase {
   private final SwerveRequest.ApplyFieldSpeeds applyFieldSpeeds;
   private final SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds;
 
-  /* Holonomic Drive Controller for pathfollowing */
-  private HolonomicDriveController holonomicDriveController;
-  private PIDController xController;
-  private PIDController yController;
-  private ProfiledPIDController thetaController;
-
   private final double maxSpeed;
   private final double maxAngularRate;
   private PIDController visionRangePID;
@@ -101,14 +87,10 @@ public class Superstructure extends SubsystemBase {
   private double rotationLastTriggered; // Keeps track of the last time the rotation was triggered
   private Optional<Rotation2d> currentHeading; // Keeps track of current heading
 
-  private boolean useLeftCamera; // Keeps track of the camera to use
-  private boolean intakeCoralLeft; // Keeps track of the coral intake side
-  private ElevatorSubsystem.ElevatorState
-      elevatorState; // Keeps track of the current elevator state
-  private double
-      elevatorHeightTranslationFactor; // Keeps track of the elevator translation speed factor
-  private double elevatorHeightStrafeFactor; // Keeps track of the elevator strafe speed factor
-  private double elevatorHeightRotationFactor; // Keeps track of the elevator rotation speed factor
+  private ElevatorSubsystem.ElevatorState elevState; // Keeps track of the current elevator state
+  private double elevHeightTranslationFactor; // Keeps track of the elevator translation speed factor
+  private double elevHeightStrafeFactor; // Keeps track of the elevator strafe speed factor
+  private double elevHeightRotationFactor; // Keeps track of the elevator rotation speed factor
 
   /** Creates a new Superstructure. */
   public Superstructure(
@@ -118,12 +100,12 @@ public class Superstructure extends SubsystemBase {
       AlgaeSubsystem algae,
       VisionSubsystem vision,
       RobotContainer container) {
-    m_swerve = swerve;
-    m_coral = coral;
-    m_elevator = elevator;
-    m_algae = algae;
-    m_vision = vision;
-    m_container = container;
+    this.swerve = swerve;
+    this.coral = coral;
+    this.elevator = elevator;
+    this.algae = algae;
+    this.vision = vision;
+    this.container = container;
 
     // Instatiate swerve max speed and angular rate //
     maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // Max speed at 12 volts
@@ -184,17 +166,8 @@ public class Superstructure extends SubsystemBase {
             .withDesaturateWheelSpeeds(true)
             .withDriveRequestType(DriveRequestType.Velocity);
 
-    // Instantiate the holonomic drive controller for path following //
-    xController = new PIDController(10, 0, 0);
-    yController = new PIDController(10, 0, 0);
-    thetaController =
-        new ProfiledPIDController(7, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI / 2));
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-    holonomicDriveController =
-        new HolonomicDriveController(xController, yController, thetaController);
-
     // Instantiate current and wanted super states as stopped //
-    m_reefAlignmentState = ReefAlignmentStates.ALIGN_REEF_LEFT_L1;
+    reefAlignmentState = ReefAlignmentStates.ALIGN_REEF_LEFT_L1;
 
     // Instantiate current heading as empty //
     currentHeading = Optional.empty(); // Keeps track of current heading
@@ -203,24 +176,18 @@ public class Superstructure extends SubsystemBase {
     rotationLastTriggered = 0.0;
 
     // Instantiate the elevator wanted state as home //
-    elevatorState = ElevatorSubsystem.ElevatorState.HOME;
-
-    // Default we use the right camera //
-    useLeftCamera = true;
+    elevState = ElevatorSubsystem.ElevatorState.HOME;
 
     // Initialize the elevator height speed factor //
-    elevatorHeightTranslationFactor = 1.0;
-    elevatorHeightStrafeFactor = 1.0;
-    elevatorHeightRotationFactor = 1.0;
-
-    // We intake coral from the left side by default //
-    intakeCoralLeft = true;
+    elevHeightTranslationFactor = 1.0;
+    elevHeightStrafeFactor = 1.0;
+    elevHeightRotationFactor = 1.0;
 
     // Instantiate the logger for telemetry //
     logger = new Telemetry(maxSpeed);
 
     // Register the telemetry for the swerve drive //
-    m_swerve.registerTelemetry(logger::telemeterize);
+    swerve.registerTelemetry(logger::telemeterize);
   }
 
   // Swerve Drive Subsystem Commands //
@@ -252,9 +219,9 @@ public class Superstructure extends SubsystemBase {
           rotation = Math.copySign(rotation * rotation, rotation);
 
           // Multiply the translation, strafe, and rotation by the elevator height speed factor //
-          translation *= elevatorHeightTranslationFactor;
-          strafe *= elevatorHeightStrafeFactor;
-          rotation *= elevatorHeightRotationFactor;
+          translation *= elevHeightTranslationFactor;
+          strafe *= elevHeightStrafeFactor;
+          rotation *= elevHeightRotationFactor;
 
           // Scale the output by half if half speed is enabled //
           if (halfSpeedSup.getAsBoolean()) {
@@ -271,7 +238,7 @@ public class Superstructure extends SubsystemBase {
           boolean rotationTriggered = Math.abs(rawRotation) > SwerveConstants.SWERVE_DEADBAND;
           boolean rotationActive =
               MathUtil.isNear(rotationLastTriggered, Timer.getFPGATimestamp(), 0.1)
-                  && (Math.abs(m_swerve.getState().Speeds.omegaRadiansPerSecond)
+                  && (Math.abs(swerve.getState().Speeds.omegaRadiansPerSecond)
                       > Math.toRadians(10));
 
           // Check if the rotation of the joystick has been triggered //
@@ -283,7 +250,7 @@ public class Superstructure extends SubsystemBase {
           if (rotationTriggered || rotationActive) {
             // If the rotation is triggered or active, set the swerve drive to rotate in
             // place //
-            m_swerve.setControl(
+            swerve.setControl(
                 drive
                     .withVelocityX(translation)
                     .withVelocityY(strafe)
@@ -292,13 +259,13 @@ public class Superstructure extends SubsystemBase {
           } else {
             // Initialize the current heading if it is empty
             if (currentHeading.isEmpty()) {
-              currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
+              currentHeading = Optional.of(swerve.getState().Pose.getRotation());
             }
 
             Optional<Alliance> alliance = DriverStation.getAlliance();
 
             if (alliance.isPresent()) {
-              m_swerve.setControl(
+              swerve.setControl(
                   driveMaintainHeading
                       .withVelocityX(translation)
                       .withVelocityY(strafe)
@@ -309,7 +276,7 @@ public class Superstructure extends SubsystemBase {
             }
           }
         },
-        m_swerve);
+        swerve);
   }
 
   public Command DriveToClosestReefPoseCommand(boolean left) {
@@ -320,18 +287,20 @@ public class Superstructure extends SubsystemBase {
               Optional<Alliance> alliance = DriverStation.getAlliance();
 
               // Grab the robot's current pose
-              Pose2d currentPose = m_swerve.getState().Pose;
+              Pose2d currentPose = swerve.getState().Pose;
 
               // Initialize the target poses based on the alliance and whether we are left or right
-              // //
+              //
+              final var redReefPoses = left
+                  ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
+                  : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES;
+              final var blueReefPoses = left
+                  ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES
+                  : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
               List<Pose2d> targetPoses =
                   alliance.isPresent() && alliance.get() == Alliance.Red
-                      ? (left
-                          ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
-                          : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES)
-                      : (left
-                          ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES
-                          : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES);
+                      ? redReefPoses
+                      : blueReefPoses;
 
               // Calculate the pose closest to the current pose
               Pose2d closestPose = findClosestPose(currentPose, targetPoses);
@@ -339,93 +308,20 @@ public class Superstructure extends SubsystemBase {
               // Add intermediate waypoint (0.25 meter back from target)
               Transform2d backwardOffset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
 
-              return new DriveToPosePID(m_swerve, applyRobotSpeeds, closestPose.transformBy(backwardOffset))
-              .andThen(new DriveToPosePID(m_swerve, applyRobotSpeeds, closestPose));
-
-              // return new DriveToPoseProfPID(
-              //         m_swerve,
-              //         applyRobotSpeeds,
-              //         closestPose.transformBy(backwardOffset),
-              //         // Max velo 3 m/s and max accel 8 m/s²
-              //         new TrapezoidProfile.Constraints(3, 8.0),
-              //         // Max velo 540 deg/s and max accel 720 deg/s²
-              //         new TrapezoidProfile.Constraints(
-              //             Units.degreesToRadians(540), Units.degreesToRadians(720)))
-              //     .andThen(
-              //         new DriveToPoseProfPID(
-              //             m_swerve,
-              //             applyRobotSpeeds,
-              //             closestPose,
-              //             // Max velo 3 m/s and max accel 8 m/s²
-              //             new TrapezoidProfile.Constraints(3.0, 8.0),
-              //             // Max velo 540 deg/s and max accel 720 deg/s²
-              //             new TrapezoidProfile.Constraints(
-              //                 Units.degreesToRadians(540), Units.degreesToRadians(720))));
+              return new DriveToPosePID(
+                  swerve,
+                  applyRobotSpeeds,
+                  closestPose.transformBy(backwardOffset))
+              .andThen(
+                  new ParallelDeadlineGroup(
+                      new DriveToPosePID(
+                          swerve,
+                          applyRobotSpeeds,
+                          closestPose),
+                      this.ElevatorL3()));
             },
-            Set.of(m_swerve))
-        .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
-  }
-
-  public Command ToggleReefBranchCommand() {
-
-    return new DeferredCommand(
-            () -> {
-              // Grab the robot's current alliance
-              Optional<Alliance> alliance = DriverStation.getAlliance();
-
-              // Grab the robot's current pose
-              Pose2d currentPose = m_swerve.getState().Pose;
-
-              // Get the heading of the current pose
-              Rotation2d currentHeading = currentPose.getRotation();
-
-              // Get reef poses based on alliance
-              List<Pose2d> targetPoses =
-                  alliance.isPresent() && alliance.get() == Alliance.Red
-                      ? FieldConstants.Reef.RED_REEF_STATION_POSES
-                      : FieldConstants.Reef.BLUE_REEF_STATION_POSES;
-
-              // Filter the only target poses that have the same heading as the current pose
-              List<Pose2d> filteredPoses = new ArrayList<>();
-              for (Pose2d targetPose : targetPoses) {
-                // Check if the heading of the target pose is close to the current heading
-                Rotation2d angleDifference = targetPose.getRotation().minus(currentHeading);
-                double angleDifferenceDegrees = angleDifference.getDegrees();
-                if (Math.abs(angleDifferenceDegrees) < 5) {
-                  filteredPoses.add(targetPose);
-                }
-              }
-
-              // Get the pose with the furthest distance from the current pose
-              if (filteredPoses.isEmpty()) {
-                // If no poses match the current heading, return an empty command
-                return new RunCommand(() -> {});
-              }
-
-              // Calculate the pose closest to the current pose
-              Pose2d furthestPose = null;
-              double maxDistanceSq = 0.0; // Use squared distance to avoid sqrt
-
-              // Iterate through the list of target poses
-              for (Pose2d pose : filteredPoses) {
-                Transform2d translationDelta = pose.minus(currentPose);
-
-                // Calculate the squared distance between the translations
-                double distanceSq = translationDelta.getTranslation().getNorm();
-
-                // If this pose is closer than the current minimum, update
-                if (distanceSq > maxDistanceSq) {
-                  maxDistanceSq = distanceSq;
-                  furthestPose = pose;
-                }
-              }
-
-              return new DriveToPosePID(m_swerve, applyRobotSpeeds, furthestPose);
-
-              // return AutoBuilder.pathfindToPose(furthestPose, constraints);
-            },
-            Set.of(m_swerve))
-        .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
+            Set.of(swerve))
+        .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
   }
 
   public Command DriveToClosestCoralStationPoseCommand() {
@@ -436,7 +332,7 @@ public class Superstructure extends SubsystemBase {
               Optional<Alliance> alliance = DriverStation.getAlliance();
 
               // Grab the robot's current pose
-              Pose2d currentPose = m_swerve.getState().Pose;
+              Pose2d currentPose = swerve.getState().Pose;
 
               List<Pose2d> targetPoses =
                   alliance.isPresent() && alliance.get() == Alliance.Red
@@ -445,18 +341,13 @@ public class Superstructure extends SubsystemBase {
 
               Pose2d closestPose = findClosestPose(currentPose, targetPoses);
 
-              return new DriveToPoseProfPID(
-                  m_swerve,
+              return new DriveToPosePID(
+                  swerve,
                   applyRobotSpeeds,
-                  closestPose,
-                  // Max velo 3 m/s and max accel 8 m/s²
-                  new TrapezoidProfile.Constraints(3.0, 8.0),
-                  // Max velo 540 deg/s and max accel 720 deg/s²
-                  new TrapezoidProfile.Constraints(
-                      Units.degreesToRadians(540), Units.degreesToRadians(720)));
+                  closestPose);
             },
-            Set.of(m_swerve))
-        .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
+            Set.of(swerve))
+        .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
   }
 
   // Helper method to find closest pose from a list
@@ -475,146 +366,59 @@ public class Superstructure extends SubsystemBase {
     return closestPose;
   }
 
-  public Command DriveToPoseCommand(boolean usePID) {
-
-    // Calculate the closest reef pose to the current pose //
-    Pose2d closestPose = null;
-
-    // Are we red or blue?
-    Optional<Alliance> alliance = DriverStation.getAlliance();
-    // If we are red, use the red reef poses //
-    if (alliance.isPresent() && alliance.get() == Alliance.Red) {
-      // Get the current robot pose //
-      Pose2d currentPose = m_swerve.getState().Pose;
-
-      double minDistanceSq = Double.MAX_VALUE; // Use squared distance to avoid sqrt
-
-      // Iterate through the list of target poses
-      for (Pose2d targetPose : FieldConstants.Reef.RED_REEF_STATION_POSES) {
-
-        Transform2d translationDelta = targetPose.minus(currentPose);
-
-        // Calculate the squared distance between the translations
-        double distanceSq = translationDelta.getTranslation().getNorm();
-
-        // If this pose is closer than the current minimum, update
-        if (distanceSq < minDistanceSq) {
-          minDistanceSq = distanceSq;
-          closestPose = targetPose;
-        }
-      }
-    }
-    // If we are blue, use the blue reef poses //
-    else {
-      // Get the current robot pose //
-      Pose2d currentPose = m_swerve.getState().Pose;
-
-      double minDistanceSq = Double.MAX_VALUE; // Use squared distance to avoid sqrt
-
-      // Iterate through the list of target poses
-      for (Pose2d targetPose : FieldConstants.Reef.BLUE_REEF_STATION_POSES) {
-        Transform2d translationDelta = targetPose.minus(currentPose);
-
-        // Calculate the squared distance between the translations
-        double distanceSq = translationDelta.getTranslation().getNorm();
-
-        // If this pose is closer than the current minimum, update
-        if (distanceSq < minDistanceSq) {
-          minDistanceSq = distanceSq;
-          closestPose = targetPose;
-        }
-      }
-    }
-
-    if (usePID) {
-      return new DriveToPosePID(m_swerve, applyRobotSpeeds, closestPose);
-    } else {
-      // Use default constraints defined elsewhere (e.g., AutoConstants)
-      PathConstraints constraints =
-          new PathConstraints(5, 3, Units.degreesToRadians(540), Units.degreesToRadians(720));
-
-      return AutoBuilder.pathfindToPose(closestPose, constraints);
-    }
-  }
-
   public void initCurrentHeading() {
-    currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
+    currentHeading = Optional.of(swerve.getState().Pose.getRotation());
   }
 
   public Command SwerveBrake() {
-    return m_swerve.applyRequest(() -> brake);
+    return swerve.applyRequest(() -> brake);
   }
 
   public Command SeedFieldCentric() {
-    return m_swerve.runOnce(() -> m_swerve.seedFieldCentric());
+    return swerve.runOnce(swerve::seedFieldCentric);
   }
 
   // Elevator Subsystem Commands //
 
   public Command ElevatorZero() {
-    Command resetEncoder =
-        new InstantCommand(
-            () -> {
-              m_elevator.seedElevatorMotorEncoderPosition(0);
-            });
-
-    return resetEncoder;
+    return new InstantCommand(
+        () -> elevator.seedElevatorMotorEncoderPosition(0),
+        elevator);
   }
 
   public Command ElevatorStop() {
-    Command setElevatorToIdle =
-        new InstantCommand(
-            () -> {
-              m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE);
-            },
-            m_elevator);
-
-    return setElevatorToIdle;
+    return new InstantCommand(
+        () -> elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE),
+        elevator);
   }
 
   public Command ElevatorManualDown() {
-    Command manuallyMoveElevatorDown =
-        new RunCommand(
-            () -> {
-              m_elevator.setElevatorMotorSpeed(-0.5);
-            },
-            m_elevator);
-
-    return manuallyMoveElevatorDown;
+    return new RunCommand(
+        () -> elevator.setElevatorMotorSpeed(-0.5),
+        elevator);
   }
 
   public Command ElevatorManualUp() {
-    Command manuallyMoveElevatorUp =
-        new RunCommand(
-            () -> {
-              m_elevator.setElevatorMotorSpeed(0.5);
-            },
-            m_elevator);
-
-    return manuallyMoveElevatorUp;
+    return new RunCommand(
+        () -> elevator.setElevatorMotorSpeed(0.5),
+        elevator);
   }
 
   public Command ElevatorIdle() {
     Command resetEncoder =
         new InstantCommand(
-            () -> {
-              m_elevator.seedElevatorMotorEncoderPosition(0);
-            });
+            () -> elevator.seedElevatorMotorEncoderPosition(0),
+            elevator);
 
     Command setElevatorToIdle =
         new InstantCommand(
-            () -> {
-              m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE);
-            },
-            m_elevator);
+            () -> elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE),
+            elevator);
 
-    Command resetElevatorEncoder =
-        new ConditionalCommand(
-            resetEncoder.andThen(setElevatorToIdle),
-            setElevatorToIdle,
-            m_elevator::isAtElevatorState);
-
-    return resetElevatorEncoder;
+    return new ConditionalCommand(
+        resetEncoder.andThen(setElevatorToIdle),
+        setElevatorToIdle,
+        elevator::isAtElevatorState);
   }
 
   public Command ElevatorHome() {
@@ -623,22 +427,20 @@ public class Superstructure extends SubsystemBase {
         new InstantCommand(
             () -> {
               // Set the robot back to full speed //
-              elevatorHeightTranslationFactor = 1.0;
-              elevatorHeightStrafeFactor = 1.0;
-              elevatorHeightRotationFactor = 1.0;
-              m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
+              elevHeightTranslationFactor = 1.0;
+              elevHeightStrafeFactor = 1.0;
+              elevHeightRotationFactor = 1.0;
+              elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
             },
-            m_elevator);
+            elevator);
 
     Command waitUntilElevatorIsAtBottom =
-        new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+        new WaitUntilCommand(elevator::isAtElevatorState);
 
     Command reZeroElevatorEncoder =
         new InstantCommand(
-            () -> {
-              m_elevator.seedElevatorMotorEncoderPosition(0);
-            },
-            m_elevator);
+            () -> elevator.seedElevatorMotorEncoderPosition(0),
+            elevator);
 
     return setElevatorHome.andThen(waitUntilElevatorIsAtBottom).andThen(reZeroElevatorEncoder);
 
@@ -652,14 +454,14 @@ public class Superstructure extends SubsystemBase {
     Command setElevatorL1 =
         new InstantCommand(
             () -> {
-              elevatorHeightTranslationFactor = 1.0;
-              elevatorHeightStrafeFactor = 1.0;
-              elevatorHeightRotationFactor = 1.0;
-              m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
+              elevHeightTranslationFactor = 1.0;
+              elevHeightStrafeFactor = 1.0;
+              elevHeightRotationFactor = 1.0;
+              elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
             },
-            m_elevator);
+            elevator);
 
-    Command waitUntilElevatorIsAtL1 = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+    Command waitUntilElevatorIsAtL1 = new WaitUntilCommand(elevator::isAtElevatorState);
 
     return setElevatorL1.andThen(waitUntilElevatorIsAtL1);
   }
@@ -669,14 +471,14 @@ public class Superstructure extends SubsystemBase {
     Command setElevatorL2 =
         new InstantCommand(
             () -> {
-              elevatorHeightTranslationFactor = 0.75;
-              elevatorHeightStrafeFactor = 0.75;
-              elevatorHeightRotationFactor = 1;
-              m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L2);
+              elevHeightTranslationFactor = 0.75;
+              elevHeightStrafeFactor = 0.75;
+              elevHeightRotationFactor = 1;
+              elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L2);
             },
-            m_elevator);
+            elevator);
 
-    Command waitUntilElevatorIsAtL2 = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+    Command waitUntilElevatorIsAtL2 = new WaitUntilCommand(elevator::isAtElevatorState);
 
     return setElevatorL2.andThen(waitUntilElevatorIsAtL2);
   }
@@ -686,14 +488,14 @@ public class Superstructure extends SubsystemBase {
     Command setElevatorL3 =
         new InstantCommand(
             () -> {
-              elevatorHeightTranslationFactor = 0.65;
-              elevatorHeightStrafeFactor = 0.65;
-              elevatorHeightRotationFactor = 1;
-              m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L3);
+              elevHeightTranslationFactor = 0.65;
+              elevHeightStrafeFactor = 0.65;
+              elevHeightRotationFactor = 1;
+              elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L3);
             },
-            m_elevator);
+            elevator);
 
-    Command waitUntilElevatorIsAtL3 = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+    Command waitUntilElevatorIsAtL3 = new WaitUntilCommand(elevator::isAtElevatorState);
 
     return setElevatorL3.andThen(waitUntilElevatorIsAtL3);
   }
@@ -703,60 +505,42 @@ public class Superstructure extends SubsystemBase {
     Command setElevatorL4 =
         new InstantCommand(
             () -> {
-              elevatorHeightTranslationFactor = 0.5;
-              elevatorHeightStrafeFactor = 0.5;
-              elevatorHeightRotationFactor = 1;
-              m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L4);
+              elevHeightTranslationFactor = 0.5;
+              elevHeightStrafeFactor = 0.5;
+              elevHeightRotationFactor = 1;
+              elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L4);
             },
-            m_elevator);
+            elevator);
 
-    Command waitUntilElevatorIsAtL4 = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+    Command waitUntilElevatorIsAtL4 = new WaitUntilCommand(elevator::isAtElevatorState);
 
     return setElevatorL4.andThen(waitUntilElevatorIsAtL4);
   }
 
   // Coral Subsystem Commands //
-  public Command SetCoralStation(boolean left) {
-    Command setCoralStation =
-        new InstantCommand(
-            () -> {
-              intakeCoralLeft = left;
-            });
-
-    return setCoralStation;
-  }
 
   public Command IntakeCoral() {
 
-    // Command setRobotHeading = new InstantCommand(() -> {
-    //   // Set the robot heading to the coral station angle for intake //
-    //   currentHeading = intakeCoralLeft ?
-    //     Optional.of(GeneralConstants.LEFT_CORAL_STATION_INTAKE_ANGLE) : // If left, set to left
-    // side angle
-    //     Optional.of(GeneralConstants.RIGHT_CORAL_STATION_INTAKE_ANGLE); // If right, set to right
-    // side angle
-    // });
-
     Command engageCoralIntake =
-        new InstantCommand(() -> m_coral.setCoralState(CoralSubsystem.CoralState.INTAKE), m_coral);
+        new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.INTAKE), coral);
 
-    Command runUntilCoralIsDetected = new WaitUntilCommand(() -> m_coral.isBeamBreakTripped());
+    Command runUntilCoralIsDetected = new WaitUntilCommand(() -> coral.isBeamBreakTripped());
 
     Command slowIntake =
         new InstantCommand(
-            () -> m_coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE), m_coral);
+            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE), coral);
 
-    Command runUntilCoralIsNotDetected = new WaitUntilCommand(() -> !m_coral.isBeamBreakTripped());
+    Command runUntilCoralIsNotDetected = new WaitUntilCommand(() -> !coral.isBeamBreakTripped());
 
     Command slowReverseIntake =
         new InstantCommand(
-            () -> m_coral.setCoralState(CoralSubsystem.CoralState.SLOW_REVERSE), m_coral);
+            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_REVERSE), coral);
 
-    Command runUntilCoralIsDetectedAgain = new WaitUntilCommand(() -> m_coral.isBeamBreakTripped());
+    Command runUntilCoralIsDetectedAgain = new WaitUntilCommand(() -> coral.isBeamBreakTripped());
 
     Command slowIntakeAgain =
         new InstantCommand(
-            () -> m_coral.setCoralState(CoralSubsystem.CoralState.SLOWER_INTAKE), m_coral);
+            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOWER_INTAKE), coral);
 
     // Run until the beambreak or current limit is tripped //
     return engageCoralIntake
@@ -764,186 +548,51 @@ public class Superstructure extends SubsystemBase {
         .andThen(slowIntake)
         .andThen(runUntilCoralIsNotDetected)
         .andThen(slowReverseIntake)
-        // .andThen(new WaitCommand(0.1));
         .andThen(runUntilCoralIsDetectedAgain)
         .andThen(slowIntakeAgain)
         .andThen(new WaitCommand(0.02));
   }
 
   public Command ReverseCoralIntake() {
-    Command slowReverseIntake =
-        new RunCommand(
-            () -> m_coral.setCoralState(CoralSubsystem.CoralState.SLOW_REVERSE), m_coral);
-
-    return slowReverseIntake;
+    return new RunCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_REVERSE), coral);
   }
 
-  // public Command AimAndRangeReefApriltag() {
-
-  //   Command autoAlignToReefTag = new AutoAlignToReefTag(
-  //     useLeftCamera,
-  //     visionAimPID,
-  //     visionRangePID,
-  //     driveMaintainHeading,
-  //     m_vision,
-  //     m_swerve);
-
-  //   Command setCurrentHeading = new InstantCommand(() -> {
-  //     currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
-  //   });
-
-  //   return autoAlignToReefTag
-  //         .andThen(setCurrentHeading);
-  // }
-
-  // public Command AlignToScoreCoral(){
-
-  //   Command autoDriveToReefStation = AimAndRangeReefApriltag();
-
-  //   Command setElevatorLevel = new InstantCommand(() -> {
-  //     m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
-  //   }, m_elevator);
-
-  //   Command waitUntilElevatorIsAtLevel = new WaitUntilCommand(() ->
-  // m_elevator.isAtElevatorState());
-
-  //   return autoDriveToReefStation
-  //         .andThen(setElevatorLevel)
-  //         .andThen(waitUntilElevatorIsAtLevel);
-  // }
-
   public Command ScoreCoral() {
-    Command scoreCoral =
-        new RunCommand(() -> m_coral.setCoralState(CoralSubsystem.CoralState.SCORE), m_coral);
-
-    return scoreCoral;
+    return new RunCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.SCORE), coral);
   }
 
   public Command HoldCoral() {
-    Command holdCoral =
-        new RunCommand(() -> m_coral.setCoralState(CoralSubsystem.CoralState.HOLD), m_coral);
-
-    return holdCoral;
+    return new RunCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.HOLD), coral);
   }
 
   // Algae Subsystem Commands //
 
   public Command IntakeAlgae() {
-
-    Command engageAlgaeIntake =
-        new RunCommand(() -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE), m_algae);
-
-    Command runUntilAlgaeIsDetected = new WaitUntilCommand(() -> m_algae.hasAlgae());
-
-    Command holdAlgae =
-        new RunCommand(() -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD), m_algae);
-
-    // Run until the beambreak or current limit is tripped //
-    return engageAlgaeIntake;
+    return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE), algae);
   }
 
   public Command DeAlgaeify() {
-    Command engageAlgaeDeAlgaeify =
-        new RunCommand(() -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE), m_algae);
-
-    return engageAlgaeDeAlgaeify;
+    return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE), algae);
   }
 
   public Command ScoreAlgae() {
-    Command scoreAlgae =
-        new RunCommand(() -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.SCORE), m_algae);
-
-    return scoreAlgae;
+    return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.SCORE), algae);
   }
 
   public Command AlgaeArmHome() {
-    Command homeAlgaeArm =
-        new RunCommand(() -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOME), m_algae);
-
-    return homeAlgaeArm;
+    return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOME), algae);
   }
 
   public Command AlgaeArmIntake() {
-    Command setAlgaeArmIntake =
-        new RunCommand(() -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE), m_algae);
-
-    return setAlgaeArmIntake;
+    return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE), algae);
   }
 
   public Command AlgaeArmDeAlgaeify() {
-    Command setAlgaeArmDeAlgaeify =
-        new RunCommand(() -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE), m_algae);
-
-    return setAlgaeArmDeAlgaeify;
+    return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE), algae);
   }
 
   public Command AlgaeArmHold() {
-    Command setAlgaeArmHold =
-        new RunCommand(() -> m_algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD), m_algae);
-
-    return setAlgaeArmHold;
-  }
-
-  /** Robot state configurations - operator (2nd driver) sets up what the score button does */
-  public void setReefAlignment(ReefAlignmentStates wantedReefAlignmentState) {
-    switch (wantedReefAlignmentState) {
-      case ALIGN_REEF_LEFT_L1:
-        elevatorState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
-        useLeftCamera = true; // Use the left camera
-        break;
-      case ALIGN_REEF_LEFT_L2:
-        elevatorState = ElevatorSubsystem.ElevatorState.L2; // Set the elevator to L2
-        useLeftCamera = true; // Use the left camera
-        break;
-      case ALIGN_REEF_LEFT_L3:
-        elevatorState = ElevatorSubsystem.ElevatorState.L3; // Set the elevator to L1
-        useLeftCamera = true; // Use the left camera
-        break;
-      case ALIGN_REEF_LEFT_L4:
-        elevatorState = ElevatorSubsystem.ElevatorState.L4; // Set the elevator to L1
-        useLeftCamera = true; // Use the left camera
-        break;
-      case ALIGN_REEF_RIGHT_L1:
-        elevatorState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
-        useLeftCamera = false; // Use the right camera
-        break;
-      case ALIGN_REEF_RIGHT_L2:
-        elevatorState = ElevatorSubsystem.ElevatorState.L2; // Set the elevator to L1
-        useLeftCamera = false; // Use the right camera
-        break;
-      case ALIGN_REEF_RIGHT_L3:
-        elevatorState = ElevatorSubsystem.ElevatorState.L3; // Set the elevator to L3
-        useLeftCamera = false; // Use the right camera
-        break;
-      case ALIGN_REEF_RIGHT_L4:
-        elevatorState = ElevatorSubsystem.ElevatorState.L4; // Set the elevator to L4
-        useLeftCamera = false; // Use the right camera
-        break;
-      default:
-        elevatorState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
-        useLeftCamera = true; // Use the left camera
-        break;
-    }
-  }
-
-  public Command setReefAlignmentCommand(ReefAlignmentStates wantedReefAlignmentState) {
-    return new InstantCommand(() -> setReefAlignment(wantedReefAlignmentState));
-  }
-
-  public void setReefAlignment(boolean left) {
-    useLeftCamera = left;
-  }
-
-  public Command SetReefAlignment(boolean left) {
-    return new InstantCommand(() -> setReefAlignment(left));
-  }
-
-  public void setReefHeight(ElevatorState wantedElevatorState) {
-    elevatorState = wantedElevatorState;
-  }
-
-  public Command SetReefHeight(ElevatorState wantedElevatorState) {
-    return new InstantCommand(() -> setReefHeight(wantedElevatorState));
+    return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD), algae);
   }
 
   @Override
