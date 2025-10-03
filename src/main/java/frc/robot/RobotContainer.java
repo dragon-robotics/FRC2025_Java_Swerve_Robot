@@ -47,63 +47,60 @@ import frc.robot.util.OperatorDashboard;
 public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
-  public final CommandSwerveDrivetrain m_swerveDriveSubsystem;
-  public final CoralSubsystem m_coralSubsystem;
-  public final ElevatorSubsystem m_elevatorSubsystem;
-  public final AlgaeSubsystem m_algaeSubsystem;
-  public final VisionSubsystem m_visionSubsystem;
-  public final LedSubsystem m_ledSubsystem;
-  public final Superstructure m_superstructureSubsystem;
+  public final CommandSwerveDrivetrain swerveSubsystem;
+  public final CoralSubsystem coralSubsystem;
+  public final ElevatorSubsystem elevatorSubsystem;
+  public final AlgaeSubsystem algaeSubsystem;
+  public final VisionSubsystem visionSubsystem;
+  public final LedSubsystem ledSubsystem;
+  public final Superstructure superstructureSubsystem;
 
   // Define Driver and Operator controllers //
-  private final CommandXboxController m_driverController;
-  private final CommandXboxController m_operatorController;
-  private final CommandJoystick m_operatorButtonBoxController;
-  private final CommandJoystick m_testerController;
+  private final CommandXboxController driverController;
+  private final CommandXboxController operatorController;
+  private final CommandJoystick operatorButtonBoxController;
+  private final CommandJoystick testerController;
 
   private final SendableChooser<Command> autoChooser;
 
   // Swerve Commands //
-  private Command m_defaultDriveCommand;
-  // private Command m_aimAndAlignToReefApriltagCommand;
-  //   private Command m_driveToClosestReefPoseCommand;
-  private Command m_driveToClosestLeftReefPoseCommand;
-  private Command m_driveToClosestRightReefPoseCommand;
-  private Command m_driveToClosestCoralStationPoseCommand;
-  private Command m_toggleReefBranchCommand;
-  private Command m_swerveBrakeCommand;
-  private Command m_seedFieldCentricCommand;
+  private Command defaultDriveCommand;
+  private Command driveToClosestLeftReefPoseCommand;
+  private Command driveToClosestRightReefPoseCommand;
+  private Command driveToClosestCoralStationPoseCommand;
+  private Command swerveBrakeCommand;
+  private Command seedFieldCentricCommand;
 
   // Elevator Commands //
-  private Command m_elevatorHomeCommand;
-  private Command m_elevatorL1Command;
-  private Command m_elevatorL2Command;
-  private Command m_elevatorL3Command;
-  private Command m_elevatorL4Command;
-  private Command m_elevatorManualUpCommand;
-  private Command m_elevatorManualDownCommand;
-  private Command m_elevatorStopCommand;
-  private Command m_elevatorSeedCommand;
+  private Command elevatorHomeCommand;
+  private Command elevatorL1Command;
+  private Command elevatorL2Command;
+  private Command elevatorL3Command;
+  private Command elevatorL4Command;
+  private Command elevatorManualUpCommand;
+  private Command elevatorManualDownCommand;
+  private Command elevatorStopCommand;
+  private Command elevatorSeedCommand;
 
   // Coral Commands //
-  private Command m_slowReverseCoralIntakeCommand;
-  private Command m_intakeCoralCommand;
-  private Command m_intakeFromLeftCoralStationCommand;
-  private Command m_intakeFromRightCoralStationCommand;
-  private Command m_holdCoralCommand;
-  private Command m_alignToLeftReefBranchCommand;
-  private Command m_alignToRightReefBranchCommand;
-  private Command m_scoreCoralCommand;
+  private Command slowReverseCoralIntakeCommand;
+  private Command intakeCoralCommand;
+  private Command intakeFromLeftCoralStationCommand;
+  private Command intakeFromRightCoralStationCommand;
+  private Command holdCoralCommand;
+  private Command alignToLeftReefBranchCommand;
+  private Command alignToRightReefBranchCommand;
+  private Command scoreCoralCommand;
 
   // Algae Commands //
-  private Command m_algaeHomeCommand;
-  private Command m_intakeAlgaeCommand;
-  private Command m_holdAlgaeCommand;
-  private Command m_scoreAlgaeCommand;
-  private Command m_deAlgaeCommand;
+  private Command algaeHomeCommand;
+  private Command intakeAlgaeCommand;
+  private Command holdAlgaeCommand;
+  private Command scoreAlgaeCommand;
+  private Command deAlgaeCommand;
 
   // Operator Dashboard //
-  private OperatorDashboard m_operatorDashboard;
+  private OperatorDashboard operatorDashboard;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -112,211 +109,205 @@ public class RobotContainer {
     DogLog.setOptions(new DogLogOptions().withCaptureDs(true));
     DogLog.setPdh(new PowerDistribution());
 
-    m_operatorDashboard = new OperatorDashboard();
+    operatorDashboard = new OperatorDashboard();
 
     // Instantiate the joysticks //
-    m_driverController = new CommandXboxController(OperatorConstants.DRIVER_PORT);
-    m_operatorController = new CommandXboxController(OperatorConstants.OPERATOR_PORT);
-    m_operatorButtonBoxController = new CommandJoystick(OperatorConstants.OPERATOR_BUTTON_PORT);
-    m_testerController = new CommandJoystick(OperatorConstants.TEST_PORT);
+    driverController = new CommandXboxController(OperatorConstants.DRIVER_PORT);
+    operatorController = new CommandXboxController(OperatorConstants.OPERATOR_PORT);
+    operatorButtonBoxController = new CommandJoystick(OperatorConstants.OPERATOR_BUTTON_PORT);
+    testerController = new CommandJoystick(OperatorConstants.TEST_PORT);
 
     // Instantiate all the subsystems //
-    m_swerveDriveSubsystem =
+    swerveSubsystem =
         TunerConstants.createDrivetrain(
             250, SwerveConstants.ODOMETRY_STD, VisionConstants.DEFAULT_TAG_STDDEV);
 
     // Change initialization based on the state of the robot //
     switch (CURRENT_MODE) {
       case COMP:
-        m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
-        m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
-        m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
-        m_visionSubsystem =
+        coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
+        elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
+        algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
+        visionSubsystem =
             new VisionSubsystem(
-                m_swerveDriveSubsystem,
-                m_swerveDriveSubsystem::addVisionMeasurement,
+                swerveSubsystem,
+                swerveSubsystem::addVisionMeasurement,
                 new VisionIOPhotonVision(
                     APTAG_CAMERA_NAMES[0],
                     VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-                    () -> m_swerveDriveSubsystem.getState()),
+                    swerveSubsystem::getState),
                 new VisionIOPhotonVision(
                     APTAG_CAMERA_NAMES[1],
                     VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-                    () -> m_swerveDriveSubsystem.getState()));
-        m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+                    swerveSubsystem::getState));
+        ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
         break;
       case SIM:
-        m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
-        m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
-        m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
-        m_visionSubsystem =
+        coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
+        elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
+        algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
+        visionSubsystem =
             new VisionSubsystem(
-                m_swerveDriveSubsystem,
-                m_swerveDriveSubsystem::addVisionMeasurement,
+                swerveSubsystem,
+                swerveSubsystem::addVisionMeasurement,
                 // Auto-Align Cameras //
                 new VisionIOPhotonVisionSim(
                     APTAG_CAMERA_NAMES[0],
                     VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-                    () -> m_swerveDriveSubsystem.getState()),
+                    swerveSubsystem::getState),
                 new VisionIOPhotonVisionSim(
                     APTAG_CAMERA_NAMES[1],
                     VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-                    () -> m_swerveDriveSubsystem.getState())
+                    swerveSubsystem::getState)
                 // // Apriltag Pose-Estimation Cameras //
                 // new VisionIOPhotonVisionSim(
                 //     APTAG_CAMERA_NAMES[2],
-                //     VisionConstants.APTAG_POSE_EST_CAM_FL_POS,
-                //     () -> m_swerveDriveSubsystem.getState()),
+                //     VisionConstants.APTAG_POSE_EST_CAFL_POS,
+                //     swerveSubsystem::getState),
                 // new VisionIOPhotonVisionSim(
                 //     APTAG_CAMERA_NAMES[3],
-                //     VisionConstants.APTAG_POSE_EST_CAM_FR_POS,
-                //     () -> m_swerveDriveSubsystem.getState()),
+                //     VisionConstants.APTAG_POSE_EST_CAFR_POS,
+                //     swerveSubsystem::getState),
                 // new VisionIOPhotonVisionSim(
                 //     APTAG_CAMERA_NAMES[4],
-                //     VisionConstants.APTAG_POSE_EST_CAM_BL_POS,
-                //     () -> m_swerveDriveSubsystem.getState()),
+                //     VisionConstants.APTAG_POSE_EST_CABL_POS,
+                //     swerveSubsystem::getState),
                 // new VisionIOPhotonVisionSim(
                 //     APTAG_CAMERA_NAMES[5],
-                //     VisionConstants.APTAG_POSE_EST_CAM_BR_POS,
-                //     () -> m_swerveDriveSubsystem.getState())
+                //     VisionConstants.APTAG_POSE_EST_CABR_POS,
+                //     swerveSubsystem::getState)
                 );
-        m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+        ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
         break;
       case TEST:
-        m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
-        m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
-        m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
-        m_visionSubsystem =
+        coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
+        elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
+        algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
+        visionSubsystem =
             new VisionSubsystem(
-                m_swerveDriveSubsystem,
-                m_swerveDriveSubsystem::addVisionMeasurement,
+                swerveSubsystem,
+                swerveSubsystem::addVisionMeasurement,
                 new VisionIOPhotonVision(
                     APTAG_CAMERA_NAMES[0],
                     VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-                    () -> m_swerveDriveSubsystem.getState()),
+                    swerveSubsystem::getState),
                 new VisionIOPhotonVision(
                     APTAG_CAMERA_NAMES[1],
                     VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-                    () -> m_swerveDriveSubsystem.getState()));
-        m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+                    swerveSubsystem::getState));
+        ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
         break;
       default: // Default should be in comp mode //
-        m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
-        m_elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
-        m_algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
-        m_visionSubsystem =
+        coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
+        elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSparkMax());
+        algaeSubsystem = new AlgaeSubsystem(new AlgaeIOSparkMax());
+        visionSubsystem =
             new VisionSubsystem(
-                m_swerveDriveSubsystem,
-                m_swerveDriveSubsystem::addVisionMeasurement,
+                swerveSubsystem,
+                swerveSubsystem::addVisionMeasurement,
                 new VisionIOPhotonVision(
                     APTAG_CAMERA_NAMES[0],
                     VisionConstants.APTAG_ALIGN_LEFT_CAM_POS,
-                    () -> m_swerveDriveSubsystem.getState()),
+                    swerveSubsystem::getState),
                 new VisionIOPhotonVision(
                     APTAG_CAMERA_NAMES[1],
                     VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
-                    () -> m_swerveDriveSubsystem.getState()));
-        m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+                    swerveSubsystem::getState));
+        ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
         break;
     }
 
     // Create the superstructure subsystem //
-    m_superstructureSubsystem =
+    superstructureSubsystem =
         new Superstructure(
-            m_swerveDriveSubsystem,
-            m_coralSubsystem,
-            m_elevatorSubsystem,
-            m_algaeSubsystem,
-            m_visionSubsystem,
+            swerveSubsystem,
+            coralSubsystem,
+            elevatorSubsystem,
+            algaeSubsystem,
+            visionSubsystem,
             this);
 
     // Instantiate all commands used //
 
     // Instantiate Swerve Commands //
-    m_defaultDriveCommand =
-        m_superstructureSubsystem.DefaultDriveCommand(
-            () -> -m_driverController.getLeftY(),
-            () -> -m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX(),
-            () -> m_driverController.getHID().getPOV() == 0);
-    // m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
-    // m_driveToClosestReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand();
-    m_driveToClosestLeftReefPoseCommand =
-        m_superstructureSubsystem.DriveToClosestReefPoseCommand(true);
-    m_driveToClosestRightReefPoseCommand =
-        m_superstructureSubsystem.DriveToClosestReefPoseCommand(false);
-    ;
-    m_driveToClosestCoralStationPoseCommand =
-        m_superstructureSubsystem.DriveToClosestCoralStationPoseCommand();
-    m_toggleReefBranchCommand = m_superstructureSubsystem.ToggleReefBranchCommand();
-    m_swerveBrakeCommand = m_superstructureSubsystem.SwerveBrake();
-    m_seedFieldCentricCommand = m_superstructureSubsystem.SeedFieldCentric();
+    defaultDriveCommand =
+        superstructureSubsystem.DefaultDriveCommand(
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX(),
+            () -> driverController.getHID().getPOV() == 0);
+    driveToClosestLeftReefPoseCommand =
+        superstructureSubsystem.DriveToClosestReefPoseCommand(true);
+    driveToClosestRightReefPoseCommand =
+        superstructureSubsystem.DriveToClosestReefPoseCommand(false);
+    driveToClosestCoralStationPoseCommand =
+        superstructureSubsystem.DriveToClosestCoralStationPoseCommand();
+    swerveBrakeCommand = superstructureSubsystem.SwerveBrake();
+    seedFieldCentricCommand = superstructureSubsystem.SeedFieldCentric();
 
     // Instantiate Elevator Commands //
-    m_elevatorHomeCommand = m_superstructureSubsystem.ElevatorHome();
-    m_elevatorL1Command = m_superstructureSubsystem.ElevatorL1();
-    m_elevatorL2Command = m_superstructureSubsystem.ElevatorL2();
-    m_elevatorL3Command = m_superstructureSubsystem.ElevatorL3();
-    m_elevatorL4Command = m_superstructureSubsystem.ElevatorL4();
-    m_elevatorManualUpCommand = m_superstructureSubsystem.ElevatorManualUp();
-    m_elevatorManualDownCommand = m_superstructureSubsystem.ElevatorManualDown();
-    m_elevatorStopCommand = m_superstructureSubsystem.ElevatorStop();
-    m_elevatorSeedCommand = m_superstructureSubsystem.ElevatorZero();
+    elevatorHomeCommand = superstructureSubsystem.ElevatorHome();
+    elevatorL1Command = superstructureSubsystem.ElevatorL1();
+    elevatorL2Command = superstructureSubsystem.ElevatorL2();
+    elevatorL3Command = superstructureSubsystem.ElevatorL3();
+    elevatorL4Command = superstructureSubsystem.ElevatorL4();
+    elevatorManualUpCommand = superstructureSubsystem.ElevatorManualUp();
+    elevatorManualDownCommand = superstructureSubsystem.ElevatorManualDown();
+    elevatorStopCommand = superstructureSubsystem.ElevatorStop();
+    elevatorSeedCommand = superstructureSubsystem.ElevatorZero();
 
     // Instantiate Coral Commands //
-    m_slowReverseCoralIntakeCommand = m_superstructureSubsystem.ReverseCoralIntake();
-    m_intakeCoralCommand = m_superstructureSubsystem.IntakeCoral();
-    m_intakeFromLeftCoralStationCommand = m_superstructureSubsystem.SetCoralStation(true);
-    m_intakeFromRightCoralStationCommand = m_superstructureSubsystem.SetCoralStation(false);
-    m_holdCoralCommand = m_superstructureSubsystem.HoldCoral();
-    m_alignToLeftReefBranchCommand = m_superstructureSubsystem.SetReefAlignment(true);
-    m_alignToRightReefBranchCommand = m_superstructureSubsystem.SetReefAlignment(false);
-    m_scoreCoralCommand = m_superstructureSubsystem.ScoreCoral();
+    slowReverseCoralIntakeCommand = superstructureSubsystem.ReverseCoralIntake();
+    intakeCoralCommand = superstructureSubsystem.IntakeCoral();
+    intakeFromLeftCoralStationCommand = superstructureSubsystem.SetCoralStation(true);
+    intakeFromRightCoralStationCommand = superstructureSubsystem.SetCoralStation(false);
+    holdCoralCommand = superstructureSubsystem.HoldCoral();
+    alignToLeftReefBranchCommand = superstructureSubsystem.SetReefAlignment(true);
+    alignToRightReefBranchCommand = superstructureSubsystem.SetReefAlignment(false);
+    scoreCoralCommand = superstructureSubsystem.ScoreCoral();
 
     // Instantiate Algae Commands //
-    m_algaeHomeCommand = m_superstructureSubsystem.AlgaeArmHome();
-    m_intakeAlgaeCommand = m_superstructureSubsystem.IntakeAlgae();
-    m_holdAlgaeCommand = m_superstructureSubsystem.AlgaeArmHold();
-    m_scoreAlgaeCommand = m_superstructureSubsystem.ScoreAlgae();
-    m_deAlgaeCommand = m_superstructureSubsystem.AlgaeArmDeAlgaeify();
+    algaeHomeCommand = superstructureSubsystem.AlgaeArmHome();
+    intakeAlgaeCommand = superstructureSubsystem.IntakeAlgae();
+    holdAlgaeCommand = superstructureSubsystem.AlgaeArmHold();
+    scoreAlgaeCommand = superstructureSubsystem.ScoreAlgae();
+    deAlgaeCommand = superstructureSubsystem.AlgaeArmDeAlgaeify();
 
     // Register Named Commands //
     // Register Swerve Commands //
-    NamedCommands.registerCommand("DefaultDrive", m_defaultDriveCommand);
-    // NamedCommands.registerCommand("AimAndAlignToReefAprilTag",
-    // m_aimAndAlignToReefApriltagCommand);
-    NamedCommands.registerCommand("SwerveBrake", m_swerveBrakeCommand);
-    NamedCommands.registerCommand("SeedFieldCentric", m_seedFieldCentricCommand);
+    NamedCommands.registerCommand("DefaultDrive", defaultDriveCommand);
+    NamedCommands.registerCommand("SwerveBrake", swerveBrakeCommand);
+    NamedCommands.registerCommand("SeedFieldCentric", seedFieldCentricCommand);
 
     // Register Elevator Commands //
-    NamedCommands.registerCommand("ElevatorHome", m_elevatorHomeCommand);
-    NamedCommands.registerCommand("ElevatorL1", m_elevatorL1Command);
-    NamedCommands.registerCommand("ElevatorL2", m_elevatorL2Command);
-    NamedCommands.registerCommand("ElevatorL3", m_elevatorL3Command);
-    NamedCommands.registerCommand("ElevatorL4", m_elevatorL4Command);
-    NamedCommands.registerCommand("ElevatorManualUp", m_elevatorManualUpCommand);
-    NamedCommands.registerCommand("ElevatorManualDown", m_elevatorManualDownCommand);
-    NamedCommands.registerCommand("ElevatorStop", m_elevatorStopCommand);
-    NamedCommands.registerCommand("ElevatorSeed", m_elevatorSeedCommand);
+    NamedCommands.registerCommand("ElevatorHome", elevatorHomeCommand);
+    NamedCommands.registerCommand("ElevatorL1", elevatorL1Command);
+    NamedCommands.registerCommand("ElevatorL2", elevatorL2Command);
+    NamedCommands.registerCommand("ElevatorL3", elevatorL3Command);
+    NamedCommands.registerCommand("ElevatorL4", elevatorL4Command);
+    NamedCommands.registerCommand("ElevatorManualUp", elevatorManualUpCommand);
+    NamedCommands.registerCommand("ElevatorManualDown", elevatorManualDownCommand);
+    NamedCommands.registerCommand("ElevatorStop", elevatorStopCommand);
+    NamedCommands.registerCommand("ElevatorSeed", elevatorSeedCommand);
 
     // Register Coral Commands //
-    NamedCommands.registerCommand("ReverseIntakeCoral", m_slowReverseCoralIntakeCommand);
-    NamedCommands.registerCommand("IntakeCoral", m_intakeCoralCommand);
+    NamedCommands.registerCommand("ReverseIntakeCoral", slowReverseCoralIntakeCommand);
+    NamedCommands.registerCommand("IntakeCoral", intakeCoralCommand);
     NamedCommands.registerCommand(
-        "IntakeFromLeftCoralStation", m_intakeFromLeftCoralStationCommand);
+        "IntakeFromLeftCoralStation", intakeFromLeftCoralStationCommand);
     NamedCommands.registerCommand(
-        "IntakeFromRightCoralStation", m_intakeFromRightCoralStationCommand);
-    NamedCommands.registerCommand("HoldCoral", m_holdCoralCommand);
-    NamedCommands.registerCommand("AlignToLeftReefBranch", m_alignToLeftReefBranchCommand);
-    NamedCommands.registerCommand("AlignToRightReefBranch", m_alignToRightReefBranchCommand);
-    NamedCommands.registerCommand("ScoreCoral", m_scoreCoralCommand);
+        "IntakeFromRightCoralStation", intakeFromRightCoralStationCommand);
+    NamedCommands.registerCommand("HoldCoral", holdCoralCommand);
+    NamedCommands.registerCommand("AlignToLeftReefBranch", alignToLeftReefBranchCommand);
+    NamedCommands.registerCommand("AlignToRightReefBranch", alignToRightReefBranchCommand);
+    NamedCommands.registerCommand("ScoreCoral", scoreCoralCommand);
 
     // Register Algae Commands //
-    NamedCommands.registerCommand("AlgaeHome", m_algaeHomeCommand);
-    NamedCommands.registerCommand("IntakeAlgae", m_intakeAlgaeCommand);
-    NamedCommands.registerCommand("HoldAlgae", m_holdAlgaeCommand);
-    NamedCommands.registerCommand("ScoreAlgae", m_scoreAlgaeCommand);
-    NamedCommands.registerCommand("DeAlgae", m_deAlgaeCommand);
+    NamedCommands.registerCommand("AlgaeHome", algaeHomeCommand);
+    NamedCommands.registerCommand("IntakeAlgae", intakeAlgaeCommand);
+    NamedCommands.registerCommand("HoldAlgae", holdAlgaeCommand);
+    NamedCommands.registerCommand("ScoreAlgae", scoreAlgaeCommand);
+    NamedCommands.registerCommand("DeAlgae", deAlgaeCommand);
 
     // Init Auto Chooser //
     autoChooser = AutoBuilder.buildAutoChooser("S6-R02-R03-R04-SeqElev-Auto");
@@ -338,149 +329,148 @@ public class RobotContainer {
   private void configureBindings() {
 
     // Swerve Drive Default Command //
-    m_swerveDriveSubsystem.setDefaultCommand(m_defaultDriveCommand);
+    swerveSubsystem.setDefaultCommand(defaultDriveCommand);
 
-    m_coralSubsystem.setDefaultCommand(m_holdCoralCommand);
-    m_algaeSubsystem.setDefaultCommand(m_algaeHomeCommand);
-    // m_elevatorSubsystem.setDefaultCommand(m_elevatorHomeCommand);
+    coralSubsystem.setDefaultCommand(holdCoralCommand);
+    algaeSubsystem.setDefaultCommand(algaeHomeCommand);
 
     // Use the "Back" button to reset the Gyro orientation //
-    m_driverController.back().onTrue(m_seedFieldCentricCommand);
+    driverController.back().onTrue(seedFieldCentricCommand);
     // Use the "Start" button to x-lock the wheels //
-    m_driverController.start().onTrue(m_swerveBrakeCommand);
+    driverController.start().onTrue(swerveBrakeCommand);
 
     // Press the left bumper to trigger coral intake //
-    m_driverController.leftBumper().onTrue(m_intakeCoralCommand);
+    driverController.leftBumper().onTrue(intakeCoralCommand);
 
     // Pres the right bumper to score the coral //
-    m_driverController.rightBumper().whileTrue(m_scoreCoralCommand);
+    driverController.rightBumper().whileTrue(scoreCoralCommand);
 
     // Press the left trigger to intake algae //
-    m_driverController.leftTrigger(0.2).whileTrue(m_intakeAlgaeCommand).onFalse(m_holdAlgaeCommand);
+    driverController.leftTrigger(0.2).whileTrue(intakeAlgaeCommand).onFalse(holdAlgaeCommand);
 
     // Press the right trigger to score algae //
-    m_driverController.rightTrigger(0.2).whileTrue(m_scoreAlgaeCommand);
+    driverController.rightTrigger(0.2).whileTrue(scoreAlgaeCommand);
 
     // pov 270 = align left branch
-    m_driverController.pov(270).whileTrue(m_driveToClosestLeftReefPoseCommand);
+    driverController.pov(270).whileTrue(driveToClosestLeftReefPoseCommand);
 
     // pov 90 = align right branch
-    m_driverController.pov(90).whileTrue(m_driveToClosestRightReefPoseCommand);
+    driverController.pov(90).whileTrue(driveToClosestRightReefPoseCommand);
 
     // pov 180 = auto-align to nearest coral station
-    m_driverController.pov(180).whileTrue(m_driveToClosestCoralStationPoseCommand);
+    driverController.pov(180).whileTrue(driveToClosestCoralStationPoseCommand);
 
     // Right stick button = Dealgae
-    m_driverController.rightStick().whileTrue(m_deAlgaeCommand);
+    driverController.rightStick().whileTrue(deAlgaeCommand);
 
     // Left stick button = Elevator Home
-    m_driverController.leftStick().whileTrue(m_slowReverseCoralIntakeCommand);
+    driverController.leftStick().whileTrue(slowReverseCoralIntakeCommand);
 
     // // A = L1, toggle = Home / L1
-    // m_driverController.a().toggleOnTrue(
+    // driverController.a().toggleOnTrue(
     //     Commands.either(
     //         // If currently at L1, go to home
-    //         m_superstructureSubsystem.ElevatorHome(),
+    //         superstructureSubsystem.ElevatorHome(),
     //         // If not at L1, go to L1
-    //         m_superstructureSubsystem.ElevatorL1(),
+    //         superstructureSubsystem.ElevatorL1(),
     //         // Condition: check if elevator is currently at L1
-    //         () -> m_elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L1
+    //         () -> elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L1
     //     )
     // );
 
     // // X = L2, toggle = Home / L2
-    // m_driverController.b().toggleOnTrue(
+    // driverController.b().toggleOnTrue(
     //     Commands.either(
     //         // If currently at L2, go to home
-    //         m_superstructureSubsystem.ElevatorHome(),
+    //         superstructureSubsystem.ElevatorHome(),
     //         // If not at L2, go to L2
-    //         m_superstructureSubsystem.ElevatorL2(),
+    //         superstructureSubsystem.ElevatorL2(),
     //         // Condition: check if elevator is currently at L2
-    //         () -> m_elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L2
+    //         () -> elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L2
     //     )
     // );
 
     // // B = L3, toggle = Home / L3
-    // m_driverController.x().toggleOnTrue(
+    // driverController.x().toggleOnTrue(
     //     Commands.either(
     //         // If currently at L3, go to home
-    //         m_superstructureSubsystem.ElevatorHome(),
+    //         superstructureSubsystem.ElevatorHome(),
     //         // If not at L3, go to L3
-    //         m_superstructureSubsystem.ElevatorL3(),
+    //         superstructureSubsystem.ElevatorL3(),
     //         // Condition: check if elevator is currently at L3
-    //         () -> m_elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L3
+    //         () -> elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L3
     //     )
     // );
 
     // // Y = L4, toggle = Home / L4
-    // m_driverController.y().toggleOnTrue(
+    // driverController.y().toggleOnTrue(
     //     Commands.either(
     //         // If currently at L4, go to home
-    //         m_superstructureSubsystem.ElevatorHome(),
+    //         superstructureSubsystem.ElevatorHome(),
     //         // If not at L4, go to L4
-    //         m_superstructureSubsystem.ElevatorL4(),
+    //         superstructureSubsystem.ElevatorL4(),
     //         // Condition: check if elevator is currently at L4
-    //         () -> m_elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L4
+    //         () -> elevatorSubsystem.getElevatorState() == ElevatorSubsystem.ElevatorState.L4
     //     )
     // );
 
-    // m_driverController.pov(90)
-    //     .whileTrue(m_elevatorManualUpCommand)
-    //     .onFalse(m_elevatorStopCommand); // Elevator Manual Up
-    // m_driverController.pov(270)
-    //     .whileTrue(m_elevatorManualDownCommand)
-    //     .onFalse(m_elevatorStopCommand); // Elevator Manual Down
-    // m_driverController.pov(180)
-    //     .onTrue(m_elevatorSeedCommand); // Elevator Rezero
+    // driverController.pov(90)
+    //     .whileTrue(elevatorManualUpCommand)
+    //     .onFalse(elevatorStopCommand); // Elevator Manual Up
+    // driverController.pov(270)
+    //     .whileTrue(elevatorManualDownCommand)
+    //     .onFalse(elevatorStopCommand); // Elevator Manual Down
+    // driverController.pov(180)
+    //     .onTrue(elevatorSeedCommand); // Elevator Rezero
 
     // Elevator Triggers //
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.ELEVATOR_HOME_BTN)
-        .onTrue(m_elevatorHomeCommand);
+        .onTrue(elevatorHomeCommand);
 
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.ELEVATOR_L1_BTN)
-        .onTrue(m_elevatorL1Command);
+        .onTrue(elevatorL1Command);
 
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.ELEVATOR_L2_BTN)
-        .onTrue(m_elevatorL2Command);
+        .onTrue(elevatorL2Command);
 
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.ELEVATOR_L3_BTN)
-        .onTrue(m_elevatorL3Command);
+        .onTrue(elevatorL3Command);
 
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.ELEVATOR_L4_BTN)
-        .onTrue(m_elevatorL4Command);
+        .onTrue(elevatorL4Command);
 
     // Coral Triggers //
 
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.ALIGN_LEFT_REEF_BRANCH_BTN)
-        .onTrue(m_alignToLeftReefBranchCommand);
+        .onTrue(alignToLeftReefBranchCommand);
 
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.ALIGN_RIGHT_REEF_BRANCH_BTN)
-        .onTrue(m_alignToRightReefBranchCommand);
+        .onTrue(alignToRightReefBranchCommand);
 
     // Algae Triggers //
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.ALGAE_HOME_BTN)
-        .onTrue(m_algaeHomeCommand);
+        .onTrue(algaeHomeCommand);
 
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.INTAKE_ALGAE_BTN)
-        .whileTrue(m_intakeAlgaeCommand)
-        .onFalse(m_holdAlgaeCommand);
+        .whileTrue(intakeAlgaeCommand)
+        .onFalse(holdAlgaeCommand);
 
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.SCORE_ALGAE_BTN)
-        .onTrue(m_scoreAlgaeCommand);
+        .onTrue(scoreAlgaeCommand);
 
-    m_operatorButtonBoxController
+    operatorButtonBoxController
         .button(OperatorControlNameConstants.DEALGAE_BTN)
-        .whileTrue(m_deAlgaeCommand);
+        .whileTrue(deAlgaeCommand);
   }
 
   /**
