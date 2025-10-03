@@ -1,5 +1,8 @@
 package frc.robot.subsystems.algae;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public interface AlgaeIO {
 
   default void setArmMotorVoltage(double voltage) {
@@ -14,10 +17,6 @@ public interface AlgaeIO {
     throw new UnsupportedOperationException("setArmSetpoint is not implemented");
   }
 
-  default void setArmSetpointFF(double setpoint) {
-    throw new UnsupportedOperationException("setArmSetpointFF is not implemented");
-  }
-
   default void setIntakeMotorVoltage(double voltage) {
     throw new UnsupportedOperationException("setIntakeMotorVoltage is not implemented");
   }
@@ -29,25 +28,38 @@ public interface AlgaeIO {
   class AlgaeIOInputs {
 
     // Are the motors connected to the CAN bus? //
-    public boolean armMotorConnected;
-    public boolean intakeMotorConnected;
+    @Getter @Setter
+    private boolean armMotorConnected;
+    @Getter @Setter
+    private boolean intakeMotorConnected;
 
     // Arm Motor data //
-    public double armMotorVoltage;
-    public double armMotorDutyCycle;
-    public double armMotorCurrent;
-    public double armMotorTemperature;
-    public double armMotorPosition;
-    public double armMotorVelocity;
+    @Getter @Setter
+    private double armMotorVoltage;
+    @Getter @Setter
+    private double armMotorDutyCycle;
+    @Getter @Setter
+    private double armMotorCurrent;
+    @Getter @Setter
+    private double armMotorTemperature;
+    @Getter @Setter
+    private double armMotorPosition;
+    @Getter @Setter
+    private double armMotorVelocity;
 
     // Intake motor data //
-    public double intakeMotorVoltage;
-    public double intakeMotorDutyCycle;
-    public double intakeMotorCurrent;
-    public double intakeMotorTemperature;
+    @Getter @Setter
+    private double intakeMotorVoltage;
+    @Getter @Setter
+    private double intakeMotorDutyCycle;
+    @Getter @Setter
+    private double intakeMotorCurrent;
+    @Getter @Setter
+    private double intakeMotorTemperature;
 
     // Is the current limit tripped? //
-    public boolean intakeCurrentLimitTripped;
+    @Getter @Setter
+    private boolean intakeCurrentLimitTripped;
   }
 
   default void updateInputs(AlgaeIOInputs inputs) {}

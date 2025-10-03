@@ -12,8 +12,6 @@ import frc.robot.subsystems.algae.AlgaeIO.AlgaeIOInputs;
 public class AlgaeSubsystem extends SubsystemBase {
   /** Creates a new ArmSmartMotionSubsystem. */
 
-  // @TODO: Create Elastic Tabs for the Arm Subsystem //
-
   // Algae Subsystem States //
   public enum AlgaeState {
     IDLE,
@@ -24,17 +22,17 @@ public class AlgaeSubsystem extends SubsystemBase {
     SCORE,
   }
 
-  private AlgaeIO m_algaeIO;
-  private AlgaeState m_algaeState;
-  private AlgaeIOInputs m_algaeIOInputs;
+  private AlgaeIO algaeIO;
+  private AlgaeState algaeState;
+  private AlgaeIOInputs algaeIOInputs;
 
-  private boolean m_hasAlgae;
+  private boolean hasAlgae;
 
   public AlgaeSubsystem(AlgaeIO algaeIO) {
-    m_algaeIO = algaeIO;
-    m_algaeIOInputs = new AlgaeIOInputs();
-    m_algaeState = AlgaeState.IDLE;
-    m_hasAlgae = false; // The robot initially has no algae
+    this.algaeIO = algaeIO;
+    algaeIOInputs = new AlgaeIOInputs();
+    algaeState = AlgaeState.IDLE;
+    hasAlgae = false; // The robot initially has no algae
   }
 
   /*
@@ -42,12 +40,12 @@ public class AlgaeSubsystem extends SubsystemBase {
    * @return true if current limit is tripped
    */
   public boolean isCurrentLimitTripped() {
-    return m_algaeIOInputs.intakeCurrentLimitTripped;
+    return algaeIOInputs.isIntakeCurrentLimitTripped();
   }
 
   /** Get whether the algae intake has an algae */
   public boolean hasAlgae() {
-    return m_hasAlgae;
+    return hasAlgae;
   }
 
   /**
@@ -56,7 +54,7 @@ public class AlgaeSubsystem extends SubsystemBase {
    * @param hasAlgae
    */
   public void setHasAlgae(boolean hasAlgae) {
-    m_hasAlgae = hasAlgae;
+    this.hasAlgae = hasAlgae;
   }
 
   /**
@@ -66,9 +64,9 @@ public class AlgaeSubsystem extends SubsystemBase {
    */
   public void setAlgaeState(AlgaeState wantedAlgaeState) {
 
-    m_algaeState = wantedAlgaeState;
+    algaeState = wantedAlgaeState;
 
-    switch (m_algaeState) {
+    switch (algaeState) {
       case INTAKE:
         handleMotors(ARM_INTAKE_GOAL, INTAKE_SPEED);
         break;
@@ -85,24 +83,24 @@ public class AlgaeSubsystem extends SubsystemBase {
         handleMotors(ARM_HOME_GOAL, 0);
         break;
       case IDLE:
-        m_algaeIO.setIntakeMotorPercentage(0);
-        m_algaeIO.setArmMotorPercentage(0);
+        algaeIO.setIntakeMotorPercentage(0);
+        algaeIO.setArmMotorPercentage(0);
         break;
     }
   }
 
   public void setAlgaeIntakeMotorSpeed(double speed) {
-    m_algaeIO.setIntakeMotorPercentage(speed);
+    algaeIO.setIntakeMotorPercentage(speed);
   }
 
   public void setAlgaeArmMotorSpeed(double speed) {
-    m_algaeIO.setArmMotorPercentage(speed);
+    algaeIO.setArmMotorPercentage(speed);
   }
 
   /** Handles the action of the intake and the arm motors for each state */
   private void handleMotors(double armSetpoint, double intakeSpeed) {
-    m_algaeIO.setArmSetpoint(armSetpoint);
-    m_algaeIO.setIntakeMotorPercentage(intakeSpeed);
+    algaeIO.setArmSetpoint(armSetpoint);
+    algaeIO.setIntakeMotorPercentage(intakeSpeed);
   }
 
   @Override
@@ -110,6 +108,6 @@ public class AlgaeSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // Update inputs
-    m_algaeIO.updateInputs(m_algaeIOInputs);
+    algaeIO.updateInputs(algaeIOInputs);
   }
 }
