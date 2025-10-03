@@ -259,11 +259,7 @@ public class RobotContainer {
     // Instantiate Coral Commands //
     slowReverseCoralIntakeCommand = superstructureSubsystem.ReverseCoralIntake();
     intakeCoralCommand = superstructureSubsystem.IntakeCoral();
-    intakeFromLeftCoralStationCommand = superstructureSubsystem.SetCoralStation(true);
-    intakeFromRightCoralStationCommand = superstructureSubsystem.SetCoralStation(false);
     holdCoralCommand = superstructureSubsystem.HoldCoral();
-    alignToLeftReefBranchCommand = superstructureSubsystem.SetReefAlignment(true);
-    alignToRightReefBranchCommand = superstructureSubsystem.SetReefAlignment(false);
     scoreCoralCommand = superstructureSubsystem.ScoreCoral();
 
     // Instantiate Algae Commands //
