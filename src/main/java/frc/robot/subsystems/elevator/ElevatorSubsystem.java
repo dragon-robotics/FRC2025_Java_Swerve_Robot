@@ -45,10 +45,10 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public boolean isAtElevatorState() {
     return switch (m_elevatorState) {
-      case L1 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L1, 0.1);
-      case L2 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L2, 0.1);
-      case L3 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L3, 0.1);
-      case L4 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L4, 0.1);
+      case L1 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L1, 0.5);
+      case L2 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L2, 0.5);
+      case L3 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L3, 0.5);
+      case L4 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L4, 0.5);
       case HOME -> {
         // Get the current encoder position.
         double encoderPosition = m_elevatorIOInputs.elevatorLeadMotorPosition;
