@@ -27,42 +27,28 @@ public interface ElevatorIO {
   class ElevatorIOInputs {
 
     // Are the motors connected to the CAN bus? //
-    @Getter @Setter
-    private boolean elevatorLeadMotorConnected;
-    @Getter @Setter
-    private boolean elevatorFollowMotorConnected;
+    @Getter @Setter private boolean elevatorLeadMotorConnected;
+    @Getter @Setter private boolean elevatorFollowMotorConnected;
 
     // Left Elevator Motor data //
-    @Getter @Setter
-    private double elevatorLeadMotorVoltage;
-    @Getter @Setter
-    private double elevatorLeadMotorDutyCycle;
-    @Getter @Setter
-    private double elevatorLeadMotorCurrent;
-    @Getter @Setter
-    private double elevatorLeadMotorTemperature;
-    @Getter @Setter
-    private double elevatorLeadMotorPosition;
-    @Getter @Setter
-    private double elevatorLeadMotorVelocity;
+    @Getter @Setter private double elevatorLeadMotorVoltage;
+    @Getter @Setter private double elevatorLeadMotorDutyCycle;
+    @Getter @Setter private double elevatorLeadMotorCurrent;
+    @Getter @Setter private double elevatorLeadMotorTemperature;
+    @Getter @Setter private double elevatorLeadMotorPosition;
+    @Getter @Setter private double elevatorLeadMotorVelocity;
 
     // Right Elevator Motor data //
-    @Getter @Setter
-    private double elevatorFollowMotorVoltage;
-    @Getter @Setter
-    private double elevatorFollowMotorDutyCycle;
-    @Getter @Setter
-    private double elevatorFollowMotorCurrent;
-    @Getter @Setter
-    private double elevatorFollowMotorTemperature;
+    @Getter @Setter private double elevatorFollowMotorVoltage;
+    @Getter @Setter private double elevatorFollowMotorDutyCycle;
+    @Getter @Setter private double elevatorFollowMotorCurrent;
+    @Getter @Setter private double elevatorFollowMotorTemperature;
 
     // Is the current limit tripped? //
-    @Getter @Setter
-    private boolean elevatorCurrentLimitTripped;
+    @Getter @Setter private boolean elevatorCurrentLimitTripped;
 
     // Is the elevator at the slow down threshold? //
-    @Getter @Setter
-    private boolean elevatorAtSlowDownThreshold;
+    @Getter @Setter private boolean elevatorAtSlowDownThreshold;
   }
 
   default void updateInputs(ElevatorIOInputs inputs) {}

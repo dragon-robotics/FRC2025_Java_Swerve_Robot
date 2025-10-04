@@ -15,24 +15,18 @@ public interface CoralIO {
   class CoralIOInputs {
 
     // Are the motors connected to the CAN bus? //
-    @Getter @Setter
-    private boolean intakeMotorConnected;
+    @Getter @Setter private boolean intakeMotorConnected;
 
     // Motor data //
-    @Getter @Setter
-    private double intakeMotorVoltage;
-    @Getter @Setter
-    private double intakeMotorCurrent;
-    @Getter @Setter
-    private double intakeMotorTemperature;
+    @Getter @Setter private double intakeMotorVoltage;
+    @Getter @Setter private double intakeMotorCurrent;
+    @Getter @Setter private double intakeMotorTemperature;
 
     // Is the beam break tripped? //
-    @Getter @Setter
-    private boolean beamBreakTripped;
+    @Getter @Setter private boolean beamBreakTripped;
 
     // Is the current limit tripped? //
-    @Getter @Setter
-    private boolean intakeCurrentLimitTripped;
+    @Getter @Setter private boolean intakeCurrentLimitTripped;
   }
 
   default void updateInputs(CoralIOInputs inputs) {}

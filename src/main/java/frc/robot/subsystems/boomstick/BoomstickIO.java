@@ -19,22 +19,15 @@ public interface BoomstickIO {
   class BoomstickIOInputs {
 
     // Are the motors connected to the CAN bus? //
-    @Getter @Setter
-    private boolean armMotorConnected;
+    @Getter @Setter private boolean armMotorConnected;
 
     // Left Arm Motor data //
-    @Getter @Setter
-    private double armMotorVoltage;
-    @Getter @Setter
-    private double armMotorDutyCycle;
-    @Getter @Setter
-    private double armMotorCurrent;
-    @Getter @Setter
-    private double armMotorTemperature;
-    @Getter @Setter
-    private double armMotorPosition;
-    @Getter @Setter
-    private double armMotorVelocity;
+    @Getter @Setter private double armMotorVoltage;
+    @Getter @Setter private double armMotorDutyCycle;
+    @Getter @Setter private double armMotorCurrent;
+    @Getter @Setter private double armMotorTemperature;
+    @Getter @Setter private double armMotorPosition;
+    @Getter @Setter private double armMotorVelocity;
   }
 
   default void updateInputs(BoomstickIOInputs inputs) {}

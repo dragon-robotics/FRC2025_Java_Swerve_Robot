@@ -28,38 +28,25 @@ public interface AlgaeIO {
   class AlgaeIOInputs {
 
     // Are the motors connected to the CAN bus? //
-    @Getter @Setter
-    private boolean armMotorConnected;
-    @Getter @Setter
-    private boolean intakeMotorConnected;
+    @Getter @Setter private boolean armMotorConnected;
+    @Getter @Setter private boolean intakeMotorConnected;
 
     // Arm Motor data //
-    @Getter @Setter
-    private double armMotorVoltage;
-    @Getter @Setter
-    private double armMotorDutyCycle;
-    @Getter @Setter
-    private double armMotorCurrent;
-    @Getter @Setter
-    private double armMotorTemperature;
-    @Getter @Setter
-    private double armMotorPosition;
-    @Getter @Setter
-    private double armMotorVelocity;
+    @Getter @Setter private double armMotorVoltage;
+    @Getter @Setter private double armMotorDutyCycle;
+    @Getter @Setter private double armMotorCurrent;
+    @Getter @Setter private double armMotorTemperature;
+    @Getter @Setter private double armMotorPosition;
+    @Getter @Setter private double armMotorVelocity;
 
     // Intake motor data //
-    @Getter @Setter
-    private double intakeMotorVoltage;
-    @Getter @Setter
-    private double intakeMotorDutyCycle;
-    @Getter @Setter
-    private double intakeMotorCurrent;
-    @Getter @Setter
-    private double intakeMotorTemperature;
+    @Getter @Setter private double intakeMotorVoltage;
+    @Getter @Setter private double intakeMotorDutyCycle;
+    @Getter @Setter private double intakeMotorCurrent;
+    @Getter @Setter private double intakeMotorTemperature;
 
     // Is the current limit tripped? //
-    @Getter @Setter
-    private boolean intakeCurrentLimitTripped;
+    @Getter @Setter private boolean intakeCurrentLimitTripped;
   }
 
   default void updateInputs(AlgaeIOInputs inputs) {}

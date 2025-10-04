@@ -17,12 +17,10 @@ public interface LedIO {
   class LedIOInputs {
 
     // Is the LED Controller connected? //
-    @Getter @Setter
-    private boolean ledControllerConnected;
+    @Getter @Setter private boolean ledControllerConnected;
 
     // LED controller data //
-    @Getter @Setter
-    private double curLedValue;
+    @Getter @Setter private double curLedValue;
   }
 
   default void updateInputs(LedIOInputs inputs) {}

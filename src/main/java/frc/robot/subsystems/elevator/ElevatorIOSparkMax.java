@@ -20,8 +20,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 
 public class ElevatorIOSparkMax implements ElevatorIO {
   private final SparkMax elevatorLeadMotor = new SparkMax(LEAD_MOTOR_ID, MotorType.kBrushless);
-  private final SparkMax elevatorFollowMotor =
-      new SparkMax(FOLLOW_MOTOR_ID, MotorType.kBrushless);
+  private final SparkMax elevatorFollowMotor = new SparkMax(FOLLOW_MOTOR_ID, MotorType.kBrushless);
 
   private final SparkClosedLoopController elevatorLeadController =
       elevatorLeadMotor.getClosedLoopController();
@@ -73,9 +72,7 @@ public class ElevatorIOSparkMax implements ElevatorIO {
         .follow(LEAD_MOTOR_ID, true);
 
     elevatorLeadMotor.configure(
-        elevatorLeadMotorConfig,
-        ResetMode.kNoResetSafeParameters,
-        PersistMode.kPersistParameters);
+        elevatorLeadMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
     elevatorFollowMotor.configure(
         elevatorFollowMotorConfig,
@@ -150,7 +147,8 @@ public class ElevatorIOSparkMax implements ElevatorIO {
 
     // Check if the current limit is tripped //
     inputs.setElevatorLeadMotorCurrent(elevatorLeadMotor.getOutputCurrent());
-    inputs.setElevatorCurrentLimitTripped(inputs.getElevatorLeadMotorCurrent() >= STALL_CURRENT_LIMIT);
+    inputs.setElevatorCurrentLimitTripped(
+        inputs.getElevatorLeadMotorCurrent() >= STALL_CURRENT_LIMIT);
 
     // Check if the elevator is at the slow down threshold //
     inputs.setElevatorAtSlowDownThreshold(inputs.getElevatorLeadMotorPosition() >= HOME);

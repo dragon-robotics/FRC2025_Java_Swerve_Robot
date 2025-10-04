@@ -164,7 +164,8 @@ public class AlgaeIOSparkMax implements AlgaeIO {
     inputs.setIntakeMotorCurrent(intakeMotor.getOutputCurrent());
 
     // Check if the current limit is tripped //
-    inputs.setIntakeCurrentLimitTripped(inputs.getIntakeMotorCurrent() > ALGAE_DETECT_CURRENT_THRESHOLD);
+    inputs.setIntakeCurrentLimitTripped(
+        inputs.getIntakeMotorCurrent() > ALGAE_DETECT_CURRENT_THRESHOLD);
 
     DogLog.log("Algae/ArmMotor/Connected", inputs.isArmMotorConnected());
     DogLog.log("Algae/ArmMotor/Voltage", inputs.getArmMotorVoltage());

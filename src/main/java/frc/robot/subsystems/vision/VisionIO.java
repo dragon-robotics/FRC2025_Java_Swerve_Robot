@@ -2,16 +2,21 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import lombok.Getter;
+import lombok.Setter;
 
 public interface VisionIO {
 
   public static class VisionIOInputs {
-    public String cameraName = "";
-    public boolean connected = false;
-    public TargetObservation latestTargetObservation =
+    @Getter @Setter private String cameraName = "";
+    @Getter @Setter private boolean connected = false;
+
+    @Getter @Setter
+    private TargetObservation latestTargetObservation =
         new TargetObservation(new Rotation2d(), new Rotation2d());
-    public PoseObservation[] poseObservations = new PoseObservation[0];
-    public int[] tagIds = new int[0];
+
+    @Getter @Setter private PoseObservation[] poseObservations = new PoseObservation[0];
+    @Getter @Setter private int[] tagIds = new int[0];
   }
 
   /** Represents the angle to a simple target, not used for pose estimation. */
@@ -28,7 +33,7 @@ public interface VisionIO {
       double edgeFactor, // how close the tags are to the edge of the camera frame
       PoseObservationType type) {}
 
-  public static enum PoseObservationType {
+  public enum PoseObservationType {
     MEGATAG_1,
     MEGATAG_2,
     PHOTONVISION

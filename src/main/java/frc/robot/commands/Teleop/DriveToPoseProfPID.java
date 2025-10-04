@@ -138,8 +138,6 @@ public class DriveToPoseProfPID extends Command {
   @Override
   public boolean isFinished() {
     // Check if all controllers are at their setpoints (within tolerance)
-    return translateController.atGoal()
-        && strafeController.atGoal()
-        && rotationController.atGoal();
+    return translateController.atGoal() && strafeController.atGoal() && rotationController.atGoal();
   }
 }

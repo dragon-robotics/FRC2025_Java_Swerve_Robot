@@ -84,7 +84,8 @@ public class CoralIOSparkMax implements CoralIO {
     inputs.setBeamBreakTripped(canRange.getIsDetected().getValue());
 
     // Check if the current limit is tripped //
-    inputs.setIntakeCurrentLimitTripped(inputs.getIntakeMotorCurrent() > CORAL_DETECT_CURRENT_THRESHOLD);
+    inputs.setIntakeCurrentLimitTripped(
+        inputs.getIntakeMotorCurrent() > CORAL_DETECT_CURRENT_THRESHOLD);
 
     DogLog.log("Coral/IntakeMotor/Connected", inputs.isIntakeMotorConnected());
     DogLog.log("Coral/IntakeMotor/Voltage", inputs.getIntakeMotorVoltage());

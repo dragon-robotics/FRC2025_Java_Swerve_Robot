@@ -3,7 +3,6 @@ package frc.robot.commands.teleop;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -87,7 +86,7 @@ public class DriveToPosePID extends Command {
             currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
 
     // Clamp linear speeds to 75% of max speed for safety
-    double maxLinearSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);    
+    double maxLinearSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     xSpeed = MathUtil.clamp(xSpeed, -0.5 * maxLinearSpeed, 0.5 * maxLinearSpeed);
     ySpeed = MathUtil.clamp(ySpeed, -0.5 * maxLinearSpeed, 0.5 * maxLinearSpeed);
 
