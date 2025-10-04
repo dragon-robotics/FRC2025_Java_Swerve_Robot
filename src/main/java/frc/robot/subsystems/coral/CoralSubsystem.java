@@ -11,8 +11,6 @@ import frc.robot.subsystems.coral.CoralIO.CoralIOInputs;
 
 public class CoralSubsystem extends SubsystemBase {
 
-  // @TODO: Create Elastic Tabs for the Intake Subsystem //
-
   // Coral Subsystem States //
   public enum CoralState {
     IDLE,
