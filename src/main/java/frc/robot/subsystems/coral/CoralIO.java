@@ -1,5 +1,8 @@
 package frc.robot.subsystems.coral;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public interface CoralIO {
   default void setIntakeMotorVoltage(double voltage) {
     throw new UnsupportedOperationException("setIntakeMotorVoltage is not implemented");
@@ -12,21 +15,24 @@ public interface CoralIO {
   class CoralIOInputs {
 
     // Are the motors connected to the CAN bus? //
-    public boolean intakeMotorConnected;
+    @Getter @Setter
+    private boolean intakeMotorConnected;
 
     // Motor data //
-    public double intakeMotorVoltage;
-    public double intakeMotorCurrent;
-    public double intakeMotorTemperature;
+    @Getter @Setter
+    private double intakeMotorVoltage;
+    @Getter @Setter
+    private double intakeMotorCurrent;
+    @Getter @Setter
+    private double intakeMotorTemperature;
 
     // Is the beam break tripped? //
-    public boolean beamBreakTripped;
+    @Getter @Setter
+    private boolean beamBreakTripped;
 
     // Is the current limit tripped? //
-    public boolean intakeCurrentLimitTripped;
-
-    // // Is the coral in the robot ? //
-    // public boolean isCoralInRobot;
+    @Getter @Setter
+    private boolean intakeCurrentLimitTripped;
   }
 
   default void updateInputs(CoralIOInputs inputs) {}

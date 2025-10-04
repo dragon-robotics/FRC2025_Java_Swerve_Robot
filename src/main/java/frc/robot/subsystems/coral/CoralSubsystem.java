@@ -25,31 +25,23 @@ public class CoralSubsystem extends SubsystemBase {
     SLOW_REVERSE
   }
 
-  private enum HoldState {
-    REVERSE,
-    FORWARD
-  }
+  private CoralIO coralIO;
+  private CoralState coralState;
+  private CoralIOInputs coralIOInputs;
 
-  private HoldState m_holdState = HoldState.REVERSE;
-  private double m_forwardEndTime = 0.0;
-
-  private CoralIO m_coralIO;
-  private CoralState m_coralState;
-  private CoralIOInputs m_coralIOInputs;
-
-  private boolean m_hasCoral;
+  private boolean hasCoral;
 
   /** Creates a new IntakeSubsystem. */
   public CoralSubsystem(CoralIO coralIO) {
-    m_coralIO = coralIO;
-    m_coralIOInputs = new CoralIOInputs();
-    m_coralState = CoralState.IDLE;
-    m_hasCoral = false; // The robot initially has no coral
+    this.coralIO = coralIO;
+    coralIOInputs = new CoralIOInputs();
+    coralState = CoralState.IDLE;
+    hasCoral = false; // The robot initially has no coral
   }
 
   /** Get whether the coral intake has a coral */
   public boolean hasCoral() {
-    return m_hasCoral;
+    return hasCoral;
   }
 
   /**
@@ -58,11 +50,11 @@ public class CoralSubsystem extends SubsystemBase {
    * @param hasCoral
    */
   public void setHasCoral(boolean hasCoral) {
-    m_hasCoral = hasCoral;
+    this.hasCoral = hasCoral;
   }
 
   public boolean isBeamBreakTripped() {
-    return m_coralIOInputs.beamBreakTripped;
+    return coralIOInputs.isBeamBreakTripped();
   }
 
   /**
@@ -72,60 +64,40 @@ public class CoralSubsystem extends SubsystemBase {
    */
   public void setCoralState(CoralState wantedCoralState) {
 
-    m_coralState = wantedCoralState;
+    coralState = wantedCoralState;
 
-    switch (m_coralState) {
+    switch (coralState) {
       case INTAKE:
-        m_coralIO.setIntakeMotorPercentage(INTAKE_SPEED);
+        coralIO.setIntakeMotorPercentage(INTAKE_SPEED);
         break;
       case SLOW_INTAKE:
-        m_coralIO.setIntakeMotorPercentage(SLOW_INTAKE_SPEED);
+        coralIO.setIntakeMotorPercentage(SLOW_INTAKE_SPEED);
         break;
       case SLOWER_INTAKE:
-        m_coralIO.setIntakeMotorPercentage(0.08);
+        coralIO.setIntakeMotorPercentage(0.08);
         break;
       case HOLD:
-        // switch (m_holdState) {
-        //   case REVERSE:
-        //     // Reverse the intake until beam break detected
-        //     m_coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
-        //     if (m_coralIOInputs.beamBreakTripped) {
-        //       // Coral hit the beam break, switch to forward for 0.1 seconds
-        //       m_holdState = HoldState.FORWARD;
-        //       m_forwardEndTime = Timer.getFPGATimestamp() + 0.1;
-        //     }
-        //     break;
-
-        //   case FORWARD:
-        //     // Run intake forward for a short time
-        //     m_coralIO.setIntakeMotorPercentage(-SLOW_REVERSE_SPEED);
-        //     if (Timer.getFPGATimestamp() >= m_forwardEndTime) {
-        //       // 0.1 seconds elapsed, switch back to reverse
-        //       m_holdState = HoldState.REVERSE;
-        //     }
-        //     break;
-        // }
-        m_coralIO.setIntakeMotorPercentage(0);
+        coralIO.setIntakeMotorPercentage(0);
         break;
       case SCORE:
-        m_coralIO.setIntakeMotorPercentage(OUTTAKE_SPEED);
+        coralIO.setIntakeMotorPercentage(OUTTAKE_SPEED);
         break;
       case REVERSE:
-        m_coralIO.setIntakeMotorPercentage(REVERSE_SPEED);
+        coralIO.setIntakeMotorPercentage(REVERSE_SPEED);
         break;
       case SLOW_REVERSE:
-        m_coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
+        coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
         break;
       case IDLE:
       default:
-        m_coralIO.setIntakeMotorPercentage(0);
+        coralIO.setIntakeMotorPercentage(0);
         break;
     }
   }
 
   /** Set the motor speeds manually */
   public void setCoralMotorSpeeds(double intakeSpeed) {
-    m_coralIO.setIntakeMotorPercentage(intakeSpeed);
+    coralIO.setIntakeMotorPercentage(intakeSpeed);
   }
 
   @Override
@@ -133,6 +105,6 @@ public class CoralSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // Update inputs
-    m_coralIO.updateInputs(m_coralIOInputs);
+    coralIO.updateInputs(coralIOInputs);
   }
 }
