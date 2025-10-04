@@ -4,15 +4,12 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import dev.doglog.DogLog;
 
 public class Telemetry {
-  private final double MaxSpeed;
-
   /**
    * Construct a telemetry object, with the specified max speed of the robot
    *
    * @param maxSpeed Maximum speed in meters per second
    */
   public Telemetry(double maxSpeed) {
-    MaxSpeed = maxSpeed;
   }
 
   /** Accept the swerve drive state and telemeterize it to SmartDashboard and SignalLogger. */
