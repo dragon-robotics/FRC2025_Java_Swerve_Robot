@@ -30,6 +30,7 @@ import frc.robot.subsystems.coral.CoralIOSparkMax;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSparkMax;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorState;
 import frc.robot.subsystems.led.LedIORevBlinkin;
 import frc.robot.subsystems.led.LedSubsystem;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -80,6 +81,9 @@ public class RobotContainer {
   private Command elevatorManualDownCommand;
   private Command elevatorStopCommand;
   private Command elevatorSeedCommand;
+  private Command setElevatorStateL2Command;    // Sets the desired state to L2 without moving
+  private Command setElevatorStateL3Command;    // Sets the desired state to L3 without moving
+  private Command setElevatorStateL4Command;    // Sets the desired state to L4 without moving
 
   // Coral Commands //
   private Command slowReverseCoralIntakeCommand;
@@ -223,42 +227,45 @@ public class RobotContainer {
 
     // Instantiate Swerve Commands //
     defaultDriveCommand =
-        superstructureSubsystem.DefaultDriveCommand(
+        superstructureSubsystem.defaultDriveCmd(
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX(),
             () -> driverController.getHID().getPOV() == 0);
-    driveToClosestLeftReefPoseCommand = superstructureSubsystem.DriveToClosestReefPoseCommand(true);
+    driveToClosestLeftReefPoseCommand = superstructureSubsystem.driveToClosestReefPoseCmd(true);
     driveToClosestRightReefPoseCommand =
-        superstructureSubsystem.DriveToClosestReefPoseCommand(false);
+        superstructureSubsystem.driveToClosestReefPoseCmd(false);
     driveToClosestCoralStationPoseCommand =
-        superstructureSubsystem.DriveToClosestCoralStationPoseCommand();
-    swerveBrakeCommand = superstructureSubsystem.SwerveBrake();
-    seedFieldCentricCommand = superstructureSubsystem.SeedFieldCentric();
+        superstructureSubsystem.driveToClosestCoralStationPoseCmd();
+    swerveBrakeCommand = superstructureSubsystem.swerveBrakeCmd();
+    seedFieldCentricCommand = superstructureSubsystem.seedFieldCentricCmd();
 
     // Instantiate Elevator Commands //
-    elevatorHomeCommand = superstructureSubsystem.ElevatorHome();
-    elevatorL1Command = superstructureSubsystem.ElevatorL1();
-    elevatorL2Command = superstructureSubsystem.ElevatorL2();
-    elevatorL3Command = superstructureSubsystem.ElevatorL3();
-    elevatorL4Command = superstructureSubsystem.ElevatorL4();
-    elevatorManualUpCommand = superstructureSubsystem.ElevatorManualUp();
-    elevatorManualDownCommand = superstructureSubsystem.ElevatorManualDown();
-    elevatorStopCommand = superstructureSubsystem.ElevatorStop();
-    elevatorSeedCommand = superstructureSubsystem.ElevatorZero();
+    elevatorHomeCommand = superstructureSubsystem.elevatorHomeCmd();
+    elevatorL1Command = superstructureSubsystem.elevatorL1Cmd();
+    elevatorL2Command = superstructureSubsystem.elevatorL2Cmd();
+    elevatorL3Command = superstructureSubsystem.elevatorL3Cmd();
+    elevatorL4Command = superstructureSubsystem.elevatorL4Cmd();
+    elevatorManualUpCommand = superstructureSubsystem.elevatorManualUpCmd();
+    elevatorManualDownCommand = superstructureSubsystem.elevatorManualDownCmd();
+    elevatorStopCommand = superstructureSubsystem.elevatorStopCmd();
+    elevatorSeedCommand = superstructureSubsystem.elevatorZeroCmd();
+    setElevatorStateL2Command = superstructureSubsystem.setElevatorStateCmd(ElevatorState.L2);
+    setElevatorStateL3Command = superstructureSubsystem.setElevatorStateCmd(ElevatorState.L3);
+    setElevatorStateL4Command = superstructureSubsystem.setElevatorStateCmd(ElevatorState.L4);    
 
     // Instantiate Coral Commands //
-    slowReverseCoralIntakeCommand = superstructureSubsystem.ReverseCoralIntake();
-    intakeCoralCommand = superstructureSubsystem.IntakeCoral();
-    holdCoralCommand = superstructureSubsystem.HoldCoral();
-    scoreCoralCommand = superstructureSubsystem.ScoreCoral();
+    slowReverseCoralIntakeCommand = superstructureSubsystem.reverseCoralIntakeCmd();
+    intakeCoralCommand = superstructureSubsystem.intakeCoralCmd();
+    holdCoralCommand = superstructureSubsystem.holdCoralCmd();
+    scoreCoralCommand = superstructureSubsystem.scoreCoralCmd();
 
     // Instantiate Algae Commands //
-    algaeHomeCommand = superstructureSubsystem.AlgaeArmHome();
-    intakeAlgaeCommand = superstructureSubsystem.IntakeAlgae();
-    holdAlgaeCommand = superstructureSubsystem.AlgaeArmHold();
-    scoreAlgaeCommand = superstructureSubsystem.ScoreAlgae();
-    deAlgaeCommand = superstructureSubsystem.AlgaeArmDeAlgaeify();
+    algaeHomeCommand = superstructureSubsystem.algaeArmHomeCmd();
+    intakeAlgaeCommand = superstructureSubsystem.intakeAlgaeCmd();
+    holdAlgaeCommand = superstructureSubsystem.algaeArmHoldCmd();
+    scoreAlgaeCommand = superstructureSubsystem.scoreAlgaeCmd();
+    deAlgaeCommand = superstructureSubsystem.algaeArmDeAlgaeifyCmd();
 
     // Register Named Commands //
     // Register Swerve Commands //
@@ -349,6 +356,18 @@ public class RobotContainer {
 
     // Left stick button = Elevator Home
     driverController.leftStick().whileTrue(slowReverseCoralIntakeCommand);
+
+    driverController.a().onTrue(elevatorHomeCommand);
+    driverController.x().whileTrue(setElevatorStateL2Command);
+    driverController.b().whileTrue(setElevatorStateL3Command);
+    driverController.y().whileTrue(setElevatorStateL4Command);
+
+    // Operator Controller Commands //
+    operatorController.a().onTrue(elevatorHomeCommand);
+    operatorController.x().whileTrue(setElevatorStateL2Command);
+    operatorController.b().whileTrue(setElevatorStateL3Command);
+    operatorController.y().whileTrue(setElevatorStateL4Command);
+
 
     // // A = L1, toggle = Home / L1
     // driverController.a().toggleOnTrue(
