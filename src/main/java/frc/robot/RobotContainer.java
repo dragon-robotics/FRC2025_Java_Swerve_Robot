@@ -36,7 +36,6 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
-import frc.robot.util.OperatorDashboard;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
