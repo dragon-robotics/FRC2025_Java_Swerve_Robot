@@ -7,6 +7,7 @@ package frc.robot.subsystems.vision;
 import static frc.robot.Constants.FieldConstants.*;
 import static frc.robot.Constants.VisionConstants.*;
 
+import com.ctre.phoenix6.Utils;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -24,39 +25,34 @@ import frc.robot.util.vision.RejectedPose;
 import frc.robot.util.vision.VisionPoseValidator;
 import java.util.LinkedList;
 
-import com.ctre.phoenix6.Utils;
-
 public class VisionSubsystem extends SubsystemBase {
 
-  private final CommandSwerveDrivetrain m_swerve;
-  private final VisionConsumer m_consumer;
-  private final VisionIO[] m_io;
-  private final VisionIOInputs[] m_inputs;
-  private final Alert[] m_disconnectedAlerts;
+  private final CommandSwerveDrivetrain swerve;
+  private final VisionConsumer consumer;
+  private final VisionIO[] io;
+  private final VisionIOInputs[] inputs;
+  private final Alert[] disconnectedAlerts;
 
   // Check for odometry initialization and use about //
-  private int m_stablePoseCounter = 5;
-  private boolean m_odometryInitialized = false;
+  private int stablePoseCounter = 5;
+  private boolean odometryInitialized = false;
 
   // Import VisionPoseValidator to validate our vision observations //
-  private final VisionPoseValidator m_poseValidator = new VisionPoseValidator();
+  private final VisionPoseValidator poseValidator = new VisionPoseValidator();
 
   /** Creates a new VisionSubsystem. */
-  public VisionSubsystem(
-      CommandSwerveDrivetrain swerve,
-      VisionConsumer consumer,
-      VisionIO... io) {
-    m_swerve = swerve;
-    m_consumer = consumer;
-    m_io = io;
+  public VisionSubsystem(CommandSwerveDrivetrain swerve, VisionConsumer consumer, VisionIO... io) {
+    this.swerve = swerve;
+    this.consumer = consumer;
+    this.io = io;
 
     // Initialize the the inputs
-    m_inputs = new VisionIOInputs[m_io.length];
-    m_disconnectedAlerts = new Alert[m_io.length];
+    inputs = new VisionIOInputs[io.length];
+    disconnectedAlerts = new Alert[io.length];
 
-    for (int i = 0; i < m_inputs.length; i++) {
-      m_inputs[i] = new VisionIOInputs();
-      m_disconnectedAlerts[i] =
+    for (int i = 0; i < inputs.length; i++) {
+      inputs[i] = new VisionIOInputs();
+      disconnectedAlerts[i] =
           new Alert(
               "Vision camera " + io[i].getCameraName() + " is disconnected.", AlertType.kWarning);
     }
@@ -81,8 +77,8 @@ public class VisionSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Use local variables to reduce field access (optimization)
-    final var cameraIOs = m_io;
-    final var cameraInputs = m_inputs;
+    final var cameraIOs = io;
+    final var cameraInputs = inputs;
 
     // This method will be called once per scheduler run
     for (int i = 0; i < cameraIOs.length; i++) {
@@ -90,10 +86,10 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     // Initialize logging values
-    LinkedList<Pose3d> allTagPoses = new LinkedList<Pose3d>();
-    LinkedList<Pose3d> allRobotPoses = new LinkedList<Pose3d>();
-    LinkedList<Pose3d> allRobotPosesAccepted = new LinkedList<Pose3d>();
-    LinkedList<Pose3d> allRobotPosesRejected = new LinkedList<Pose3d>();
+    LinkedList<Pose3d> allTagPoses = new LinkedList<>();
+    LinkedList<Pose3d> allRobotPoses = new LinkedList<>();
+    LinkedList<Pose3d> allRobotPosesAccepted = new LinkedList<>();
+    LinkedList<Pose3d> allRobotPosesRejected = new LinkedList<>();
 
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < cameraIOs.length; cameraIndex++) {
@@ -121,7 +117,7 @@ public class VisionSubsystem extends SubsystemBase {
 
   private CameraProcessingResult processCameraData(int cameraIndex, VisionIOInputs inputs) {
     // Update disconnected alert
-    m_disconnectedAlerts[cameraIndex].set(!inputs.connected);
+    disconnectedAlerts[cameraIndex].set(!inputs.isConnected());
 
     var tagPoses = new LinkedList<Pose3d>();
     var robotPoses = new LinkedList<Pose3d>();
@@ -129,60 +125,64 @@ public class VisionSubsystem extends SubsystemBase {
     var rejectedPoses = new LinkedList<Pose3d>();
 
     // Add tag poses
-    for (int tagId : inputs.tagIds) {
-      var tagPose = APTAG_FIELD_LAYOUT.getTagPose(tagId);
-      if (tagPose.isPresent()) {
-        tagPoses.add(tagPose.get());
-      }
+    for (int tagId : inputs.getTagIds()) {
+      APTAG_FIELD_LAYOUT.getTagPose(tagId).ifPresent(tagPoses::add);
     }
 
     // Process pose observations with sealed classes
-    for (var observation : inputs.poseObservations) {
+    for (var observation : inputs.getPoseObservations()) {
       robotPoses.add(observation.pose());
 
       // Use instanceof with pattern matching
-      var validationResult = m_poseValidator.validatePose(observation);
+      var validationResult = poseValidator.validatePose(observation);
+      String cameraIndexString = "Vision/Camera" + cameraIndex;
 
       if (validationResult instanceof AcceptedPose accepted) {
-        acceptedPoses.add(accepted.poseObservation().pose());
-
-        // Check if odometry is initialized
-        if (!m_odometryInitialized) {
-          m_stablePoseCounter--;
-          if (m_stablePoseCounter <= 0) {
-            m_swerve.resetPose(accepted.poseObservation().pose().toPose2d());
-            m_odometryInitialized = true;
-            // System.out.println("VisionSubsystem: Odometry initialized with vision.");
-            DogLog.log("Vision/OdometryInitialized", true);
-          }
-        }
-
-        // Add to pose estimator
-        var stdDevs = calculateStandardDeviations(accepted);
-        m_consumer.accept(
-            accepted.poseObservation().pose().toPose2d(),
-            Utils.fpgaToCurrentTime(accepted.poseObservation().timestamp()),
-            stdDevs);
-
-        // Log acceptance
-        DogLog.log(
-            "Vision/Camera" + cameraIndex + "/AcceptedPose", accepted.poseObservation().pose());
+        handleAcceptedPose(accepted, cameraIndexString, acceptedPoses);
       } else if (validationResult instanceof RejectedPose rejected) {
-
-        // If odometry not initialized, count down stable poses
-        if (!m_odometryInitialized) {
-          m_stablePoseCounter = 5; // Reset counter
-        }
-
-        rejectedPoses.add(rejected.poseObservation().pose());
-
-        DogLog.log("Vision/Camera" + cameraIndex + "/RejectionReason", rejected.reason().name());
-        DogLog.log(
-            "Vision/Camera" + cameraIndex + "/RejectedPose", rejected.poseObservation().pose());
+        handleRejectedPose(rejected, cameraIndexString, rejectedPoses);
       }
     }
 
     return new CameraProcessingResult(tagPoses, robotPoses, acceptedPoses, rejectedPoses);
+  }
+
+  private void handleAcceptedPose(
+      AcceptedPose accepted, String cameraIndexString, LinkedList<Pose3d> acceptedPoses) {
+    acceptedPoses.add(accepted.poseObservation().pose());
+
+    // Check if odometry is initialized
+    if (!odometryInitialized) {
+      stablePoseCounter--;
+      if (stablePoseCounter <= 0) {
+        swerve.resetPose(accepted.poseObservation().pose().toPose2d());
+        odometryInitialized = true;
+        DogLog.log("Vision/OdometryInitialized", true);
+      }
+    }
+
+    // Add to pose estimator
+    var stdDevs = calculateStandardDeviations(accepted);
+    consumer.accept(
+        accepted.poseObservation().pose().toPose2d(),
+        Utils.fpgaToCurrentTime(accepted.poseObservation().timestamp()),
+        stdDevs);
+
+    // Log acceptance
+    DogLog.log(cameraIndexString + "/AcceptedPose", accepted.poseObservation().pose());
+  }
+
+  private void handleRejectedPose(
+      RejectedPose rejected, String cameraIndexString, LinkedList<Pose3d> rejectedPoses) {
+    // If odometry not initialized, reset stable pose counter
+    if (!odometryInitialized) {
+      stablePoseCounter = 5;
+    }
+
+    rejectedPoses.add(rejected.poseObservation().pose());
+
+    DogLog.log(cameraIndexString + "/RejectionReason", rejected.reason().name());
+    DogLog.log(cameraIndexString + "/RejectedPose", rejected.poseObservation().pose());
   }
 
   private Matrix<N3, N1> calculateStandardDeviations(AcceptedPose accepted) {

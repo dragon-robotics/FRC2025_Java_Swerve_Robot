@@ -12,10 +12,8 @@ import org.photonvision.simulation.VisionSystemSim;
 
 public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
 
-  private static VisionSystemSim m_visionSim;
-  private final PhotonCameraSim m_cameraSim;
-
-  private final Supplier<SwerveDriveState> m_swerveDriveStateSupplier;
+  private final VisionSystemSim visionSim;
+  private final PhotonCameraSim cameraSim;
 
   /**
    * Creates a new VisionIOPhotonVisionSim.
@@ -26,13 +24,10 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
   public VisionIOPhotonVisionSim(
       String name, Transform3d robotToCamera, Supplier<SwerveDriveState> swerveDriveStateSupplier) {
     super(name, robotToCamera, swerveDriveStateSupplier);
-    m_swerveDriveStateSupplier = swerveDriveStateSupplier;
 
     // Initialize vision sim
-    if (m_visionSim == null) {
-      m_visionSim = new VisionSystemSim("main");
-      m_visionSim.addAprilTags(APTAG_FIELD_LAYOUT);
-    }
+    visionSim = new VisionSystemSim("main");
+    visionSim.addAprilTags(APTAG_FIELD_LAYOUT);
 
     // Add sim camera
     var cameraProperties = new SimCameraProperties();
@@ -42,22 +37,20 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
     cameraProperties.setAvgLatencyMs(10);
     cameraProperties.setLatencyStdDevMs(5);
 
-    m_cameraSim = new PhotonCameraSim(m_camera, cameraProperties, APTAG_FIELD_LAYOUT);
+    cameraSim = new PhotonCameraSim(camera, cameraProperties, APTAG_FIELD_LAYOUT);
 
-    m_visionSim.addCamera(m_cameraSim, robotToCamera);
-
-    // m_cameraSim.enableDrawWireframe(true);
+    visionSim.addCamera(cameraSim, robotToCamera);
   }
 
   @Override
   public String getCameraName() {
     // Get the camera object
-    return m_camera.getName();
+    return camera.getName();
   }
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
-    m_visionSim.update(m_swerveDriveStateSupplier.get().Pose);
+    visionSim.update(this.swerveDriveStateSupplier.get().Pose);
     super.updateInputs(inputs);
   }
 }
