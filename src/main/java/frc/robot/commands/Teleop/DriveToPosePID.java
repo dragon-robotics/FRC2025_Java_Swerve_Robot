@@ -1,4 +1,4 @@
-package frc.robot.commands.Teleop;
+package frc.robot.commands.teleop;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
@@ -17,15 +17,15 @@ import frc.robot.swerve_constant.TunerConstants;
 
 /** Drives the robot to a specified pose on the field using PID controllers. */
 public class DriveToPosePID extends Command {
-  private final CommandSwerveDrivetrain m_swerve;
-  private final ApplyRobotSpeeds m_robotSpeeds;
-  private final Pose2d m_targetPose;
+  private final CommandSwerveDrivetrain swerve;
+  private final ApplyRobotSpeeds robotSpeeds;
+  private final Pose2d targetPose;
 
   // PID controllers for field-relative X, Y, and Theta
   // Tune these gains carefully!
-  private final PIDController m_xController = new PIDController(4, 0, 0); // P_x
-  private final PIDController m_yController = new PIDController(4, 0, 0); // P_y
-  private final ProfiledPIDController m_rotController =
+  private final PIDController xController = new PIDController(4, 0, 0); // P_x
+  private final PIDController yController = new PIDController(4, 0, 0); // P_y
+  private final ProfiledPIDController rotController =
       new ProfiledPIDController(
           5.0,
           0,
@@ -34,41 +34,41 @@ public class DriveToPosePID extends Command {
               Units.degreesToRadians(540), Units.degreesToRadians(720)));
 
   // Tolerances - how close is close enough?
-  private static final double m_positionTolerance = Units.inchesToMeters(2); // meters
-  private static final double m_angleTolerance = Math.toRadians(2.0); // radians
+  private static final double POSITION_TOLERANCE = Units.inchesToMeters(2); // meters
+  private static final double ANGLE_TOLERANCE = Math.toRadians(2); // radians
 
   public DriveToPosePID(
       CommandSwerveDrivetrain swerve, ApplyRobotSpeeds robotSpeeds, Pose2d targetPose) {
-    m_swerve = swerve;
-    m_robotSpeeds = robotSpeeds;
-    m_targetPose = targetPose;
+    this.swerve = swerve;
+    this.robotSpeeds = robotSpeeds;
+    this.targetPose = targetPose;
 
     // Allow rotation controller to wrap around (-pi to pi)
-    m_rotController.enableContinuousInput(-Math.PI, Math.PI);
+    rotController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Set tolerances
-    m_xController.setTolerance(m_positionTolerance);
-    m_yController.setTolerance(m_positionTolerance);
-    m_rotController.setTolerance(m_angleTolerance);
+    xController.setTolerance(POSITION_TOLERANCE);
+    yController.setTolerance(POSITION_TOLERANCE);
+    rotController.setTolerance(ANGLE_TOLERANCE);
 
-    addRequirements(m_swerve);
+    addRequirements(swerve);
   }
 
   @Override
   public void initialize() {
 
     // Get the current pose and velocity of the swerve drive
-    Pose2d currentPose = m_swerve.getState().Pose;
-    ChassisSpeeds currentSpeeds = m_swerve.getState().Speeds;
+    Pose2d currentPose = swerve.getState().Pose;
+    ChassisSpeeds currentSpeeds = swerve.getState().Speeds;
 
     // Convert robot-relative speeds to field-relative
     ChassisSpeeds fieldRelativeSpeeds =
         ChassisSpeeds.fromRobotRelativeSpeeds(currentSpeeds, currentPose.getRotation());
 
     // Reset controllers if needed (though calculate usually handles this)
-    m_xController.reset();
-    m_yController.reset();
-    m_rotController.reset(
+    xController.reset();
+    yController.reset();
+    rotController.reset(
         new TrapezoidProfile.State(
             currentPose.getRotation().getRadians(), fieldRelativeSpeeds.omegaRadiansPerSecond));
   }
@@ -76,15 +76,15 @@ public class DriveToPosePID extends Command {
   @Override
   public void execute() {
     // Get current pose from the estimator
-    Pose2d currentPose = m_swerve.getState().Pose;
+    Pose2d currentPose = swerve.getState().Pose;
 
     // Calculate field-relative speeds using PID controllers
-    double xSpeed = m_xController.calculate(currentPose.getX(), m_targetPose.getX());
-    double ySpeed = m_yController.calculate(currentPose.getY(), m_targetPose.getY());
+    double xSpeed = xController.calculate(currentPose.getX(), targetPose.getX());
+    double ySpeed = yController.calculate(currentPose.getY(), targetPose.getY());
     // Use current rotation for theta calculation's measurement
     double thetaSpeed =
-        m_rotController.calculate(
-            currentPose.getRotation().getRadians(), m_targetPose.getRotation().getRadians());
+        rotController.calculate(
+            currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
 
     // Clamp linear speeds to 75% of max speed for safety
     double maxLinearSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);    
@@ -97,18 +97,18 @@ public class DriveToPosePID extends Command {
             xSpeed, ySpeed, thetaSpeed, currentPose.getRotation());
 
     // Command the swerve drive
-    m_swerve.setControl(m_robotSpeeds.withSpeeds(targetSpeeds));
+    swerve.setControl(robotSpeeds.withSpeeds(targetSpeeds));
   }
 
   @Override
   public boolean isFinished() {
     // Check if all controllers are at their setpoints (within tolerance)
-    return m_xController.atSetpoint() && m_yController.atSetpoint() && m_rotController.atGoal();
+    return xController.atSetpoint() && yController.atSetpoint() && rotController.atGoal();
   }
 
   @Override
   public void end(boolean interrupted) {
     // Stop the robot when the command finishes or is interrupted
-    m_swerve.setControl(m_robotSpeeds.withSpeeds(new ChassisSpeeds())); // Send zero speeds
+    swerve.setControl(robotSpeeds.withSpeeds(new ChassisSpeeds())); // Send zero speeds
   }
 }

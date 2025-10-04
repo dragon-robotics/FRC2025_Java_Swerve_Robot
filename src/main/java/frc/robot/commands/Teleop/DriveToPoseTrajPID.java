@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.Teleop;
+package frc.robot.commands.teleop;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -20,11 +20,11 @@ import java.util.List;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DriveToPoseTrajPID extends Command {
-  private final CommandSwerveDrivetrain m_swerve;
-  private final ApplyRobotSpeeds m_robotSpeeds;
+  private final CommandSwerveDrivetrain swerve;
+  private final ApplyRobotSpeeds robotSpeeds;
 
-  private Timer m_timer;
-  private Trajectory m_trajectory;
+  private Timer timer;
+  private Trajectory trajectory;
 
   // Profiled-PID controllers for X, Y, and rotation //
   private final ProfiledPIDController xController =
@@ -61,8 +61,8 @@ public class DriveToPoseTrajPID extends Command {
       ApplyRobotSpeeds robotSpeeds,
       List<Pose2d> waypoints,
       boolean reverse) {
-    m_swerve = swerve;
-    m_robotSpeeds = robotSpeeds;
+    this.swerve = swerve;
+    this.robotSpeeds = robotSpeeds;
 
     // Allow rotation controller to wrap around (-pi to pi)
     rotController.enableContinuousInput(-Math.PI, Math.PI);
@@ -73,15 +73,15 @@ public class DriveToPoseTrajPID extends Command {
     rotController.setTolerance(Units.degreesToRadians(2)); // 5 degrees tolerance for rotation
 
     // Initialize timer
-    m_timer = new Timer();
+    timer = new Timer();
 
     // Generate trajectory (same as above)
     TrajectoryConfig config = new TrajectoryConfig(1.5, 3.0);
     config.setReversed(reverse); // Set to true if you want to reverse the trajectory
-    m_trajectory = TrajectoryGenerator.generateTrajectory(waypoints, config);
+    trajectory = TrajectoryGenerator.generateTrajectory(waypoints, config);
 
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(m_swerve);
+    addRequirements(swerve);
   }
 
   // Called when the command is initially scheduled.
@@ -89,11 +89,11 @@ public class DriveToPoseTrajPID extends Command {
   public void initialize() {
 
     // Reset and start the timer
-    m_timer.restart();
+    timer.restart();
 
     // Get the current pose and velocity of the swerve drive
-    Pose2d currentPose = m_swerve.getState().Pose;
-    ChassisSpeeds currentSpeeds = m_swerve.getState().Speeds;
+    Pose2d currentPose = swerve.getState().Pose;
+    ChassisSpeeds currentSpeeds = swerve.getState().Speeds;
 
     // Convert robot-relative speeds to field-relative
     ChassisSpeeds fieldRelativeSpeeds =
@@ -113,9 +113,9 @@ public class DriveToPoseTrajPID extends Command {
   @Override
   public void execute() {
     // Execute - follow trajectory with PID
-    double currentTime = m_timer.get();
-    Trajectory.State desiredState = m_trajectory.sample(currentTime);
-    Pose2d currentPose = m_swerve.getState().Pose;
+    double currentTime = timer.get();
+    Trajectory.State desiredState = trajectory.sample(currentTime);
+    Pose2d currentPose = swerve.getState().Pose;
 
     // Calculate desired chassis speeds using PID
     double xSpeed = xController.calculate(currentPose.getX(), desiredState.poseMeters.getX());
@@ -125,42 +125,25 @@ public class DriveToPoseTrajPID extends Command {
             currentPose.getRotation().getRadians(),
             desiredState.poseMeters.getRotation().getRadians());
 
-    // Debugging inputs of currentPose.getX(), currentPose.getY(), and currentPose.getRotation()
-    System.out.printf(
-        "Current Pose - X: %.2f m, Y: %.2f m, Rotation: %.2f rad%n",
-        currentPose.getX(), currentPose.getY(), currentPose.getRotation().getRadians());
-
-    // Debugging output of desiredState.poseMeters.getX(), desiredState.poseMeters.getY(), and
-    // desiredState.poseMeters.getRotation()
-    System.out.printf(
-        "Desired State - X: %.2f m, Y: %.2f m, Rotation: %.2f rad%n",
-        desiredState.poseMeters.getX(),
-        desiredState.poseMeters.getY(),
-        desiredState.poseMeters.getRotation().getRadians());
-
-    // Debugging output of xSpeed, ySpeed, and rotSpeed
-    System.out.printf(
-        "xSpeed: %.2f m/s, ySpeed: %.2f m/s, rotSpeed: %.2f rad/s%n", xSpeed, ySpeed, rotSpeed);
-
     // Convert field-relative speeds to robot-relative ChassisSpeeds
     ChassisSpeeds targetSpeeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rotSpeed, currentPose.getRotation());
 
     // Command the swerve drive
-    m_swerve.setControl(m_robotSpeeds.withSpeeds(targetSpeeds));
+    swerve.setControl(robotSpeeds.withSpeeds(targetSpeeds));
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     // Stop the robot when the command finishes or is interrupted
-    m_swerve.setControl(m_robotSpeeds.withSpeeds(new ChassisSpeeds())); // Send zero speeds
+    swerve.setControl(robotSpeeds.withSpeeds(new ChassisSpeeds())); // Send zero speeds
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    // return m_timer.get() >= m_trajectory.getTotalTimeSeconds(); // Finished when trajectory
+    // return timer.get() >= trajectory.getTotalTimeSeconds(); // Finished when trajectory
     // complete
     return xController.atGoal() && yController.atGoal() && rotController.atGoal();
   }
