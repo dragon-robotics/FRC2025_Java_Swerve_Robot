@@ -22,43 +22,43 @@ public class LedSubsystem extends SubsystemBase {
     CORAL_AND_ALGAE_IN_BOT
   }
 
-  private LedIO m_ledIO;
-  private LedState m_ledState;
-  private LedIOInputs m_ledIOInputs;
+  private LedIO ledIO;
+  private LedState ledState;
+  private LedIOInputs ledIOInputs;
 
   /** Creates a new LedSubsystem. */
   public LedSubsystem(LedIO ledIO) {
-    m_ledIO = ledIO;
-    m_ledState = LedState.IDLE;
-    m_ledIOInputs = new LedIOInputs();
+    this.ledIO = ledIO;
+    ledState = LedState.IDLE;
+    ledIOInputs = new LedIOInputs();
   }
 
   public void setLedState(LedState ledState) {
-    m_ledState = ledState;
-    switch (m_ledState) {
+    this.ledState = ledState;
+    switch (this.ledState) {
       case IDLE:
-        m_ledIO.setLedColor(LEDConstants.GRADIENT_1_AND_2); // Set to idle color
+        ledIO.setLedColor(LEDConstants.GRADIENT_1_AND_2); // Set to idle color
         break;
       case AUTO_NOT_ALIGNED:
-        m_ledIO.setLedColor(LEDConstants.SHOT_RED); // Set to auto not aligned color
+        ledIO.setLedColor(LEDConstants.SHOT_RED); // Set to auto not aligned color
         break;
       case AUTO_ALIGNED:
-        m_ledIO.setLedColor(LEDConstants.GREEN); // Set to auto aligned color
+        ledIO.setLedColor(LEDConstants.GREEN); // Set to auto aligned color
         break;
       case READY_TO_SCORE:
-        m_ledIO.setLedColor(LEDConstants.COLOR1_STROBE); // Set to ready to score color
+        ledIO.setLedColor(LEDConstants.COLOR1_STROBE); // Set to ready to score color
         break;
       case INTAKE:
-        m_ledIO.setLedColor(LEDConstants.WHITE); // Set to intake color
+        ledIO.setLedColor(LEDConstants.WHITE); // Set to intake color
         break;
       case CORAL_ONLY_IN_BOT:
-        m_ledIO.setLedColor(LEDConstants.BLUE_VIOLET); // Set to coral in bot color
+        ledIO.setLedColor(LEDConstants.BLUE_VIOLET); // Set to coral in bot color
         break;
       case ALGAE_ONLY_IN_BOT:
-        m_ledIO.setLedColor(LEDConstants.ORANGE); // Set to algae in bot color
+        ledIO.setLedColor(LEDConstants.ORANGE); // Set to algae in bot color
         break;
       case CORAL_AND_ALGAE_IN_BOT:
-        m_ledIO.setLedColor(LEDConstants.SKY_BLUE); // Set to algae in bot color
+        ledIO.setLedColor(LEDConstants.SKY_BLUE); // Set to algae in bot color
         break;
     }
   }
@@ -66,6 +66,6 @@ public class LedSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    m_ledIO.updateInputs(m_ledIOInputs);
+    ledIO.updateInputs(ledIOInputs);
   }
 }

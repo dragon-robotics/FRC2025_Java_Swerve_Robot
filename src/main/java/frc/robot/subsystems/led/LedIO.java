@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems.led;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /** Add your docs here. */
 public interface LedIO {
 
@@ -14,10 +17,12 @@ public interface LedIO {
   class LedIOInputs {
 
     // Is the LED Controller connected? //
-    public boolean ledControllerConnected;
+    @Getter @Setter
+    private boolean ledControllerConnected;
 
     // LED controller data //
-    public double curLedValue;
+    @Getter @Setter
+    private double curLedValue;
   }
 
   default void updateInputs(LedIOInputs inputs) {}
