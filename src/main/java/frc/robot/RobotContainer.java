@@ -88,8 +88,6 @@ public class RobotContainer {
   private Command intakeFromLeftCoralStationCommand;
   private Command intakeFromRightCoralStationCommand;
   private Command holdCoralCommand;
-  private Command alignToLeftReefBranchCommand;
-  private Command alignToRightReefBranchCommand;
   private Command scoreCoralCommand;
 
   // Algae Commands //
@@ -99,17 +97,12 @@ public class RobotContainer {
   private Command scoreAlgaeCommand;
   private Command deAlgaeCommand;
 
-  // Operator Dashboard //
-  private OperatorDashboard operatorDashboard;
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
     // Add DogLog //
     DogLog.setOptions(new DogLogOptions().withCaptureDs(true));
     DogLog.setPdh(new PowerDistribution());
-
-    operatorDashboard = new OperatorDashboard();
 
     // Instantiate the joysticks //
     driverController = new CommandXboxController(OperatorConstants.DRIVER_PORT);
@@ -236,8 +229,7 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX(),
             () -> driverController.getHID().getPOV() == 0);
-    driveToClosestLeftReefPoseCommand =
-        superstructureSubsystem.DriveToClosestReefPoseCommand(true);
+    driveToClosestLeftReefPoseCommand = superstructureSubsystem.DriveToClosestReefPoseCommand(true);
     driveToClosestRightReefPoseCommand =
         superstructureSubsystem.DriveToClosestReefPoseCommand(false);
     driveToClosestCoralStationPoseCommand =
@@ -289,13 +281,10 @@ public class RobotContainer {
     // Register Coral Commands //
     NamedCommands.registerCommand("ReverseIntakeCoral", slowReverseCoralIntakeCommand);
     NamedCommands.registerCommand("IntakeCoral", intakeCoralCommand);
-    NamedCommands.registerCommand(
-        "IntakeFromLeftCoralStation", intakeFromLeftCoralStationCommand);
+    NamedCommands.registerCommand("IntakeFromLeftCoralStation", intakeFromLeftCoralStationCommand);
     NamedCommands.registerCommand(
         "IntakeFromRightCoralStation", intakeFromRightCoralStationCommand);
     NamedCommands.registerCommand("HoldCoral", holdCoralCommand);
-    NamedCommands.registerCommand("AlignToLeftReefBranch", alignToLeftReefBranchCommand);
-    NamedCommands.registerCommand("AlignToRightReefBranch", alignToRightReefBranchCommand);
     NamedCommands.registerCommand("ScoreCoral", scoreCoralCommand);
 
     // Register Algae Commands //
@@ -439,16 +428,6 @@ public class RobotContainer {
     operatorButtonBoxController
         .button(OperatorControlNameConstants.ELEVATOR_L4_BTN)
         .onTrue(elevatorL4Command);
-
-    // Coral Triggers //
-
-    operatorButtonBoxController
-        .button(OperatorControlNameConstants.ALIGN_LEFT_REEF_BRANCH_BTN)
-        .onTrue(alignToLeftReefBranchCommand);
-
-    operatorButtonBoxController
-        .button(OperatorControlNameConstants.ALIGN_RIGHT_REEF_BRANCH_BTN)
-        .onTrue(alignToRightReefBranchCommand);
 
     // Algae Triggers //
     operatorButtonBoxController
