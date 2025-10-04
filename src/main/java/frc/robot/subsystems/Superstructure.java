@@ -9,6 +9,9 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+
+import dev.doglog.DogLog;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -31,11 +34,10 @@ import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.RobotContainer;
-import frc.robot.commands.Teleop.DriveToPosePID;
+import frc.robot.commands.teleop.DriveToPosePID;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorState;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
 import frc.robot.util.Telemetry;
@@ -88,7 +90,8 @@ public class Superstructure extends SubsystemBase {
   private Optional<Rotation2d> currentHeading; // Keeps track of current heading
 
   private ElevatorSubsystem.ElevatorState elevState; // Keeps track of the current elevator state
-  private double elevHeightTranslationFactor; // Keeps track of the elevator translation speed factor
+  private double
+      elevHeightTranslationFactor; // Keeps track of the elevator translation speed factor
   private double elevHeightStrafeFactor; // Keeps track of the elevator strafe speed factor
   private double elevHeightRotationFactor; // Keeps track of the elevator rotation speed factor
 
@@ -192,48 +195,20 @@ public class Superstructure extends SubsystemBase {
 
   // Swerve Drive Subsystem Commands //
 
-  public Command DefaultDriveCommand(
+  public Command defaultDriveCmd(
       DoubleSupplier translationSup,
       DoubleSupplier strafeSup,
       DoubleSupplier rotationSup,
       BooleanSupplier halfSpeedSup) {
     return new RunCommand(
         () -> {
-          double rawTranslation = translationSup.getAsDouble();
-          double rawStrafe = strafeSup.getAsDouble();
           double rawRotation = rotationSup.getAsDouble();
-
-          // Apply deadband to joystick inputs //
-          double translation =
-              MathUtil.applyDeadband(
-                  rawTranslation, SwerveConstants.SWERVE_DEADBAND, 1); // Forward/Backward
-          double strafe =
-              MathUtil.applyDeadband(rawStrafe, SwerveConstants.SWERVE_DEADBAND, 1); // Left/Right
-          double rotation =
-              MathUtil.applyDeadband(rawRotation, SwerveConstants.SWERVE_DEADBAND, 1); // Rotation
-
-          // Square the inputs (while preserving the sign) to increase fine control while
-          // permitting full power //
-          translation = Math.copySign(translation * translation, translation);
-          strafe = Math.copySign(strafe * strafe, strafe);
-          rotation = Math.copySign(rotation * rotation, rotation);
-
-          // Multiply the translation, strafe, and rotation by the elevator height speed factor //
-          translation *= elevHeightTranslationFactor;
-          strafe *= elevHeightStrafeFactor;
-          rotation *= elevHeightRotationFactor;
-
-          // Scale the output by half if half speed is enabled //
-          if (halfSpeedSup.getAsBoolean()) {
-            translation *= 0.35;
-            strafe *= 0.35;
-            rotation *= 0.35;
-          }
-
-          // Translate input into velocities for the swerve drive //
-          translation *= maxSpeed; // Forward/Backward
-          strafe *= maxSpeed; // Left/Right
-          rotation *= maxAngularRate; // Rotation
+          var speeds =
+              processJoystickInputs(
+                  translationSup.getAsDouble(),
+                  strafeSup.getAsDouble(),
+                  rawRotation,
+                  halfSpeedSup.getAsBoolean());
 
           boolean rotationTriggered = Math.abs(rawRotation) > SwerveConstants.SWERVE_DEADBAND;
           boolean rotationActive =
@@ -241,90 +216,134 @@ public class Superstructure extends SubsystemBase {
                   && (Math.abs(swerve.getState().Speeds.omegaRadiansPerSecond)
                       > Math.toRadians(10));
 
-          // Check if the rotation of the joystick has been triggered //
           if (rotationTriggered) {
-            // Timestamp the last time the rotation was triggered //
             rotationLastTriggered = Timer.getFPGATimestamp();
           }
 
           if (rotationTriggered || rotationActive) {
-            // If the rotation is triggered or active, set the swerve drive to rotate in
-            // place //
-            swerve.setControl(
-                drive
-                    .withVelocityX(translation)
-                    .withVelocityY(strafe)
-                    .withRotationalRate(rotation));
-            currentHeading = Optional.empty();
+            setSwerveToRotate(speeds.translation, speeds.strafe, speeds.rotation);
           } else {
-            // Initialize the current heading if it is empty
-            if (currentHeading.isEmpty()) {
-              currentHeading = Optional.of(swerve.getState().Pose.getRotation());
-            }
-
-            Optional<Alliance> alliance = DriverStation.getAlliance();
-
-            if (alliance.isPresent()) {
-              swerve.setControl(
-                  driveMaintainHeading
-                      .withVelocityX(translation)
-                      .withVelocityY(strafe)
-                      .withTargetDirection(
-                          alliance.get() == Alliance.Blue
-                              ? currentHeading.get()
-                              : currentHeading.get().rotateBy(Rotation2d.fromDegrees(180))));
-            }
+            setSwerveToMaintainHeading(speeds.translation, speeds.strafe);
           }
         },
         swerve);
   }
 
-  public Command DriveToClosestReefPoseCommand(boolean left) {
-
-    return new DeferredCommand(
-            () -> {
-              // Grab the robot's current alliance
-              Optional<Alliance> alliance = DriverStation.getAlliance();
-
-              // Grab the robot's current pose
-              Pose2d currentPose = swerve.getState().Pose;
-
-              // Initialize the target poses based on the alliance and whether we are left or right
-              //
-              final var redReefPoses = left
-                  ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
-                  : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES;
-              final var blueReefPoses = left
-                  ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES
-                  : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
-              List<Pose2d> targetPoses =
-                  alliance.isPresent() && alliance.get() == Alliance.Red
-                      ? redReefPoses
-                      : blueReefPoses;
-
-              // Calculate the pose closest to the current pose
-              Pose2d closestPose = findClosestPose(currentPose, targetPoses);
-
-              // Add intermediate waypoint (0.25 meter back from target)
-              Transform2d backwardOffset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
-
-              return new DriveToPosePID(
-                  swerve,
-                  applyRobotSpeeds,
-                  closestPose.transformBy(backwardOffset))
-              .andThen(
-                  new ParallelDeadlineGroup(
-                      new DriveToPosePID(
-                          swerve,
-                          applyRobotSpeeds,
-                          closestPose),
-                      this.ElevatorL3()));
-            },
-            Set.of(swerve))
-        .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
+  private static class Speeds {
+    double translation;
+    double  strafe;
+    double  rotation;
   }
 
-  public Command DriveToClosestCoralStationPoseCommand() {
+  private Speeds processJoystickInputs(
+      double rawTranslation, double rawStrafe, double rawRotation, boolean halfSpeed) {
+    double translation = MathUtil.applyDeadband(rawTranslation, SwerveConstants.SWERVE_DEADBAND, 1);
+    double strafe = MathUtil.applyDeadband(rawStrafe, SwerveConstants.SWERVE_DEADBAND, 1);
+    double rotation = MathUtil.applyDeadband(rawRotation, SwerveConstants.SWERVE_DEADBAND, 1);
+
+    translation = Math.copySign(translation * translation, translation);
+    strafe = Math.copySign(strafe * strafe, strafe);
+    rotation = Math.copySign(rotation * rotation, rotation);
+
+    translation *= elevHeightTranslationFactor;
+    strafe *= elevHeightStrafeFactor;
+    rotation *= elevHeightRotationFactor;
+
+    if (halfSpeed) {
+      translation *= 0.35;
+      strafe *= 0.35;
+      rotation *= 0.35;
+    }
+
+    Speeds speeds = new Speeds();
+    speeds.translation = translation * maxSpeed;
+    speeds.strafe = strafe * maxSpeed;
+    speeds.rotation = rotation * maxAngularRate;
+    return speeds;
+  }
+
+  private void setSwerveToRotate(double translation, double strafe, double rotation) {
+    swerve.setControl(
+        drive.withVelocityX(translation).withVelocityY(strafe).withRotationalRate(rotation));
+    currentHeading = Optional.empty();
+  }
+
+  private void setSwerveToMaintainHeading(double translation, double strafe) {
+    if (currentHeading.isEmpty()) {
+      currentHeading = Optional.of(swerve.getState().Pose.getRotation());
+    }
+
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    if (alliance.isPresent()) {
+      Rotation2d targetDirection =
+          alliance.get() == Alliance.Blue
+              ? currentHeading.get()
+              : currentHeading.get().rotateBy(Rotation2d.fromDegrees(180));
+      swerve.setControl(
+          driveMaintainHeading
+              .withVelocityX(translation)
+              .withVelocityY(strafe)
+              .withTargetDirection(targetDirection));
+    }
+  }
+
+  public Command driveToClosestReefPoseCmd(boolean left) {
+
+    return new DeferredCommand(
+        () -> {
+          // Grab the robot's current alliance
+          Optional<Alliance> alliance = DriverStation.getAlliance();
+
+          // Grab the robot's current pose
+          Pose2d currentPose = swerve.getState().Pose;
+
+          // Initialize the target poses based on the alliance and whether we are left or right
+          //
+          final var redReefPoses =
+              left
+                  ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
+                  : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES;
+          final var blueReefPoses =
+              left
+                  ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES
+                  : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
+          List<Pose2d> targetPoses =
+              alliance.isPresent() && alliance.get() == Alliance.Red
+                  ? redReefPoses
+                  : blueReefPoses;
+
+          // Calculate the pose closest to the current pose
+          Pose2d closestPose = findClosestPose(currentPose, targetPoses);
+
+          // Determine the selected elevator state for the current reef alignment state
+          Command elevatorCommand = this.elevatorHomeCmd();
+          double backwardOffsetDist = -0.25; // Default offset distance
+          if (elevState == ElevatorSubsystem.ElevatorState.L2) {
+            elevatorCommand = this.elevatorL2Cmd();
+            backwardOffsetDist = -0.25; // Increase offset distance for L2
+          } else if (elevState == ElevatorSubsystem.ElevatorState.L3) {
+            elevatorCommand = this.elevatorL3Cmd();
+            backwardOffsetDist = -0.25; // Increase offset distance for L3
+          } else if (elevState == ElevatorSubsystem.ElevatorState.L4) {
+            elevatorCommand = this.elevatorL4Cmd();
+            backwardOffsetDist = -0.35; // Increase offset distance for L4
+          }
+
+          // Add intermediate waypoint (0.25 meter back from target)
+          Transform2d backwardOffset = new Transform2d(backwardOffsetDist, 0.0, Rotation2d.kZero);
+
+          return new DriveToPosePID(
+                  swerve, applyRobotSpeeds, closestPose.transformBy(backwardOffset))
+              .andThen(
+                  new ParallelDeadlineGroup(
+                      new DriveToPosePID(swerve, applyRobotSpeeds, closestPose),
+                      elevatorCommand));
+        },
+        Set.of(swerve))
+    .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
+  }
+
+  public Command driveToClosestCoralStationPoseCmd() {
 
     return new DeferredCommand(
             () -> {
@@ -341,10 +360,7 @@ public class Superstructure extends SubsystemBase {
 
               Pose2d closestPose = findClosestPose(currentPose, targetPoses);
 
-              return new DriveToPosePID(
-                  swerve,
-                  applyRobotSpeeds,
-                  closestPose);
+              return new DriveToPosePID(swerve, applyRobotSpeeds, closestPose);
             },
             Set.of(swerve))
         .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
@@ -370,58 +386,50 @@ public class Superstructure extends SubsystemBase {
     currentHeading = Optional.of(swerve.getState().Pose.getRotation());
   }
 
-  public Command SwerveBrake() {
+  public Command swerveBrakeCmd() {
     return swerve.applyRequest(() -> brake);
   }
 
-  public Command SeedFieldCentric() {
+  public Command seedFieldCentricCmd() {
     return swerve.runOnce(swerve::seedFieldCentric);
   }
 
   // Elevator Subsystem Commands //
 
-  public Command ElevatorZero() {
+  public Command elevatorZeroCmd() {
+    return new InstantCommand(() -> elevator.seedElevatorMotorEncoderPosition(0), elevator);
+  }
+
+  public Command elevatorStopCmd() {
     return new InstantCommand(
-        () -> elevator.seedElevatorMotorEncoderPosition(0),
-        elevator);
+        () -> elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE), elevator);
   }
 
-  public Command ElevatorStop() {
-    return new InstantCommand(
-        () -> elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE),
-        elevator);
+  public Command elevatorManualDownCmd() {
+    return new RunCommand(() -> elevator.setElevatorMotorSpeed(-0.5), elevator);
   }
 
-  public Command ElevatorManualDown() {
-    return new RunCommand(
-        () -> elevator.setElevatorMotorSpeed(-0.5),
-        elevator);
+  public Command elevatorManualUpCmd() {
+    return new RunCommand(() -> elevator.setElevatorMotorSpeed(0.5), elevator);
   }
 
-  public Command ElevatorManualUp() {
-    return new RunCommand(
-        () -> elevator.setElevatorMotorSpeed(0.5),
-        elevator);
-  }
-
-  public Command ElevatorIdle() {
+  public Command elevatorIdleCmd() {
     Command resetEncoder =
-        new InstantCommand(
-            () -> elevator.seedElevatorMotorEncoderPosition(0),
-            elevator);
+        new InstantCommand(() -> elevator.seedElevatorMotorEncoderPosition(0), elevator);
 
     Command setElevatorToIdle =
         new InstantCommand(
-            () -> elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE),
-            elevator);
+            () -> elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE), elevator);
 
     return new ConditionalCommand(
-        resetEncoder.andThen(setElevatorToIdle),
-        setElevatorToIdle,
-        elevator::isAtElevatorState);
+        resetEncoder.andThen(setElevatorToIdle), setElevatorToIdle, elevator::isAtElevatorState);
   }
 
-  public Command ElevatorHome() {
+  public Command setElevatorStateCmd(ElevatorSubsystem.ElevatorState state) {
+    return new InstantCommand(() -> elevState = state);
+  }
+
+  public Command elevatorHomeCmd() {
 
     Command setElevatorHome =
         new InstantCommand(
@@ -434,13 +442,10 @@ public class Superstructure extends SubsystemBase {
             },
             elevator);
 
-    Command waitUntilElevatorIsAtBottom =
-        new WaitUntilCommand(elevator::isAtElevatorState);
+    Command waitUntilElevatorIsAtBottom = new WaitUntilCommand(elevator::isAtElevatorState);
 
     Command reZeroElevatorEncoder =
-        new InstantCommand(
-            () -> elevator.seedElevatorMotorEncoderPosition(0),
-            elevator);
+        new InstantCommand(() -> elevator.seedElevatorMotorEncoderPosition(0), elevator);
 
     return setElevatorHome.andThen(waitUntilElevatorIsAtBottom).andThen(reZeroElevatorEncoder);
 
@@ -449,7 +454,7 @@ public class Superstructure extends SubsystemBase {
     // else set the motor to idle
   }
 
-  public Command ElevatorL1() {
+  public Command elevatorL1Cmd() {
 
     Command setElevatorL1 =
         new InstantCommand(
@@ -466,7 +471,7 @@ public class Superstructure extends SubsystemBase {
     return setElevatorL1.andThen(waitUntilElevatorIsAtL1);
   }
 
-  public Command ElevatorL2() {
+  public Command elevatorL2Cmd() {
 
     Command setElevatorL2 =
         new InstantCommand(
@@ -483,7 +488,7 @@ public class Superstructure extends SubsystemBase {
     return setElevatorL2.andThen(waitUntilElevatorIsAtL2);
   }
 
-  public Command ElevatorL3() {
+  public Command elevatorL3Cmd() {
 
     Command setElevatorL3 =
         new InstantCommand(
@@ -500,7 +505,7 @@ public class Superstructure extends SubsystemBase {
     return setElevatorL3.andThen(waitUntilElevatorIsAtL3);
   }
 
-  public Command ElevatorL4() {
+  public Command elevatorL4Cmd() {
 
     Command setElevatorL4 =
         new InstantCommand(
@@ -519,7 +524,7 @@ public class Superstructure extends SubsystemBase {
 
   // Coral Subsystem Commands //
 
-  public Command IntakeCoral() {
+  public Command intakeCoralCmd() {
 
     Command engageCoralIntake =
         new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.INTAKE), coral);
@@ -527,8 +532,7 @@ public class Superstructure extends SubsystemBase {
     Command runUntilCoralIsDetected = new WaitUntilCommand(() -> coral.isBeamBreakTripped());
 
     Command slowIntake =
-        new InstantCommand(
-            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE), coral);
+        new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE), coral);
 
     Command runUntilCoralIsNotDetected = new WaitUntilCommand(() -> !coral.isBeamBreakTripped());
 
@@ -553,52 +557,51 @@ public class Superstructure extends SubsystemBase {
         .andThen(new WaitCommand(0.02));
   }
 
-  public Command ReverseCoralIntake() {
+  public Command reverseCoralIntakeCmd() {
     return new RunCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_REVERSE), coral);
   }
 
-  public Command ScoreCoral() {
+  public Command scoreCoralCmd() {
     return new RunCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.SCORE), coral);
   }
 
-  public Command HoldCoral() {
+  public Command holdCoralCmd() {
     return new RunCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.HOLD), coral);
   }
 
   // Algae Subsystem Commands //
 
-  public Command IntakeAlgae() {
+  public Command intakeAlgaeCmd() {
     return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE), algae);
   }
 
-  public Command DeAlgaeify() {
+  public Command deAlgaeifyCmd() {
     return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE), algae);
   }
 
-  public Command ScoreAlgae() {
+  public Command scoreAlgaeCmd() {
     return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.SCORE), algae);
   }
 
-  public Command AlgaeArmHome() {
+  public Command algaeArmHomeCmd() {
     return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOME), algae);
   }
 
-  public Command AlgaeArmIntake() {
+  public Command algaeArmIntakeCmd() {
     return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.INTAKE), algae);
   }
 
-  public Command AlgaeArmDeAlgaeify() {
+  public Command algaeArmDeAlgaeifyCmd() {
     return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.DEALGAE), algae);
   }
 
-  public Command AlgaeArmHold() {
+  public Command algaeArmHoldCmd() {
     return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD), algae);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
-    // Update the robot pose using Photonvision's Pose Estimates //
+    DogLog.log("Elevator/AutoAlignElevatorState", elevState.toString());
   }
 }
