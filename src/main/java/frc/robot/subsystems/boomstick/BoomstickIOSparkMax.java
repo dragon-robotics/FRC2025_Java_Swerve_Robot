@@ -17,26 +17,26 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 
 public class BoomstickIOSparkMax implements BoomstickIO {
-  private final SparkMax m_armMotor;
+  private final SparkMax armMotor;
 
-  private final SparkClosedLoopController m_armController;
-  private final AbsoluteEncoder m_armAbsEncoder;
+  private final SparkClosedLoopController armController;
+  private final AbsoluteEncoder armAbsEncoder;
 
-  private int m_ntUpdateCounter = 0; // Counter to track loops for NT updates
+  private int ntUpdateCounter = 0; // Counter to track loops for NT updates
 
   public BoomstickIOSparkMax() {
     // Instantiate the Motors //
-    m_armMotor = new SparkMax(ARM_MOTOR_ID, MotorType.kBrushless);
+    armMotor = new SparkMax(ARM_MOTOR_ID, MotorType.kBrushless);
 
     // Instatiate the Sparkmax closed loop controller and the encoder //
-    m_armController = m_armMotor.getClosedLoopController();
-    m_armAbsEncoder = m_armMotor.getAbsoluteEncoder();
+    armController = armMotor.getClosedLoopController();
+    armAbsEncoder = armMotor.getAbsoluteEncoder();
 
     // Boomstick Arm Motor Configuration //
-    SparkMaxConfig m_armMotorConfig = new SparkMaxConfig();
+    SparkMaxConfig armMotorConfig = new SparkMaxConfig();
 
     // Left Motor Configuration //
-    m_armMotorConfig
+    armMotorConfig
         .voltageCompensation(ARM_NOMINAL_VOLTAGE)
         .smartCurrentLimit(ARM_STALL_CURRENT_LIMIT)
         .secondaryCurrentLimit(ARM_SECONDARY_CURRENT_LIMIT)
@@ -44,14 +44,14 @@ public class BoomstickIOSparkMax implements BoomstickIO {
         .idleMode(IdleMode.kBrake);
 
     // Left Motor Absolute Encoder Configuration //
-    m_armMotorConfig
+    armMotorConfig
         .absoluteEncoder
         // .zeroCentered(true)
         .zeroOffset(ABS_ENC_OFFSET_VAL)
         .inverted(true);
 
     // Left Motor Closed Loop Configuration //
-    m_armMotorConfig
+    armMotorConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
         .pidf(ARM_P, ARM_I, ARM_D, ARM_F, PID_SLOT)
@@ -64,50 +64,50 @@ public class BoomstickIOSparkMax implements BoomstickIO {
         .allowedClosedLoopError(ARM_MAXMOTION_ALLOWED_ERROR, PID_SLOT)
         .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal, PID_SLOT);
 
-    m_armMotor.configure(
-        m_armMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    armMotor.configure(
+        armMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
   public void setArmMotorVoltage(double voltage) {
-    m_armMotor.setVoltage(MathUtil.clamp(voltage, -ARM_NOMINAL_VOLTAGE, ARM_NOMINAL_VOLTAGE));
+    armMotor.setVoltage(MathUtil.clamp(voltage, -ARM_NOMINAL_VOLTAGE, ARM_NOMINAL_VOLTAGE));
   }
 
   @Override
   public void setArmMotorPercentage(double percentage) {
-    m_armMotor.set(MathUtil.clamp(percentage, -1, 1));
+    armMotor.set(MathUtil.clamp(percentage, -1, 1));
   }
 
   @Override
   public void setArmSetpoint(double setpoint) {
-    m_armController.setReference(setpoint, ControlType.kPosition, PID_SLOT);
+    armController.setReference(setpoint, ControlType.kPosition, PID_SLOT);
   }
 
   @Override
   public void updateInputs(BoomstickIOInputs inputs) {
 
     // Only update every 4 loops
-    if (m_ntUpdateCounter % 4 == 0) {
+    if (ntUpdateCounter % 4 == 0) {
       // Check if motors are connected //
-      inputs.armMotorConnected = m_armMotor.getDeviceId() == ARM_MOTOR_ID;
+      inputs.setArmMotorConnected(armMotor.getDeviceId() == ARM_MOTOR_ID);
 
       // Get arm motor data //
-      inputs.armMotorVoltage = m_armMotor.getBusVoltage();
-      inputs.armMotorDutyCycle = m_armMotor.getAppliedOutput();
-      inputs.armMotorCurrent = m_armMotor.getOutputCurrent();
-      inputs.armMotorTemperature = m_armMotor.getMotorTemperature();
-      inputs.armMotorPosition = m_armAbsEncoder.getPosition();
-      inputs.armMotorVelocity = m_armAbsEncoder.getVelocity();
+      inputs.setArmMotorVoltage(armMotor.getBusVoltage());
+      inputs.setArmMotorDutyCycle(armMotor.getAppliedOutput());
+      inputs.setArmMotorCurrent(armMotor.getOutputCurrent());
+      inputs.setArmMotorTemperature(armMotor.getMotorTemperature());
+      inputs.setArmMotorPosition(armAbsEncoder.getPosition());
+      inputs.setArmMotorVelocity(armAbsEncoder.getVelocity());
     }
 
-    m_ntUpdateCounter++;
+    ntUpdateCounter++;
 
-    DogLog.log("Boomstick/ArmMotor/Connected", inputs.armMotorConnected);
-    DogLog.log("Boomstick/ArmMotor/Voltage", inputs.armMotorVoltage);
-    DogLog.log("Boomstick/ArmMotor/DutyCycle", inputs.armMotorDutyCycle);
-    DogLog.log("Boomstick/ArmMotor/Current", inputs.armMotorCurrent);
-    DogLog.log("Boomstick/ArmMotor/Temperature", inputs.armMotorTemperature);
-    DogLog.log("Boomstick/ArmMotor/Position", inputs.armMotorPosition);
-    DogLog.log("Boomstick/ArmMotor/Velocity", inputs.armMotorVelocity);
+    DogLog.log("Boomstick/ArmMotor/Connected", inputs.isArmMotorConnected());
+    DogLog.log("Boomstick/ArmMotor/Voltage", inputs.getArmMotorVoltage());
+    DogLog.log("Boomstick/ArmMotor/DutyCycle", inputs.getArmMotorDutyCycle());
+    DogLog.log("Boomstick/ArmMotor/Current", inputs.getArmMotorCurrent());
+    DogLog.log("Boomstick/ArmMotor/Temperature", inputs.getArmMotorTemperature());
+    DogLog.log("Boomstick/ArmMotor/Position", inputs.getArmMotorPosition());
+    DogLog.log("Boomstick/ArmMotor/Velocity", inputs.getArmMotorVelocity());
   }
 }

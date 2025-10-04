@@ -20,14 +20,14 @@ public class BoomstickSubsystem extends SubsystemBase {
     HIGH_DEALGAE,
   }
 
-  private BoomstickIO m_boomstickIO;
-  private BoomstickState m_boomstickState;
-  private BoomstickIOInputs m_boomstickIOInputs;
+  private BoomstickIO boomstickIO;
+  private BoomstickState boomstickState;
+  private BoomstickIOInputs boomstickIOInputs;
 
   public BoomstickSubsystem(BoomstickIO boomstickIO) {
-    m_boomstickIO = boomstickIO;
-    m_boomstickIOInputs = new BoomstickIOInputs();
-    m_boomstickState = BoomstickState.IDLE;
+    this.boomstickIO = boomstickIO;
+    boomstickIOInputs = new BoomstickIOInputs();
+    boomstickState = BoomstickState.IDLE;
   }
 
   /**
@@ -37,28 +37,28 @@ public class BoomstickSubsystem extends SubsystemBase {
    */
   public void setBoomstickState(BoomstickState wantedState) {
 
-    m_boomstickState = wantedState;
+    boomstickState = wantedState;
 
-    switch (m_boomstickState) {
+    switch (boomstickState) {
       case IDLE:
         // Set the arm to the idle position
-        m_boomstickIO.setArmMotorVoltage(0);
+        boomstickIO.setArmMotorVoltage(0);
         break;
       case HOME:
         // Set the arm to the home position
-        m_boomstickIO.setArmSetpoint(ARM_HIGH_DEALGAE_GOAL);
+        boomstickIO.setArmSetpoint(ARM_HIGH_DEALGAE_GOAL);
         break;
       case LOW_DEALGAE:
         // Set the arm to the low dealgae position
-        m_boomstickIO.setArmSetpoint(ARM_LOW_DEALGAE_GOAL);
+        boomstickIO.setArmSetpoint(ARM_LOW_DEALGAE_GOAL);
         break;
       case HIGH_DEALGAE:
         // Set the arm to the high dealgae position
-        m_boomstickIO.setArmSetpoint(ARM_HIGH_DEALGAE_GOAL);
+        boomstickIO.setArmSetpoint(ARM_HIGH_DEALGAE_GOAL);
         break;
       default:
         // Set the arm to the idle position
-        m_boomstickIO.setArmMotorVoltage(0);
+        boomstickIO.setArmMotorVoltage(0);
         break;
     }
   }
@@ -68,6 +68,6 @@ public class BoomstickSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // Update inputs
-    m_boomstickIO.updateInputs(m_boomstickIOInputs);
+    boomstickIO.updateInputs(boomstickIOInputs);
   }
 }

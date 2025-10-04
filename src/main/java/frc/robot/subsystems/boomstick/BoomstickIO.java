@@ -1,5 +1,8 @@
 package frc.robot.subsystems.boomstick;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public interface BoomstickIO {
   default void setArmMotorVoltage(double voltage) {
     throw new UnsupportedOperationException("setArmMotorVoltage is not implemented");
@@ -16,15 +19,22 @@ public interface BoomstickIO {
   class BoomstickIOInputs {
 
     // Are the motors connected to the CAN bus? //
-    public boolean armMotorConnected;
+    @Getter @Setter
+    private boolean armMotorConnected;
 
     // Left Arm Motor data //
-    public double armMotorVoltage;
-    public double armMotorDutyCycle;
-    public double armMotorCurrent;
-    public double armMotorTemperature;
-    public double armMotorPosition;
-    public double armMotorVelocity;
+    @Getter @Setter
+    private double armMotorVoltage;
+    @Getter @Setter
+    private double armMotorDutyCycle;
+    @Getter @Setter
+    private double armMotorCurrent;
+    @Getter @Setter
+    private double armMotorTemperature;
+    @Getter @Setter
+    private double armMotorPosition;
+    @Getter @Setter
+    private double armMotorVelocity;
   }
 
   default void updateInputs(BoomstickIOInputs inputs) {}
