@@ -7,7 +7,6 @@ package frc.robot;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -61,10 +60,14 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() { /* Stub to remind devs in case this needs to be implemented */ }
+  public void disabledInit() {
+    /* Stub to remind devs in case this needs to be implemented */
+  }
 
   @Override
-  public void disabledPeriodic() { /* Stub to remind devs in case this needs to be implemented */ }
+  public void disabledPeriodic() {
+    /* Stub to remind devs in case this needs to be implemented */
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
@@ -83,7 +86,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() { /* Stub to remind devs in case this needs to be implemented */ }
+  public void autonomousPeriodic() {
+    /* Stub to remind devs in case this needs to be implemented */
+  }
 
   @Override
   public void teleopInit() {
@@ -105,7 +110,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() { /* Stub to remind devs in case this needs to be implemented */ }
+  public void teleopPeriodic() {
+    /* Stub to remind devs in case this needs to be implemented */
+  }
 
   @Override
   public void testInit() {
@@ -115,13 +122,19 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() { /* Stub to remind devs in case this needs to be implemented */ }
+  public void testPeriodic() {
+    /* Stub to remind devs in case this needs to be implemented */
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() { /* Stub to remind devs in case this needs to be implemented */ }
+  public void simulationInit() {
+    /* Stub to remind devs in case this needs to be implemented */
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() { /* Stub to remind devs in case this needs to be implemented */ }
+  public void simulationPeriodic() {
+    /* Stub to remind devs in case this needs to be implemented */
+  }
 }
