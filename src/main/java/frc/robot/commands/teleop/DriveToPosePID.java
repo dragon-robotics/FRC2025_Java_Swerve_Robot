@@ -87,8 +87,8 @@ public class DriveToPosePID extends Command {
 
     // Clamp linear speeds to 75% of max speed for safety
     double maxLinearSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    xSpeed = MathUtil.clamp(xSpeed, -0.5 * maxLinearSpeed, 0.5 * maxLinearSpeed);
-    ySpeed = MathUtil.clamp(ySpeed, -0.5 * maxLinearSpeed, 0.5 * maxLinearSpeed);
+    xSpeed = MathUtil.clamp(xSpeed, -0.75 * maxLinearSpeed, 0.75 * maxLinearSpeed);
+    ySpeed = MathUtil.clamp(ySpeed, -0.75 * maxLinearSpeed, 0.75 * maxLinearSpeed);
 
     // Convert field-relative speeds to robot-relative ChassisSpeeds
     ChassisSpeeds targetSpeeds =
