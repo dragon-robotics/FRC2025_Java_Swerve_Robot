@@ -12,8 +12,6 @@ import frc.robot.subsystems.elevator.ElevatorIO.ElevatorIOInputs;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
-  // @TODO: Create Elastic Tabs for the Elevator Subsystem //
-
   // Algae Subsystem States //
   public enum ElevatorState {
     IDLE,
@@ -24,15 +22,15 @@ public class ElevatorSubsystem extends SubsystemBase {
     L4,
   }
 
-  private ElevatorIO m_elevatorIO;
-  private ElevatorState m_elevatorState;
-  private ElevatorIOInputs m_elevatorIOInputs;
+  private ElevatorIO elevatorIO;
+  private ElevatorState elevatorState;
+  private ElevatorIOInputs elevatorIOInputs;
 
   /** Creates a new ClimberSubsystem. */
   public ElevatorSubsystem(ElevatorIO elevatorIO) {
-    m_elevatorIO = elevatorIO;
-    m_elevatorState = ElevatorState.IDLE;
-    m_elevatorIOInputs = new ElevatorIOInputs();
+    this.elevatorIO = elevatorIO;
+    elevatorState = ElevatorState.IDLE;
+    elevatorIOInputs = new ElevatorIOInputs();
   }
 
   /*
@@ -40,24 +38,24 @@ public class ElevatorSubsystem extends SubsystemBase {
    * @return true if current limit is tripped
    */
   public boolean isCurrentLimitTripped() {
-    return m_elevatorIOInputs.elevatorCurrentLimitTripped;
+    return elevatorIOInputs.isElevatorCurrentLimitTripped();
   }
 
   public boolean isAtElevatorState() {
-    return switch (m_elevatorState) {
-      case L1 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L1, 0.5);
-      case L2 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L2, 0.5);
-      case L3 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L3, 0.5);
-      case L4 -> MathUtil.isNear(m_elevatorIO.getElevatorSetpoint(), L4, 0.5);
+    return switch (elevatorState) {
+      case L1 -> MathUtil.isNear(elevatorIO.getElevatorSetpoint(), L1, 0.5);
+      case L2 -> MathUtil.isNear(elevatorIO.getElevatorSetpoint(), L2, 0.5);
+      case L3 -> MathUtil.isNear(elevatorIO.getElevatorSetpoint(), L3, 0.5);
+      case L4 -> MathUtil.isNear(elevatorIO.getElevatorSetpoint(), L4, 0.5);
       case HOME -> {
         // Get the current encoder position.
-        double encoderPosition = m_elevatorIOInputs.elevatorLeadMotorPosition;
+        double encoderPosition = elevatorIOInputs.getElevatorLeadMotorPosition();
 
         // Check if the encoder is at the bottom
         boolean encoderAtBottom = MathUtil.isNear(HOME, encoderPosition, 0.01);
 
         // Check if the current limit is tripped
-        boolean currentSpiked = m_elevatorIOInputs.elevatorCurrentLimitTripped;
+        boolean currentSpiked = elevatorIOInputs.isElevatorCurrentLimitTripped();
 
         yield encoderAtBottom && currentSpiked;
       }
@@ -66,7 +64,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public void seedElevatorMotorEncoderPosition(double position) {
-    m_elevatorIO.seedElevatorMotorEncoderPosition(position);
+    elevatorIO.seedElevatorMotorEncoderPosition(position);
   }
 
   /**
@@ -76,27 +74,28 @@ public class ElevatorSubsystem extends SubsystemBase {
    */
   public void setElevatorState(ElevatorState wantedElevatorState) {
 
-    m_elevatorState = wantedElevatorState;
+    elevatorState = wantedElevatorState;
 
-    switch (m_elevatorState) {
+    switch (elevatorState) {
       case L1:
-        m_elevatorIO.setElevatorMotorSetpoint(L1);
+        elevatorIO.setElevatorMotorSetpoint(L1);
         break;
       case L2:
-        m_elevatorIO.setElevatorMotorSetpoint(L2);
+        elevatorIO.setElevatorMotorSetpoint(L2);
         break;
       case L3:
-        m_elevatorIO.setElevatorMotorSetpoint(L3);
+        elevatorIO.setElevatorMotorSetpoint(L3);
         break;
       case L4:
-        m_elevatorIO.setElevatorMotorSetpoint(L4);
+        elevatorIO.setElevatorMotorSetpoint(L4);
         break;
       case HOME:
-        m_elevatorIO.setElevatorMotorSetpoint(HOME);
+        elevatorIO.setElevatorMotorSetpoint(HOME);
         break;
       case IDLE:
         // Stop the motors if the wanted state is IDLE //
-        m_elevatorIO.setElevatorMotorPercentage(0);
+        elevatorIO.setElevatorMotorPercentage(0);
+        break;
       default:
         break;
     }
@@ -104,11 +103,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   /** Get the elevator state */
   public ElevatorState getElevatorState() {
-    return m_elevatorState;
+    return elevatorState;
   }
 
   public void setElevatorMotorSpeed(double speed) {
-    m_elevatorIO.setElevatorMotorPercentage(speed);
+    elevatorIO.setElevatorMotorPercentage(speed);
   }
 
   @Override
@@ -116,6 +115,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // Update inputs
-    m_elevatorIO.updateInputs(m_elevatorIOInputs);
+    elevatorIO.updateInputs(elevatorIOInputs);
   }
 }

@@ -22,51 +22,44 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
 public class ElevatorIOSparkMax implements ElevatorIO {
-  private final SparkMax m_elevatorLeadMotor = new SparkMax(LEAD_MOTOR_ID, MotorType.kBrushless);
-  private final SparkMax m_elevatorFollowMotor =
+  private final SparkMax elevatorLeadMotor = new SparkMax(LEAD_MOTOR_ID, MotorType.kBrushless);
+  private final SparkMax elevatorFollowMotor =
       new SparkMax(FOLLOW_MOTOR_ID, MotorType.kBrushless);
 
-  private final SparkClosedLoopController m_elevatorLeadController =
-      m_elevatorLeadMotor.getClosedLoopController();
-  private final SparkMaxAlternateEncoder m_elevatorLeadRelEncoder =
-      (SparkMaxAlternateEncoder) m_elevatorLeadMotor.getAlternateEncoder();
-  private final ProfiledPIDController m_pidController;
+  private final SparkClosedLoopController elevatorLeadController =
+      elevatorLeadMotor.getClosedLoopController();
+  private final SparkMaxAlternateEncoder elevatorLeadRelEncoder =
+      (SparkMaxAlternateEncoder) elevatorLeadMotor.getAlternateEncoder();
+  private final ProfiledPIDController pidController;
 
   // Feedforward for elevator motor //
-  private final ElevatorFeedforward m_elevatorLeadFeedforward =
+  private final ElevatorFeedforward elevatorLeadFeedforward =
       new ElevatorFeedforward(ELEVATOR_KS, ELEVATOR_KG, ELEVATOR_KV, ELEVATOR_KA);
 
-  private int m_ntUpdateCounter = 0; // Counter to track loops for NT updates
+  private int ntUpdateCounter = 0; // Counter to track loops for NT updates
 
   public ElevatorIOSparkMax() {
     // Lead and Follow Elevator Motor Configuration //
-    SparkMaxConfig m_elevatorLeadMotorConfig = new SparkMaxConfig();
-    SparkMaxConfig m_elevatorFollowMotorConfig = new SparkMaxConfig();
+    SparkMaxConfig elevatorLeadMotorConfig = new SparkMaxConfig();
+    SparkMaxConfig elevatorFollowMotorConfig = new SparkMaxConfig();
 
     // Lead Motor Configuration //
-    m_elevatorLeadMotorConfig
+    elevatorLeadMotorConfig
         .voltageCompensation(NOMINAL_VOLTAGE)
         .smartCurrentLimit(STALL_CURRENT_LIMIT, FREE_CURRENT_LIMIT)
         .secondaryCurrentLimit(SECONDARY_CURRENT_LIMIT)
         .openLoopRampRate(RAMP_RATE_IN_SEC)
         .idleMode(IdleMode.kBrake);
 
-    // Lead Motor Soft Limits //
-    // m_elevatorLeadMotorConfig.softLimit
-    //   .forwardSoftLimitEnabled(true)
-    //   .forwardSoftLimit(ENDING_LIMIT)
-    //   .reverseSoftLimitEnabled(true)
-    //   .reverseSoftLimit(STARTING_LIMIT);
-
     // Lead Motor Relative Encoder Configuration //
-    m_elevatorLeadMotorConfig
+    elevatorLeadMotorConfig
         .alternateEncoder
         .averageDepth(AVERAGE_DEPTH)
         .countsPerRevolution(COUNTS_PER_REVOLUTION)
         .inverted(false);
 
     // Lead Motor Closed Loop Configuration //
-    m_elevatorLeadMotorConfig
+    elevatorLeadMotorConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
         .pid(P, I, D, PID_SLOT)
@@ -78,7 +71,7 @@ public class ElevatorIOSparkMax implements ElevatorIO {
         .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal, PID_SLOT);
 
     // Follow Motor Configuration //
-    m_elevatorFollowMotorConfig
+    elevatorFollowMotorConfig
         .voltageCompensation(NOMINAL_VOLTAGE)
         .smartCurrentLimit(STALL_CURRENT_LIMIT, FREE_CURRENT_LIMIT)
         .secondaryCurrentLimit(SECONDARY_CURRENT_LIMIT)
@@ -86,120 +79,104 @@ public class ElevatorIOSparkMax implements ElevatorIO {
         .idleMode(IdleMode.kBrake)
         .follow(LEAD_MOTOR_ID, true);
 
-    m_elevatorLeadMotor.configure(
-        m_elevatorLeadMotorConfig,
+    elevatorLeadMotor.configure(
+        elevatorLeadMotorConfig,
         ResetMode.kNoResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    m_elevatorFollowMotor.configure(
-        m_elevatorFollowMotorConfig,
+    elevatorFollowMotor.configure(
+        elevatorFollowMotorConfig,
         ResetMode.kNoResetSafeParameters,
         PersistMode.kPersistParameters);
 
     // Set the motors to start at 0 //
-    m_elevatorLeadMotor.set(0);
-    m_elevatorFollowMotor.set(0);
+    elevatorLeadMotor.set(0);
+    elevatorFollowMotor.set(0);
 
     // Set the encoder to be 0 //
-    m_elevatorLeadRelEncoder.setPosition(0);
+    elevatorLeadRelEncoder.setPosition(0);
 
     // PID Controller
-    m_pidController =
+    pidController =
         new ProfiledPIDController(
             P, I, D, new Constraints(MAX_MAXMOTION_VELOCITY, MAX_MAXMOTION_ACCELERATION));
 
-    m_pidController.setTolerance(MAXMOTION_ALLOWED_ERROR);
-  }
-
-  private double calculateFeedforward(double setpoint) {
-    double pidOutput = m_pidController.calculate(m_elevatorLeadRelEncoder.getPosition(), setpoint);
-    State setpointState = m_pidController.getSetpoint();
-    return m_elevatorLeadFeedforward.calculate(setpointState.velocity);
+    pidController.setTolerance(MAXMOTION_ALLOWED_ERROR);
   }
 
   @Override
   public void seedElevatorMotorEncoderPosition(double position) {
-    m_elevatorLeadRelEncoder.setPosition(position);
+    elevatorLeadRelEncoder.setPosition(position);
   }
 
   @Override
   public void setElevatorMotorVoltage(double voltage) {
-    m_elevatorLeadMotor.setVoltage(MathUtil.clamp(voltage, -NOMINAL_VOLTAGE, NOMINAL_VOLTAGE));
+    elevatorLeadMotor.setVoltage(MathUtil.clamp(voltage, -NOMINAL_VOLTAGE, NOMINAL_VOLTAGE));
   }
 
   @Override
   public void setElevatorMotorPercentage(double percentage) {
-    m_elevatorLeadMotor.set(MathUtil.clamp(percentage, -1, 1));
+    elevatorLeadMotor.set(MathUtil.clamp(percentage, -1, 1));
   }
 
   @Override
   public void setElevatorMotorSetpoint(double setpoint) {
-    m_elevatorLeadController.setReference(setpoint, ControlType.kPosition, PID_SLOT);
+    elevatorLeadController.setReference(setpoint, ControlType.kPosition, PID_SLOT);
   }
 
   @Override
   public double getElevatorSetpoint() {
-    return m_elevatorLeadRelEncoder.getPosition();
-  }
-
-  @Override
-  public void setElevatorSetpointFF(double setpoint) {
-    m_elevatorLeadController.setReference(
-        setpoint,
-        ControlType.kMAXMotionPositionControl,
-        PID_SLOT,
-        calculateFeedforward(setpoint),
-        ArbFFUnits.kVoltage);
+    return elevatorLeadRelEncoder.getPosition();
   }
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
 
     // Only update every 4 loops
-    if (m_ntUpdateCounter % 4 == 0) {
+    if (ntUpdateCounter % 4 == 0) {
       // Check if motors are connected //
-      inputs.elevatorLeadMotorConnected = m_elevatorLeadMotor.getDeviceId() == LEAD_MOTOR_ID;
-      inputs.elevatorFollowMotorConnected = m_elevatorFollowMotor.getDeviceId() == FOLLOW_MOTOR_ID;
+      inputs.setElevatorLeadMotorConnected(elevatorLeadMotor.getDeviceId() == LEAD_MOTOR_ID);
+      inputs.setElevatorFollowMotorConnected(elevatorFollowMotor.getDeviceId() == FOLLOW_MOTOR_ID);
 
       // Update motor data //
-      inputs.elevatorLeadMotorVoltage = m_elevatorLeadMotor.getBusVoltage();
-      inputs.elevatorLeadMotorDutyCycle = m_elevatorLeadMotor.getAppliedOutput();
-      inputs.elevatorLeadMotorTemperature = m_elevatorLeadMotor.getMotorTemperature();
-      inputs.elevatorLeadMotorVelocity = m_elevatorLeadRelEncoder.getVelocity();
+      inputs.setElevatorLeadMotorVoltage(elevatorLeadMotor.getBusVoltage());
+      inputs.setElevatorLeadMotorDutyCycle(elevatorLeadMotor.getAppliedOutput());
+      inputs.setElevatorLeadMotorTemperature(elevatorLeadMotor.getMotorTemperature());
+      inputs.setElevatorLeadMotorVelocity(elevatorLeadRelEncoder.getVelocity());
 
-      inputs.elevatorFollowMotorVoltage = m_elevatorFollowMotor.getBusVoltage();
-      inputs.elevatorFollowMotorDutyCycle = m_elevatorFollowMotor.getAppliedOutput();
-      inputs.elevatorFollowMotorCurrent = m_elevatorFollowMotor.getOutputCurrent();
-      inputs.elevatorFollowMotorTemperature = m_elevatorFollowMotor.getMotorTemperature();
+      inputs.setElevatorFollowMotorVoltage(elevatorFollowMotor.getBusVoltage());
+      inputs.setElevatorFollowMotorDutyCycle(elevatorFollowMotor.getAppliedOutput());
+      inputs.setElevatorFollowMotorCurrent(elevatorFollowMotor.getOutputCurrent());
+      inputs.setElevatorFollowMotorTemperature(elevatorFollowMotor.getMotorTemperature());
     }
 
-    m_ntUpdateCounter++;
+    ntUpdateCounter++;
 
     // Check the elevator position //
-    inputs.elevatorLeadMotorPosition = m_elevatorLeadRelEncoder.getPosition();
+    inputs.setElevatorLeadMotorPosition(elevatorLeadRelEncoder.getPosition());
 
     // Check if the current limit is tripped //
-    inputs.elevatorLeadMotorCurrent = m_elevatorLeadMotor.getOutputCurrent();
-    inputs.elevatorCurrentLimitTripped = inputs.elevatorLeadMotorCurrent >= STALL_CURRENT_LIMIT;
+    inputs.setElevatorLeadMotorCurrent(elevatorLeadMotor.getOutputCurrent());
+    inputs.setElevatorCurrentLimitTripped(inputs.getElevatorLeadMotorCurrent() >= STALL_CURRENT_LIMIT);
 
     // Check if the elevator is at the slow down threshold //
-    inputs.elevatorAtSlowDownThreshold = inputs.elevatorLeadMotorPosition >= HOME;
+    inputs.setElevatorAtSlowDownThreshold(inputs.getElevatorLeadMotorPosition() >= HOME);
 
-    DogLog.log("Elevator/LeadMotor/Connected", inputs.elevatorLeadMotorConnected);
-    DogLog.log("Elevator/LeadMotor/Voltage", inputs.elevatorLeadMotorVoltage);
-    DogLog.log("Elevator/LeadMotor/DutyCycle", inputs.elevatorLeadMotorDutyCycle);
-    DogLog.log("Elevator/LeadMotor/Current", inputs.elevatorLeadMotorCurrent);
-    DogLog.log("Elevator/LeadMotor/Temperature", inputs.elevatorLeadMotorTemperature);
-    DogLog.log("Elevator/LeadMotor/Position", inputs.elevatorLeadMotorPosition);
-    DogLog.log("Elevator/LeadMotor/Velocity", inputs.elevatorLeadMotorVelocity);
+    DogLog.log("Elevator/LeadMotor/Connected", inputs.isElevatorLeadMotorConnected());
+    DogLog.log("Elevator/LeadMotor/Voltage", inputs.getElevatorLeadMotorVoltage());
+    DogLog.log("Elevator/LeadMotor/DutyCycle", inputs.getElevatorLeadMotorDutyCycle());
+    DogLog.log("Elevator/LeadMotor/Current", inputs.getElevatorLeadMotorCurrent());
+    DogLog.log("Elevator/LeadMotor/Temperature", inputs.getElevatorLeadMotorTemperature());
+    DogLog.log("Elevator/LeadMotor/Position", inputs.getElevatorLeadMotorPosition());
+    DogLog.log("Elevator/LeadMotor/Velocity", inputs.getElevatorLeadMotorVelocity());
 
-    DogLog.log("Elevator/FollowMotor/Connected", inputs.elevatorFollowMotorConnected);
-    DogLog.log("Elevator/FollowMotor/Voltage", inputs.elevatorFollowMotorVoltage);
-    DogLog.log("Elevator/FollowMotor/DutyCycle", inputs.elevatorFollowMotorDutyCycle);
-    DogLog.log("Elevator/FollowMotor/Current", inputs.elevatorFollowMotorCurrent);
-    DogLog.log("Elevator/FollowMotor/Temperature", inputs.elevatorFollowMotorTemperature);
+    DogLog.log("Elevator/FollowMotor/Connected", inputs.isElevatorFollowMotorConnected());
+    DogLog.log("Elevator/FollowMotor/Voltage", inputs.getElevatorFollowMotorVoltage());
+    DogLog.log("Elevator/FollowMotor/DutyCycle", inputs.getElevatorFollowMotorDutyCycle());
+    DogLog.log("Elevator/FollowMotor/Current", inputs.getElevatorFollowMotorCurrent());
+    DogLog.log("Elevator/FollowMotor/Temperature", inputs.getElevatorFollowMotorTemperature());
 
-    DogLog.log("Elevator/CurrentLimitTripped", inputs.elevatorCurrentLimitTripped);
-    DogLog.log("Elevator/AtSlowDownThreshold", inputs.elevatorAtSlowDownThreshold);
+    DogLog.log("Elevator/CurrentLimitTripped", inputs.isElevatorCurrentLimitTripped());
+    DogLog.log("Elevator/AtSlowDownThreshold", inputs.isElevatorAtSlowDownThreshold());
   }
 }
