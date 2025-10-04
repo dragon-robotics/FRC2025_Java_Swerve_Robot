@@ -6,7 +6,6 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkMaxAlternateEncoder;
@@ -16,10 +15,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
 public class ElevatorIOSparkMax implements ElevatorIO {
   private final SparkMax elevatorLeadMotor = new SparkMax(LEAD_MOTOR_ID, MotorType.kBrushless);
@@ -31,10 +28,6 @@ public class ElevatorIOSparkMax implements ElevatorIO {
   private final SparkMaxAlternateEncoder elevatorLeadRelEncoder =
       (SparkMaxAlternateEncoder) elevatorLeadMotor.getAlternateEncoder();
   private final ProfiledPIDController pidController;
-
-  // Feedforward for elevator motor //
-  private final ElevatorFeedforward elevatorLeadFeedforward =
-      new ElevatorFeedforward(ELEVATOR_KS, ELEVATOR_KG, ELEVATOR_KV, ELEVATOR_KA);
 
   private int ntUpdateCounter = 0; // Counter to track loops for NT updates
 
