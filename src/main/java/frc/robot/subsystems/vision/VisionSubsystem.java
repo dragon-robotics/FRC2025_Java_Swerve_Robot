@@ -102,10 +102,10 @@ public class VisionSubsystem extends SubsystemBase {
       allRobotPosesRejected.addAll(result.rejectedPoses());
     }
 
-    DogLog.log("Vision/Summary/TagPoses", allTagPoses.toArray(Pose3d[]::new));
-    DogLog.log("Vision/Summary/RobotPoses", allRobotPoses.toArray(Pose3d[]::new));
+    // DogLog.log("Vision/Summary/TagPoses", allTagPoses.toArray(Pose3d[]::new));
+    // DogLog.log("Vision/Summary/RobotPoses", allRobotPoses.toArray(Pose3d[]::new));
     DogLog.log("Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(Pose3d[]::new));
-    DogLog.log("Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(Pose3d[]::new));
+    // DogLog.log("Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(Pose3d[]::new));
   }
 
   // Record for camera processing results
@@ -167,9 +167,6 @@ public class VisionSubsystem extends SubsystemBase {
         accepted.poseObservation().pose().toPose2d(),
         Utils.fpgaToCurrentTime(accepted.poseObservation().timestamp()),
         stdDevs);
-
-    // Log acceptance
-    DogLog.log(cameraIndexString + "/AcceptedPose", accepted.poseObservation().pose());
   }
 
   private void handleRejectedPose(
@@ -180,9 +177,6 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     rejectedPoses.add(rejected.poseObservation().pose());
-
-    DogLog.log(cameraIndexString + "/RejectionReason", rejected.reason().name());
-    DogLog.log(cameraIndexString + "/RejectedPose", rejected.poseObservation().pose());
   }
 
   private Matrix<N3, N1> calculateStandardDeviations(AcceptedPose accepted) {
