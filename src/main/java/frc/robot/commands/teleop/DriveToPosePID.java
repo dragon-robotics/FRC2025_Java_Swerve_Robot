@@ -33,7 +33,7 @@ public class DriveToPosePID extends Command {
               Units.degreesToRadians(540), Units.degreesToRadians(720)));
 
   // Tolerances - how close is close enough?
-  private static final double POSITION_TOLERANCE = Units.inchesToMeters(2); // meters
+  private static final double POSITION_TOLERANCE = Units.inchesToMeters(1); // meters
   private static final double ANGLE_TOLERANCE = Math.toRadians(2); // radians
 
   public DriveToPosePID(
@@ -87,8 +87,8 @@ public class DriveToPosePID extends Command {
 
     // Clamp linear speeds to 75% of max speed for safety
     double maxLinearSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    xSpeed = MathUtil.clamp(xSpeed, -0.75 * maxLinearSpeed, 0.75 * maxLinearSpeed);
-    ySpeed = MathUtil.clamp(ySpeed, -0.75 * maxLinearSpeed, 0.75 * maxLinearSpeed);
+    xSpeed = MathUtil.clamp(xSpeed, -0.6 * maxLinearSpeed, 0.6 * maxLinearSpeed);
+    ySpeed = MathUtil.clamp(ySpeed, -0.6 * maxLinearSpeed, 0.6 * maxLinearSpeed);
 
     // Convert field-relative speeds to robot-relative ChassisSpeeds
     ChassisSpeeds targetSpeeds =
