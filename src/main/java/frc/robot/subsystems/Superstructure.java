@@ -9,9 +9,6 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-
-import dev.doglog.DogLog;
-
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -25,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -231,8 +227,8 @@ public class Superstructure extends SubsystemBase {
 
   private static class Speeds {
     double translation;
-    double  strafe;
-    double  rotation;
+    double strafe;
+    double rotation;
   }
 
   private Speeds processJoystickInputs(
@@ -290,57 +286,43 @@ public class Superstructure extends SubsystemBase {
   public Command driveToClosestReefPoseCmd(boolean left) {
 
     return new DeferredCommand(
-        () -> {
-          // Grab the robot's current alliance
-          Optional<Alliance> alliance = DriverStation.getAlliance();
+            () -> {
+              // Grab the robot's current alliance
+              Optional<Alliance> alliance = DriverStation.getAlliance();
 
-          // Grab the robot's current pose
-          Pose2d currentPose = swerve.getState().Pose;
+              // Grab the robot's current pose
+              Pose2d currentPose = swerve.getState().Pose;
 
-          // Initialize the target poses based on the alliance and whether we are left or right
-          //
-          final var redReefPoses =
-              left
-                  ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
-                  : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES;
-          final var blueReefPoses =
-              left
-                  ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES
-                  : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
-          List<Pose2d> targetPoses =
-              alliance.isPresent() && alliance.get() == Alliance.Red
-                  ? redReefPoses
-                  : blueReefPoses;
+              // Initialize the target poses based on the alliance and whether we are left or right
+              //
+              final var redReefPoses =
+                  left
+                      ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
+                      : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES;
+              final var blueReefPoses =
+                  left
+                      ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES
+                      : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
+              List<Pose2d> targetPoses =
+                  alliance.isPresent() && alliance.get() == Alliance.Red
+                      ? redReefPoses
+                      : blueReefPoses;
 
-          // Calculate the pose closest to the current pose
-          Pose2d closestPose = findClosestPose(currentPose, targetPoses);
+              // Calculate the pose closest to the current pose
+              Pose2d closestPose = findClosestPose(currentPose, targetPoses);
 
-          // Determine the selected elevator state for the current reef alignment state
-          Command elevatorCommand = this.elevatorHomeCmd();
-          double backwardOffsetDist = -0.25; // Default offset distance
-          if (elevState == ElevatorSubsystem.ElevatorState.L2) {
-            elevatorCommand = this.elevatorL2Cmd();
-            backwardOffsetDist = -0.25; // Increase offset distance for L2
-          } else if (elevState == ElevatorSubsystem.ElevatorState.L3) {
-            elevatorCommand = this.elevatorL3Cmd();
-            backwardOffsetDist = -0.25; // Increase offset distance for L3
-          } else if (elevState == ElevatorSubsystem.ElevatorState.L4) {
-            elevatorCommand = this.elevatorL4Cmd();
-            backwardOffsetDist = -0.35; // Increase offset distance for L4
-          }
+              double backwardOffsetDist = -0.25; // Default offset distance
 
-          // Add intermediate waypoint (0.25 meter back from target)
-          Transform2d backwardOffset = new Transform2d(backwardOffsetDist, 0.0, Rotation2d.kZero);
+              // Add intermediate waypoint (0.25 meter back from target)
+              Transform2d backwardOffset =
+                  new Transform2d(backwardOffsetDist, 0.0, Rotation2d.kZero);
 
-          return new DriveToPosePID(
-                  swerve, applyRobotSpeeds, closestPose.transformBy(backwardOffset))
-              .andThen(
-                  new ParallelDeadlineGroup(
-                      new DriveToPosePID(swerve, applyRobotSpeeds, closestPose),
-                      elevatorCommand));
-        },
-        Set.of(swerve))
-    .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
+              return new DriveToPosePID(
+                      swerve, applyRobotSpeeds, closestPose.transformBy(backwardOffset))
+                  .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, closestPose));
+            },
+            Set.of(swerve))
+        .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
   }
 
   public Command driveToClosestCoralStationPoseCmd() {
@@ -602,6 +584,5 @@ public class Superstructure extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    DogLog.log("Elevator/AutoAlignElevatorState", elevState.toString());
   }
 }
