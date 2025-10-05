@@ -9,8 +9,7 @@ public class Telemetry {
    *
    * @param maxSpeed Maximum speed in meters per second
    */
-  public Telemetry(double maxSpeed) {
-  }
+  public Telemetry(double maxSpeed) {}
 
   /** Accept the swerve drive state and telemeterize it to SmartDashboard and SignalLogger. */
   public void telemeterize(SwerveDriveState state) {
