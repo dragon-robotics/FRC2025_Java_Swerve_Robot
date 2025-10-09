@@ -91,7 +91,7 @@ public class VisionSubsystem extends SubsystemBase {
       cameraIOs[cameraIndex].updateInputs(cameraInputs[cameraIndex]);
 
       var result = processCameraData(cameraIndex, cameraInputs[cameraIndex]);
-  
+
       // Efficient collection operations
       // allTagPoses.addAll(result.tagPoses());
       // allRobotPoses.addAll(result.robotPoses());
@@ -102,7 +102,8 @@ public class VisionSubsystem extends SubsystemBase {
     // DogLog.log("Vision/Summary/TagPoses", allTagPoses.toArray(Pose3d[]::new));
     // DogLog.log("Vision/Summary/RobotPoses", allRobotPoses.toArray(Pose3d[]::new));
     DogLog.log("Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(Pose3d[]::new));
-    // DogLog.log("Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(Pose3d[]::new));
+    // DogLog.log("Vision/Summary/RobotPosesRejected",
+    // allRobotPosesRejected.toArray(Pose3d[]::new));
   }
 
   // Record for camera processing results

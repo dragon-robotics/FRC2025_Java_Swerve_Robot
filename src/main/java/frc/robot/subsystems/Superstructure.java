@@ -299,27 +299,31 @@ public class Superstructure extends SubsystemBase {
     // return Commands.runOnce(() -> {
     //   Pose2d target = left ? cachedClosestLeftReef : cachedClosestRightReef;
     //   Transform2d offset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
-      
+
     //   new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
     //       .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, target));
     // }).andThen(
     //     () -> currentHeading = Optional.of(swerve.getState().Pose.getRotation())
     // );
     // Lambda is now trivial - just reads cached value
-    return new DeferredCommand(() -> {
-        Pose2d target = left ? cachedClosestLeftReef : cachedClosestRightReef;
-        Transform2d offset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
-        
-        return new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
-            .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, target));
-    }, Set.of(swerve))
-    .andThen(
-        Commands.deadline(
-          new RunCommand(() -> controller.setControllerState(ControllerState.STRONG_RUMBLE), controller).withTimeout(0.5)),
-          new InstantCommand(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation())
-        )).handleInterrupt(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
-      
+    return new DeferredCommand(
+            () -> {
+              Pose2d target = left ? cachedClosestLeftReef : cachedClosestRightReef;
+              Transform2d offset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
 
+              return new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
+                  .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, target));
+            },
+            Set.of(swerve))
+        .andThen(
+            Commands.deadline(
+                new RunCommand(
+                        () -> controller.setControllerState(ControllerState.STRONG_RUMBLE),
+                        controller)
+                    .withTimeout(0.5)),
+            new InstantCommand(
+                () -> currentHeading = Optional.of(swerve.getState().Pose.getRotation())))
+        .handleInterrupt(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
   }
 
   // public Command driveToClosestReefPoseCmd(boolean left) {
@@ -332,7 +336,8 @@ public class Superstructure extends SubsystemBase {
   //             // Grab the robot's current pose
   //             Pose2d currentPose = swerve.getState().Pose;
 
-  //             // Initialize the target poses based on the alliance and whether we are left or right
+  //             // Initialize the target poses based on the alliance and whether we are left or
+  // right
   //             //
   //             final var redReefPoses =
   //                 left
@@ -628,18 +633,20 @@ public class Superstructure extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-      
+
     Pose2d currentPose = swerve.getState().Pose;
     Optional<Alliance> alliance = DriverStation.getAlliance();
-    
+
     if (alliance.isPresent()) {
-      List<Pose2d> leftPoses = alliance.get() == Alliance.Red
-          ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
-          : FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES;
-      List<Pose2d> rightPoses = alliance.get() == Alliance.Red
-          ? FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES
-          : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
-      
+      List<Pose2d> leftPoses =
+          alliance.get() == Alliance.Red
+              ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
+              : FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES;
+      List<Pose2d> rightPoses =
+          alliance.get() == Alliance.Red
+              ? FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES
+              : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
+
       cachedClosestLeftReef = findClosestPose(currentPose, leftPoses);
       cachedClosestRightReef = findClosestPose(currentPose, rightPoses);
     }

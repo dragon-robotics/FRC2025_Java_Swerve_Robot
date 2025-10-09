@@ -4,11 +4,8 @@
 
 package frc.robot.subsystems.controller;
 
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.controller.ControllerIO.ControllerIOInputs;
-import frc.robot.subsystems.led.LedIO;
-import frc.robot.subsystems.led.LedIO.LedIOInputs;
 
 public class ControllerSubsystem extends SubsystemBase {
 
@@ -22,7 +19,7 @@ public class ControllerSubsystem extends SubsystemBase {
 
   private ControllerIO controllerIO;
   private ControllerState controllerState;
-  private ControllerIOInputs controllerIOInputs;  
+  private ControllerIOInputs controllerIOInputs;
 
   /** Creates a new ControllerSubsystem. */
   public ControllerSubsystem(ControllerIO controllerIO) {
@@ -71,7 +68,7 @@ public class ControllerSubsystem extends SubsystemBase {
         controllerIO.setControllerRumble(0.0, left); // Default to no rumble
         break;
     }
-  }  
+  }
 
   @Override
   public void periodic() {

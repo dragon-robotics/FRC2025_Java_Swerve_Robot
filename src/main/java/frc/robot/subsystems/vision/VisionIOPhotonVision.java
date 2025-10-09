@@ -3,7 +3,6 @@ package frc.robot.subsystems.vision;
 import static frc.robot.Constants.FieldConstants.APTAG_FIELD_LAYOUT;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Timer;
@@ -28,9 +27,9 @@ public class VisionIOPhotonVision implements VisionIO {
   protected final Supplier<SwerveDriveState> swerveDriveStateSupplier;
 
   // In constructor or as static finals
-  private static final double YAW_THRESHOLD = 
+  private static final double YAW_THRESHOLD =
       VisionConstants.CAMERA_FOV_HORIZONTAL_DEGREES / 2.0 * 0.8;
-  private static final double PITCH_THRESHOLD = 
+  private static final double PITCH_THRESHOLD =
       VisionConstants.CAMERA_FOV_VERTICAL_DEGREES / 2.0 * 0.8;
   private static final double YAW_HALF_THRESH = YAW_THRESHOLD * 0.5;
   private static final double PITCH_HALF_THRESH = PITCH_THRESHOLD * 0.5;
@@ -80,8 +79,10 @@ public class VisionIOPhotonVision implements VisionIO {
     for (var result : camera.getAllUnreadResults()) {
       // Update latest target observation
       inputs.setLatestTargetObservation(new TargetObservation(new Rotation2d(), new Rotation2d()));
-      if (!result.hasTargets()) {continue;}
-        
+      if (!result.hasTargets()) {
+        continue;
+      }
+
       inputs.setLatestTargetObservation(
           new TargetObservation(
               Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
@@ -90,37 +91,39 @@ public class VisionIOPhotonVision implements VisionIO {
       // Add pose observation based on how many tags we see
       Optional<EstimatedRobotPose> visionEst = poseEstimator.update(result);
 
-      visionEst.ifPresent(estimator -> {
-        List<PhotonTrackedTarget> targets = result.getTargets();
-        int targetCount = targets.size();
-        
-        // Single-pass computation
-        double totalDistance = 0;
-        double totalAmbiguity = 0;
-        double maxEdgeFactor = 1.0;
-        
-        for (PhotonTrackedTarget target : targets) {
-          totalDistance += target.bestCameraToTarget.getTranslation().getNorm();
-          totalAmbiguity += target.getPoseAmbiguity();
-          tagIds.add((short) target.getFiducialId());
-          
-          // Edge factor calculation
-          double targetYaw = Math.abs(target.getYaw());
-          double targetPitch = Math.abs(target.getPitch());
-          double yawScore = Math.max(0, targetYaw - YAW_HALF_THRESH) / YAW_HALF_THRESH;
-          double pitchScore = Math.max(0, targetPitch - PITCH_HALF_THRESH) / PITCH_HALF_THRESH;
-          maxEdgeFactor = Math.max(maxEdgeFactor, 1.0 + Math.max(yawScore, pitchScore));
-        }
-  
-        poseObservations.add(new PoseObservation(
-            estimator.timestampSeconds,
-            estimator.estimatedPose,
-            totalAmbiguity / targetCount,
-            targetCount,
-            totalDistance / targetCount,
-            result.metadata.getLatencyMillis() / 1000.0,
-            maxEdgeFactor,
-            PoseObservationType.PHOTONVISION));
+      visionEst.ifPresent(
+          estimator -> {
+            List<PhotonTrackedTarget> targets = result.getTargets();
+            int targetCount = targets.size();
+
+            // Single-pass computation
+            double totalDistance = 0;
+            double totalAmbiguity = 0;
+            double maxEdgeFactor = 1.0;
+
+            for (PhotonTrackedTarget target : targets) {
+              totalDistance += target.bestCameraToTarget.getTranslation().getNorm();
+              totalAmbiguity += target.getPoseAmbiguity();
+              tagIds.add((short) target.getFiducialId());
+
+              // Edge factor calculation
+              double targetYaw = Math.abs(target.getYaw());
+              double targetPitch = Math.abs(target.getPitch());
+              double yawScore = Math.max(0, targetYaw - YAW_HALF_THRESH) / YAW_HALF_THRESH;
+              double pitchScore = Math.max(0, targetPitch - PITCH_HALF_THRESH) / PITCH_HALF_THRESH;
+              maxEdgeFactor = Math.max(maxEdgeFactor, 1.0 + Math.max(yawScore, pitchScore));
+            }
+
+            poseObservations.add(
+                new PoseObservation(
+                    estimator.timestampSeconds,
+                    estimator.estimatedPose,
+                    totalAmbiguity / targetCount,
+                    targetCount,
+                    totalDistance / targetCount,
+                    result.metadata.getLatencyMillis() / 1000.0,
+                    maxEdgeFactor,
+                    PoseObservationType.PHOTONVISION));
           });
     }
 
