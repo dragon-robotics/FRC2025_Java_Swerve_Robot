@@ -80,26 +80,23 @@ public class VisionSubsystem extends SubsystemBase {
     final var cameraIOs = io;
     final var cameraInputs = inputs;
 
-    // This method will be called once per scheduler run
-    for (int i = 0; i < cameraIOs.length; i++) {
-      cameraIOs[i].updateInputs(cameraInputs[i]);
-    }
-
     // Initialize logging values
-    LinkedList<Pose3d> allTagPoses = new LinkedList<>();
-    LinkedList<Pose3d> allRobotPoses = new LinkedList<>();
+    // LinkedList<Pose3d> allTagPoses = new LinkedList<>();
+    // LinkedList<Pose3d> allRobotPoses = new LinkedList<>();
     LinkedList<Pose3d> allRobotPosesAccepted = new LinkedList<>();
-    LinkedList<Pose3d> allRobotPosesRejected = new LinkedList<>();
+    // LinkedList<Pose3d> allRobotPosesRejected = new LinkedList<>();
 
-    // Loop over cameras
+    // This method will be called once per scheduler run
     for (int cameraIndex = 0; cameraIndex < cameraIOs.length; cameraIndex++) {
-      var result = processCameraData(cameraIndex, cameraInputs[cameraIndex]);
+      cameraIOs[cameraIndex].updateInputs(cameraInputs[cameraIndex]);
 
+      var result = processCameraData(cameraIndex, cameraInputs[cameraIndex]);
+  
       // Efficient collection operations
-      allTagPoses.addAll(result.tagPoses());
-      allRobotPoses.addAll(result.robotPoses());
+      // allTagPoses.addAll(result.tagPoses());
+      // allRobotPoses.addAll(result.robotPoses());
       allRobotPosesAccepted.addAll(result.acceptedPoses());
-      allRobotPosesRejected.addAll(result.rejectedPoses());
+      // allRobotPosesRejected.addAll(result.rejectedPoses());
     }
 
     // DogLog.log("Vision/Summary/TagPoses", allTagPoses.toArray(Pose3d[]::new));
