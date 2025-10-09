@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -90,6 +91,11 @@ public class Superstructure extends SubsystemBase {
       elevHeightTranslationFactor; // Keeps track of the elevator translation speed factor
   private double elevHeightStrafeFactor; // Keeps track of the elevator strafe speed factor
   private double elevHeightRotationFactor; // Keeps track of the elevator rotation speed factor
+
+  // Cache the closest reef pose, updated periodically
+  private Pose2d cachedClosestLeftReef = new Pose2d();
+  private Pose2d cachedClosestRightReef = new Pose2d();
+  private int updateCounter = 0;
 
   /** Creates a new Superstructure. */
   public Superstructure(
@@ -284,46 +290,69 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command driveToClosestReefPoseCmd(boolean left) {
+    // // No DeferredCommand needed - just read cached value
+    // return Commands.runOnce(() -> {
+    //   Pose2d target = left ? cachedClosestLeftReef : cachedClosestRightReef;
+    //   Transform2d offset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
+      
+    //   new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
+    //       .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, target));
+    // }).andThen(
+    //     () -> currentHeading = Optional.of(swerve.getState().Pose.getRotation())
+    // );
+    // Lambda is now trivial - just reads cached value
+    return new DeferredCommand(() -> {
+        Pose2d target = left ? cachedClosestLeftReef : cachedClosestRightReef;
+        Transform2d offset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
+        
+        return new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
+            .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, target));
+    }, Set.of(swerve))
+    .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
 
-    return new DeferredCommand(
-            () -> {
-              // Grab the robot's current alliance
-              Optional<Alliance> alliance = DriverStation.getAlliance();
-
-              // Grab the robot's current pose
-              Pose2d currentPose = swerve.getState().Pose;
-
-              // Initialize the target poses based on the alliance and whether we are left or right
-              //
-              final var redReefPoses =
-                  left
-                      ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
-                      : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES;
-              final var blueReefPoses =
-                  left
-                      ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES
-                      : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
-              List<Pose2d> targetPoses =
-                  alliance.isPresent() && alliance.get() == Alliance.Red
-                      ? redReefPoses
-                      : blueReefPoses;
-
-              // Calculate the pose closest to the current pose
-              Pose2d closestPose = findClosestPose(currentPose, targetPoses);
-
-              double backwardOffsetDist = -0.25; // Default offset distance
-
-              // Add intermediate waypoint (0.25 meter back from target)
-              Transform2d backwardOffset =
-                  new Transform2d(backwardOffsetDist, 0.0, Rotation2d.kZero);
-
-              return new DriveToPosePID(
-                      swerve, applyRobotSpeeds, closestPose.transformBy(backwardOffset))
-                  .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, closestPose));
-            },
-            Set.of(swerve))
-        .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
   }
+
+  // public Command driveToClosestReefPoseCmd(boolean left) {
+
+  //   return new DeferredCommand(
+  //           () -> {
+  //             // Grab the robot's current alliance
+  //             Optional<Alliance> alliance = DriverStation.getAlliance();
+
+  //             // Grab the robot's current pose
+  //             Pose2d currentPose = swerve.getState().Pose;
+
+  //             // Initialize the target poses based on the alliance and whether we are left or right
+  //             //
+  //             final var redReefPoses =
+  //                 left
+  //                     ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
+  //                     : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES;
+  //             final var blueReefPoses =
+  //                 left
+  //                     ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES
+  //                     : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
+  //             List<Pose2d> targetPoses =
+  //                 alliance.isPresent() && alliance.get() == Alliance.Red
+  //                     ? redReefPoses
+  //                     : blueReefPoses;
+
+  //             // Calculate the pose closest to the current pose
+  //             Pose2d closestPose = findClosestPose(currentPose, targetPoses);
+
+  //             double backwardOffsetDist = -0.25; // Default offset distance
+
+  //             // Add intermediate waypoint (0.25 meter back from target)
+  //             Transform2d backwardOffset =
+  //                 new Transform2d(backwardOffsetDist, 0.0, Rotation2d.kZero);
+
+  //             return new DriveToPosePID(
+  //                     swerve, applyRobotSpeeds, closestPose.transformBy(backwardOffset))
+  //                 .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, closestPose));
+  //           },
+  //           Set.of(swerve))
+  //       .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
+  // }
 
   public Command driveToClosestCoralStationPoseCmd() {
 
@@ -584,5 +613,25 @@ public class Superstructure extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    // Update cache every 2 loops (~40ms at 20ms loop time)
+    if (++updateCounter >= 2) {
+      updateCounter = 0;
+      
+      Pose2d currentPose = swerve.getState().Pose;
+      Optional<Alliance> alliance = DriverStation.getAlliance();
+      
+      if (alliance.isPresent()) {
+        List<Pose2d> leftPoses = alliance.get() == Alliance.Red
+            ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
+            : FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES;
+        List<Pose2d> rightPoses = alliance.get() == Alliance.Red
+            ? FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES
+            : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
+        
+        cachedClosestLeftReef = findClosestPose(currentPose, leftPoses);
+        cachedClosestRightReef = findClosestPose(currentPose, rightPoses);
+      }
+    }
   }
 }
