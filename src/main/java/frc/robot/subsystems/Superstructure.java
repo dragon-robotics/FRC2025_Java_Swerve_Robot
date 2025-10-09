@@ -628,25 +628,20 @@ public class Superstructure extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
-    // Update cache every 2 loops (~40ms at 20ms loop time)
-    if (++updateCounter >= 2) {
-      updateCounter = 0;
       
-      Pose2d currentPose = swerve.getState().Pose;
-      Optional<Alliance> alliance = DriverStation.getAlliance();
+    Pose2d currentPose = swerve.getState().Pose;
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    
+    if (alliance.isPresent()) {
+      List<Pose2d> leftPoses = alliance.get() == Alliance.Red
+          ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
+          : FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES;
+      List<Pose2d> rightPoses = alliance.get() == Alliance.Red
+          ? FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES
+          : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
       
-      if (alliance.isPresent()) {
-        List<Pose2d> leftPoses = alliance.get() == Alliance.Red
-            ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
-            : FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES;
-        List<Pose2d> rightPoses = alliance.get() == Alliance.Red
-            ? FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES
-            : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
-        
-        cachedClosestLeftReef = findClosestPose(currentPose, leftPoses);
-        cachedClosestRightReef = findClosestPose(currentPose, rightPoses);
-      }
+      cachedClosestLeftReef = findClosestPose(currentPose, leftPoses);
+      cachedClosestRightReef = findClosestPose(currentPose, rightPoses);
     }
   }
 }
