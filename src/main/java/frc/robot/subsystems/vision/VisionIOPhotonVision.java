@@ -27,6 +27,14 @@ public class VisionIOPhotonVision implements VisionIO {
 
   protected final Supplier<SwerveDriveState> swerveDriveStateSupplier;
 
+  // In constructor or as static finals
+  private static final double YAW_THRESHOLD = 
+      VisionConstants.CAMERA_FOV_HORIZONTAL_DEGREES / 2.0 * 0.8;
+  private static final double PITCH_THRESHOLD = 
+      VisionConstants.CAMERA_FOV_VERTICAL_DEGREES / 2.0 * 0.8;
+  private static final double YAW_HALF_THRESH = YAW_THRESHOLD * 0.5;
+  private static final double PITCH_HALF_THRESH = PITCH_THRESHOLD * 0.5;
+
   /**
    * Creates a new VisionIOPV.
    *
@@ -42,7 +50,9 @@ public class VisionIOPhotonVision implements VisionIO {
     poseEstimator =
         new PhotonPoseEstimator(
             APTAG_FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCamera);
-    poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE);
+    poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    // poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE);
+    // poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CONSTRAINED_SOLVEPNP);
 
     // Reset heading data before pose initialization //
     poseEstimator.resetHeadingData(
@@ -70,74 +80,47 @@ public class VisionIOPhotonVision implements VisionIO {
     for (var result : camera.getAllUnreadResults()) {
       // Update latest target observation
       inputs.setLatestTargetObservation(new TargetObservation(new Rotation2d(), new Rotation2d()));
-      if (result.hasTargets()) {
-        inputs.setLatestTargetObservation(
-            new TargetObservation(
-                Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
-                Rotation2d.fromDegrees(result.getBestTarget().getPitch())));
-      }
+      if (!result.hasTargets()) {continue;}
+        
+      inputs.setLatestTargetObservation(
+          new TargetObservation(
+              Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
+              Rotation2d.fromDegrees(result.getBestTarget().getPitch())));
 
       // Add pose observation based on how many tags we see
       Optional<EstimatedRobotPose> visionEst = poseEstimator.update(result);
 
-      visionEst.ifPresent(
-          estimator -> {
-            // Get robot pose
-            Pose3d robotPose = estimator.estimatedPose;
-
-            // Calculate average tag distance
-            double averageTagDistance =
-                result.getTargets().stream()
-                    .mapToDouble(t -> t.bestCameraToTarget.getTranslation().getNorm())
-                    .average()
-                    .orElse(0.0);
-
-            // Add tag IDs
-            List<Short> tagIdsUsed =
-                result.getTargets().stream().map(target -> (short) target.getFiducialId()).toList();
-            tagIds.addAll(tagIdsUsed);
-
-            // Calculate average ambiguity across all visible tags
-            double ambiguity =
-                result.getTargets().stream()
-                    .mapToDouble(PhotonTrackedTarget::getPoseAmbiguity)
-                    .average()
-                    .orElse(0.0);
-
-            // Calculate latency
-            double latencySeconds = result.metadata.getLatencyMillis() / 1000;
-
-            // Calculate Edge Factor //
-            double yawThreshold =
-                VisionConstants.CAMERA_FOV_HORIZONTAL_DEGREES / 2.0 * 0.8; // e.g., 80% of half-FOV
-            double pitchThreshold = VisionConstants.CAMERA_FOV_VERTICAL_DEGREES / 2.0 * 0.8;
-            double edgeFactor =
-                result.getTargets().stream()
-                    .mapToDouble(
-                        target -> {
-                          double targetYaw = Math.abs(target.getYaw());
-                          double targetPitch = Math.abs(target.getPitch());
-                          double yawScore =
-                              Math.max(0, targetYaw - yawThreshold * 0.5) / (yawThreshold * 0.5);
-                          double pitchScore =
-                              Math.max(0, targetPitch - pitchThreshold * 0.5)
-                                  / (pitchThreshold * 0.5);
-                          return 1.0 + Math.max(yawScore, pitchScore);
-                        })
-                    .max()
-                    .orElse(1.0);
-
-            // Add pose observation calculated from the PhotonPoseEstimator
-            poseObservations.add(
-                new PoseObservation(
-                    estimator.timestampSeconds, // Timestamp
-                    robotPose, // 3D pose estimate
-                    ambiguity, // Ambiguity
-                    result.getTargets().size(), // Tag count
-                    averageTagDistance, // Average tag distance
-                    latencySeconds, // Latency
-                    edgeFactor, // Edge factor
-                    PoseObservationType.PHOTONVISION)); // Observation type
+      visionEst.ifPresent(estimator -> {
+        List<PhotonTrackedTarget> targets = result.getTargets();
+        int targetCount = targets.size();
+        
+        // Single-pass computation
+        double totalDistance = 0;
+        double totalAmbiguity = 0;
+        double maxEdgeFactor = 1.0;
+        
+        for (PhotonTrackedTarget target : targets) {
+          totalDistance += target.bestCameraToTarget.getTranslation().getNorm();
+          totalAmbiguity += target.getPoseAmbiguity();
+          tagIds.add((short) target.getFiducialId());
+          
+          // Edge factor calculation
+          double targetYaw = Math.abs(target.getYaw());
+          double targetPitch = Math.abs(target.getPitch());
+          double yawScore = Math.max(0, targetYaw - YAW_HALF_THRESH) / YAW_HALF_THRESH;
+          double pitchScore = Math.max(0, targetPitch - PITCH_HALF_THRESH) / PITCH_HALF_THRESH;
+          maxEdgeFactor = Math.max(maxEdgeFactor, 1.0 + Math.max(yawScore, pitchScore));
+        }
+  
+        poseObservations.add(new PoseObservation(
+            estimator.timestampSeconds,
+            estimator.estimatedPose,
+            totalAmbiguity / targetCount,
+            targetCount,
+            totalDistance / targetCount,
+            result.metadata.getLatencyMillis() / 1000.0,
+            maxEdgeFactor,
+            PoseObservationType.PHOTONVISION));
           });
     }
 
@@ -145,6 +128,11 @@ public class VisionIOPhotonVision implements VisionIO {
     inputs.setPoseObservations(poseObservations.toArray(new PoseObservation[0]));
 
     // Save tag IDs to inputs objects
-    inputs.setTagIds(tagIds.stream().mapToInt(Short::shortValue).toArray());
+    int[] tagIdArray = new int[tagIds.size()];
+    int idx = 0;
+    for (short id : tagIds) {
+      tagIdArray[idx++] = id;
+    }
+    inputs.setTagIds(tagIdArray);
   }
 }
