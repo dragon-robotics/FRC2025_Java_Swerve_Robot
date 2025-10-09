@@ -26,6 +26,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.algae.AlgaeIOSparkMax;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
+import frc.robot.subsystems.controller.ControllerIOXbox;
+import frc.robot.subsystems.controller.ControllerSubsystem;
 import frc.robot.subsystems.coral.CoralIOSparkMax;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSparkMax;
@@ -53,6 +55,7 @@ public class RobotContainer {
   public final AlgaeSubsystem algaeSubsystem;
   public final VisionSubsystem visionSubsystem;
   public final LedSubsystem ledSubsystem;
+  public final ControllerSubsystem controllerSubsystem;
   public final Superstructure superstructureSubsystem;
 
   // Define Driver and Operator controllers //
@@ -97,6 +100,9 @@ public class RobotContainer {
   private Command scoreAlgaeCommand;
   private Command deAlgaeCommand;
 
+  // Other Commands //
+  private Command defaultControllerRumbleCommand;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
@@ -134,6 +140,7 @@ public class RobotContainer {
                     VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
                     swerveSubsystem::getState));
         ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+        controllerSubsystem = new ControllerSubsystem(new ControllerIOXbox(driverController));
         break;
       case SIM:
         coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -171,6 +178,7 @@ public class RobotContainer {
                 //     swerveSubsystem::getState)
                 );
         ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+        controllerSubsystem = new ControllerSubsystem(new ControllerIOXbox(driverController));
         break;
       case TEST:
         coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -189,6 +197,7 @@ public class RobotContainer {
                     VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
                     swerveSubsystem::getState));
         ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+        controllerSubsystem = new ControllerSubsystem(new ControllerIOXbox(driverController));
         break;
       default: // Default should be in comp mode //
         coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -207,6 +216,7 @@ public class RobotContainer {
                     VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
                     swerveSubsystem::getState));
         ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+        controllerSubsystem = new ControllerSubsystem(new ControllerIOXbox(driverController));
         break;
     }
 
@@ -218,6 +228,7 @@ public class RobotContainer {
             elevatorSubsystem,
             algaeSubsystem,
             visionSubsystem,
+            controllerSubsystem,
             this);
 
     // Instantiate all commands used //
@@ -259,6 +270,9 @@ public class RobotContainer {
     holdAlgaeCommand = superstructureSubsystem.algaeArmHoldCmd();
     scoreAlgaeCommand = superstructureSubsystem.scoreAlgaeCmd();
     deAlgaeCommand = superstructureSubsystem.algaeArmDeAlgaeifyCmd();
+
+    // Instantiate Other Commands //
+    defaultControllerRumbleCommand = superstructureSubsystem.defaultControllerRumbleCmd();
 
     // Register Named Commands //
     // Register Swerve Commands //
@@ -317,6 +331,8 @@ public class RobotContainer {
 
     coralSubsystem.setDefaultCommand(holdCoralCommand);
     algaeSubsystem.setDefaultCommand(algaeHomeCommand);
+
+    controllerSubsystem.setDefaultCommand(defaultControllerRumbleCommand);
 
     // Use the "Back" button to reset the Gyro orientation //
     driverController.back().onTrue(seedFieldCentricCommand);
