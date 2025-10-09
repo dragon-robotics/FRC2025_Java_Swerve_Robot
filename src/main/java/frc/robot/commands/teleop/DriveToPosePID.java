@@ -22,19 +22,19 @@ public class DriveToPosePID extends Command {
 
   // PID controllers for field-relative X, Y, and Theta
   // Tune these gains carefully!
-  private final PIDController xController = new PIDController(4, 0, 0); // P_x
-  private final PIDController yController = new PIDController(4, 0, 0); // P_y
+  private final PIDController xController = new PIDController(5, 0, 0); // P_x
+  private final PIDController yController = new PIDController(5, 0, 0); // P_y
   private final ProfiledPIDController rotController =
       new ProfiledPIDController(
-          5.0,
+          5,
           0,
           0, // Rotation controller
           new TrapezoidProfile.Constraints(
               Units.degreesToRadians(540), Units.degreesToRadians(720)));
 
   // Tolerances - how close is close enough?
-  private static final double POSITION_TOLERANCE = Units.inchesToMeters(1); // meters
-  private static final double ANGLE_TOLERANCE = Math.toRadians(2); // radians
+  private static final double POSITION_TOLERANCE = Units.inchesToMeters(2); // meters
+  private static final double ANGLE_TOLERANCE = Math.toRadians(3); // radians
 
   public DriveToPosePID(
       CommandSwerveDrivetrain swerve, ApplyRobotSpeeds robotSpeeds, Pose2d targetPose) {
@@ -87,8 +87,8 @@ public class DriveToPosePID extends Command {
 
     // Clamp linear speeds to 75% of max speed for safety
     double maxLinearSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    xSpeed = MathUtil.clamp(xSpeed, -0.6 * maxLinearSpeed, 0.6 * maxLinearSpeed);
-    ySpeed = MathUtil.clamp(ySpeed, -0.6 * maxLinearSpeed, 0.6 * maxLinearSpeed);
+    xSpeed = MathUtil.clamp(xSpeed, -0.5 * maxLinearSpeed, 0.5 * maxLinearSpeed);
+    ySpeed = MathUtil.clamp(ySpeed, -0.5 * maxLinearSpeed, 0.5 * maxLinearSpeed);
 
     // Convert field-relative speeds to robot-relative ChassisSpeeds
     ChassisSpeeds targetSpeeds =
