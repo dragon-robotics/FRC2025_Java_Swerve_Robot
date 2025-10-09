@@ -22,8 +22,8 @@ public class DriveToPosePID extends Command {
 
   // PID controllers for field-relative X, Y, and Theta
   // Tune these gains carefully!
-  private final PIDController xController = new PIDController(5, 0, 0); // P_x
-  private final PIDController yController = new PIDController(5, 0, 0); // P_y
+  private final PIDController xController = new PIDController(7, 0, 0); // P_x
+  private final PIDController yController = new PIDController(7, 0, 0); // P_y
   private final ProfiledPIDController rotController =
       new ProfiledPIDController(
           5,
@@ -33,8 +33,8 @@ public class DriveToPosePID extends Command {
               Units.degreesToRadians(540), Units.degreesToRadians(720)));
 
   // Tolerances - how close is close enough?
-  private static final double POSITION_TOLERANCE = Units.inchesToMeters(2); // meters
-  private static final double ANGLE_TOLERANCE = Math.toRadians(3); // radians
+  private static final double POSITION_TOLERANCE = Units.inchesToMeters(1.5); // meters
+  private static final double ANGLE_TOLERANCE = Math.toRadians(2); // radians
 
   public DriveToPosePID(
       CommandSwerveDrivetrain swerve, ApplyRobotSpeeds robotSpeeds, Pose2d targetPose) {
