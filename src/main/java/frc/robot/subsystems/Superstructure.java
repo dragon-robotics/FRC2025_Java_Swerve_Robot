@@ -33,6 +33,8 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.teleop.DriveToPosePID;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
+import frc.robot.subsystems.controller.ControllerSubsystem;
+import frc.robot.subsystems.controller.ControllerSubsystem.ControllerState;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -51,6 +53,7 @@ public class Superstructure extends SubsystemBase {
   private final ElevatorSubsystem elevator;
   private final AlgaeSubsystem algae;
   private final VisionSubsystem vision;
+  private final ControllerSubsystem controller;
   private final RobotContainer container;
   private final Telemetry logger;
 
@@ -104,12 +107,14 @@ public class Superstructure extends SubsystemBase {
       ElevatorSubsystem elevator,
       AlgaeSubsystem algae,
       VisionSubsystem vision,
+      ControllerSubsystem controller,
       RobotContainer container) {
     this.swerve = swerve;
     this.coral = coral;
     this.elevator = elevator;
     this.algae = algae;
     this.vision = vision;
+    this.controller = controller;
     this.container = container;
 
     // Instatiate swerve max speed and angular rate //
@@ -308,7 +313,12 @@ public class Superstructure extends SubsystemBase {
         return new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
             .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, target));
     }, Set.of(swerve))
-    .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
+    .andThen(
+        Commands.deadline(
+          new RunCommand(() -> controller.setControllerState(ControllerState.STRONG_RUMBLE), controller).withTimeout(0.5)),
+          new InstantCommand(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation())
+        ));
+      
 
   }
 
@@ -608,6 +618,11 @@ public class Superstructure extends SubsystemBase {
 
   public Command algaeArmHoldCmd() {
     return new RunCommand(() -> algae.setAlgaeState(AlgaeSubsystem.AlgaeState.HOLD), algae);
+  }
+
+  public Command defaultControllerRumbleCmd() {
+    return new RunCommand(
+        () -> controller.setControllerState(ControllerState.NO_RUMBLE), controller);
   }
 
   @Override
