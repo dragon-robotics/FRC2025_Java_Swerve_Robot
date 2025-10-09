@@ -317,7 +317,7 @@ public class Superstructure extends SubsystemBase {
         Commands.deadline(
           new RunCommand(() -> controller.setControllerState(ControllerState.STRONG_RUMBLE), controller).withTimeout(0.5)),
           new InstantCommand(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation())
-        ));
+        )).handleInterrupt(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
       
 
   }
