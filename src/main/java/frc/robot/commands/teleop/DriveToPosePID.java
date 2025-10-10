@@ -33,7 +33,7 @@ public class DriveToPosePID extends Command {
               Units.degreesToRadians(540), Units.degreesToRadians(720)));
 
   // Tolerances - how close is close enough?
-  private static final double POSITION_TOLERANCE = Units.inchesToMeters(1.5); // meters
+  private static final double POSITION_TOLERANCE = Units.inchesToMeters(1); // meters
   private static final double ANGLE_TOLERANCE = Math.toRadians(2); // radians
 
   public DriveToPosePID(
