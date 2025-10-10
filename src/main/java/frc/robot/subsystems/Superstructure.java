@@ -98,7 +98,7 @@ public class Superstructure extends SubsystemBase {
   // Cache the closest reef pose, updated periodically
   private Pose2d cachedClosestLeftReef = new Pose2d();
   private Pose2d cachedClosestRightReef = new Pose2d();
-  private int updateCounter = 0;
+  private Pose2d cachedClosestCoralStation = new Pose2d();
 
   /** Creates a new Superstructure. */
   public Superstructure(
@@ -326,70 +326,20 @@ public class Superstructure extends SubsystemBase {
         .handleInterrupt(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
   }
 
-  // public Command driveToClosestReefPoseCmd(boolean left) {
-
-  //   return new DeferredCommand(
-  //           () -> {
-  //             // Grab the robot's current alliance
-  //             Optional<Alliance> alliance = DriverStation.getAlliance();
-
-  //             // Grab the robot's current pose
-  //             Pose2d currentPose = swerve.getState().Pose;
-
-  //             // Initialize the target poses based on the alliance and whether we are left or
-  // right
-  //             //
-  //             final var redReefPoses =
-  //                 left
-  //                     ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
-  //                     : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES;
-  //             final var blueReefPoses =
-  //                 left
-  //                     ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES
-  //                     : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
-  //             List<Pose2d> targetPoses =
-  //                 alliance.isPresent() && alliance.get() == Alliance.Red
-  //                     ? redReefPoses
-  //                     : blueReefPoses;
-
-  //             // Calculate the pose closest to the current pose
-  //             Pose2d closestPose = findClosestPose(currentPose, targetPoses);
-
-  //             double backwardOffsetDist = -0.25; // Default offset distance
-
-  //             // Add intermediate waypoint (0.25 meter back from target)
-  //             Transform2d backwardOffset =
-  //                 new Transform2d(backwardOffsetDist, 0.0, Rotation2d.kZero);
-
-  //             return new DriveToPosePID(
-  //                     swerve, applyRobotSpeeds, closestPose.transformBy(backwardOffset))
-  //                 .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, closestPose));
-  //           },
-  //           Set.of(swerve))
-  //       .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
-  // }
-
   public Command driveToClosestCoralStationPoseCmd() {
 
     return new DeferredCommand(
-            () -> {
-              // Grab the robot's current alliance
-              Optional<Alliance> alliance = DriverStation.getAlliance();
-
-              // Grab the robot's current pose
-              Pose2d currentPose = swerve.getState().Pose;
-
-              List<Pose2d> targetPoses =
-                  alliance.isPresent() && alliance.get() == Alliance.Red
-                      ? FieldConstants.CoralStation.RED_CORAL_STATION_POSES
-                      : FieldConstants.CoralStation.BLUE_CORAL_STATION_POSES;
-
-              Pose2d closestPose = findClosestPose(currentPose, targetPoses);
-
-              return new DriveToPosePID(swerve, applyRobotSpeeds, closestPose);
-            },
+            () -> new DriveToPosePID(swerve, applyRobotSpeeds, cachedClosestCoralStation),
             Set.of(swerve))
-        .andThen(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
+        .andThen(
+            Commands.deadline(
+                new RunCommand(
+                        () -> controller.setControllerState(ControllerState.STRONG_RUMBLE),
+                        controller)
+                    .withTimeout(0.5)),
+            new InstantCommand(
+                () -> currentHeading = Optional.of(swerve.getState().Pose.getRotation())))
+        .handleInterrupt(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
   }
 
   // Helper method to find closest pose from a list
@@ -638,17 +588,22 @@ public class Superstructure extends SubsystemBase {
     Optional<Alliance> alliance = DriverStation.getAlliance();
 
     if (alliance.isPresent()) {
-      List<Pose2d> leftPoses =
+      List<Pose2d> leftReefPoses =
           alliance.get() == Alliance.Red
               ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
               : FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES;
-      List<Pose2d> rightPoses =
+      List<Pose2d> rightReefPoses =
           alliance.get() == Alliance.Red
               ? FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES
               : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
+      List<Pose2d> coralStationPoses =
+          alliance.get() == Alliance.Red
+              ? FieldConstants.CoralStation.RED_CORAL_STATION_POSES
+              : FieldConstants.CoralStation.BLUE_CORAL_STATION_POSES;
 
-      cachedClosestLeftReef = findClosestPose(currentPose, leftPoses);
-      cachedClosestRightReef = findClosestPose(currentPose, rightPoses);
+      cachedClosestLeftReef = findClosestPose(currentPose, leftReefPoses);
+      cachedClosestRightReef = findClosestPose(currentPose, rightReefPoses);
+      cachedClosestCoralStation = findClosestPose(currentPose, coralStationPoses);
     }
   }
 }
