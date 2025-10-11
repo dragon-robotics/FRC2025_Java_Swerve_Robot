@@ -504,71 +504,75 @@ public class Superstructure extends SubsystemBase {
   // Coral Subsystem Commands //
 
   public Command intakeCoralDetectCmd() {
+    // Engage the intake //
     Command engageCoralIntake =
         new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.INTAKE), coral);
 
-    Command runUntilCoralIsDetected = new WaitUntilCommand(coral::isBeamBreakTripped);
+    // Wait for any beambreaks to break //
+    Command runUntilCoralIsDetected = new WaitUntilCommand(
+        () -> coral.isBeamBreakNearTripped() || coral.isBeamBreakFarTripped()
+    );
 
     return engageCoralIntake
         .andThen(runUntilCoralIsDetected);
   }
 
   public Command intakeCoralCompleteCmd() {
-    Command slowIntake =
-        new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE), coral);
+    // There are 3 possible conditions that can happen at the first instance of detecting a coral:
+    // 1. The near beambreak is tripped and not the far beambreak
+    // 2. The far beambreak is tripped and not the near beambreak
+    // 3. Both beambreaks are tripped
 
-    Command runUntilCoralIsNotDetected = new WaitUntilCommand(() -> !coral.isBeamBreakTripped());
-
-    Command slowReverseIntake =
-        new InstantCommand(
-            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_REVERSE), coral);
-
-    Command runUntilCoralIsDetectedAgain = new WaitUntilCommand(() -> coral.isBeamBreakTripped());
-
-    Command slowIntakeAgain =
-        new InstantCommand(
-            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOWER_INTAKE), coral);        
-
-    // Run until the beambreak is not detected at all and reverse //
-    return slowIntake
-        .andThen(runUntilCoralIsNotDetected)
-        .andThen(slowReverseIntake)
-        .andThen(runUntilCoralIsDetectedAgain)
-        .andThen(slowIntakeAgain)
-        .andThen(new WaitCommand(0.02));
+    // Handle the intake based on which beambreaks are tripped //
+    return new ConditionalCommand(
+      Commands.sequence(
+          // Case 1, slow intake until far beambreak is tripped
+          new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE), coral),
+          new WaitUntilCommand(coral::isBeamBreakFarTripped).withTimeout(1.0), // Timeout after 1 second
+          new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.HOLD), coral)
+      ),
+      Commands.sequence(
+          // Case 2 and 3, just hold
+          new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.HOLD), coral)
+      ),
+      // Case 1 check.
+      () -> coral.isBeamBreakNearTripped() && !coral.isBeamBreakFarTripped());
   }
 
   public Command intakeCoralCmd() {
 
+    // There are 3 possible conditions that can happen at the first instance of detecting a coral:
+    // 1. The near beambreak is tripped and not the far beambreak
+    // 2. The far beambreak is tripped and not the near beambreak
+    // 3. Both beambreaks are tripped
+
+    // Engage the intake //
     Command engageCoralIntake =
         new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.INTAKE), coral);
 
-    Command runUntilCoralIsDetected = new WaitUntilCommand(() -> coral.isBeamBreakTripped());
+    // Wait for any beambreaks to break //
+    Command runUntilCoralIsDetected = new WaitUntilCommand(
+        () -> coral.isBeamBreakNearTripped() || coral.isBeamBreakFarTripped()
+    );
 
-    Command slowIntake =
-        new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE), coral);
+    // Handle the intake based on which beambreaks are tripped //
+    Command handleIntake = new ConditionalCommand(
+        Commands.sequence(
+            // Case 1, slow intake until far beambreak is tripped
+            new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE), coral),
+            new WaitUntilCommand(coral::isBeamBreakFarTripped).withTimeout(1.0), // Timeout after 1 second
+            new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.HOLD), coral)
+        ),
+        Commands.sequence(
+            // Case 2 and 3, just hold
+            new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.HOLD), coral)
+        ),
+        // Case 1 check.
+        () -> coral.isBeamBreakNearTripped() && !coral.isBeamBreakFarTripped());
 
-    Command runUntilCoralIsNotDetected = new WaitUntilCommand(() -> !coral.isBeamBreakTripped());
-
-    Command slowReverseIntake =
-        new InstantCommand(
-            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_REVERSE), coral);
-
-    Command runUntilCoralIsDetectedAgain = new WaitUntilCommand(() -> coral.isBeamBreakTripped());
-
-    Command slowIntakeAgain =
-        new InstantCommand(
-            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOWER_INTAKE), coral);
-
-    // Run until the beambreak or current limit is tripped //
     return engageCoralIntake
         .andThen(runUntilCoralIsDetected)
-        .andThen(slowIntake)
-        .andThen(runUntilCoralIsNotDetected)
-        .andThen(slowReverseIntake)
-        .andThen(runUntilCoralIsDetectedAgain)
-        .andThen(slowIntakeAgain)
-        .andThen(new WaitCommand(0.02));
+        .andThen(handleIntake);
   }
 
   public Command reverseCoralIntakeCmd() {
