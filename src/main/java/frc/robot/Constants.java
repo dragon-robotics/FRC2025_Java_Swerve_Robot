@@ -78,42 +78,6 @@ public final class Constants {
         Rotation2d.fromDegrees(54.011392);
     public static final Rotation2d ALGAE_PROCESSOR_STATION_ANGLE = Rotation2d.fromDegrees(-90);
 
-    // Blue Reef Station ID Angle Constant //
-    public static final Rotation2d REEF_STATION_ID_17_ANGLE = Rotation2d.fromDegrees(60);
-    public static final Rotation2d REEF_STATION_ID_18_ANGLE = Rotation2d.fromDegrees(0);
-    public static final Rotation2d REEF_STATION_ID_19_ANGLE = Rotation2d.fromDegrees(-60);
-    public static final Rotation2d REEF_STATION_ID_20_ANGLE = Rotation2d.fromDegrees(-120);
-    public static final Rotation2d REEF_STATION_ID_21_ANGLE = Rotation2d.fromDegrees(180);
-    public static final Rotation2d REEF_STATION_ID_22_ANGLE = Rotation2d.fromDegrees(120);
-
-    // Red Reef Station ID Angle Constant //
-    public static final Rotation2d REEF_STATION_ID_6_ANGLE = Rotation2d.fromDegrees(-60);
-    public static final Rotation2d REEF_STATION_ID_7_ANGLE = Rotation2d.fromDegrees(0);
-    public static final Rotation2d REEF_STATION_ID_8_ANGLE = Rotation2d.fromDegrees(60);
-    public static final Rotation2d REEF_STATION_ID_9_ANGLE = Rotation2d.fromDegrees(120);
-    public static final Rotation2d REEF_STATION_ID_10_ANGLE = Rotation2d.fromDegrees(180);
-    public static final Rotation2d REEF_STATION_ID_11_ANGLE = Rotation2d.fromDegrees(-120);
-
-    public static final Map<Integer, Rotation2d> REEF_STATION_ID_ANGLE_MAP =
-        Map.ofEntries(
-            Map.entry(6, REEF_STATION_ID_6_ANGLE),
-            Map.entry(7, REEF_STATION_ID_7_ANGLE),
-            Map.entry(8, REEF_STATION_ID_8_ANGLE),
-            Map.entry(9, REEF_STATION_ID_9_ANGLE),
-            Map.entry(10, REEF_STATION_ID_10_ANGLE),
-            Map.entry(11, REEF_STATION_ID_11_ANGLE),
-            Map.entry(17, REEF_STATION_ID_17_ANGLE),
-            Map.entry(18, REEF_STATION_ID_18_ANGLE),
-            Map.entry(19, REEF_STATION_ID_19_ANGLE),
-            Map.entry(20, REEF_STATION_ID_20_ANGLE),
-            Map.entry(21, REEF_STATION_ID_21_ANGLE),
-            Map.entry(22, REEF_STATION_ID_22_ANGLE));
-
-    // Reef station tag ID array //
-    public static final int[] REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
-    public static final int[] BLUE_REEF_STATION_TAG_IDS = {17, 18, 19, 20, 21, 22};
-    public static final int[] RED_REEF_STATION_TAG_IDS = {6, 7, 8, 9, 10, 11};
-
     // The different layouts of the AprilTags on the field
     public static final AprilTagFieldLayout DEFAULT_APTAG_FIELD_LAYOUT;
     public static final AprilTagFieldLayout WELDED_RED_APTAG_FIELD_LAYOUT;
@@ -209,6 +173,7 @@ public final class Constants {
 
     public static final double FIELD_LENGTH = APTAG_FIELD_LAYOUT.getFieldLength();
     public static final double FIELD_WIDTH = APTAG_FIELD_LAYOUT.getFieldWidth();
+    public static final double REEF_CENTER_X = (APTAG_FIELD_LAYOUT.getTagPose(21).get().getX() + APTAG_FIELD_LAYOUT.getTagPose(18).get().getX()) / 2;
 
     public static class CoralStation {
       public static final Pose2d CORAL_STATION_LEFT_1_BLUE =
