@@ -100,6 +100,9 @@ public class Superstructure extends SubsystemBase {
   private Pose2d cachedClosestRightReef = new Pose2d();
   private Pose2d cachedClosestCoralStation = new Pose2d();
 
+  private int updateCounter = 0;
+  private static final int CACHED_CLOSEST_POSE_UPDATE_RATE = 5; // Update every 5th call to periodic()
+
   /** Creates a new Superstructure. */
   public Superstructure(
       CommandSwerveDrivetrain swerve,
@@ -580,30 +583,50 @@ public class Superstructure extends SubsystemBase {
         () -> controller.setControllerState(ControllerState.NO_RUMBLE), controller);
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-
+  private void updateCachedClosestPoses() {
     Pose2d currentPose = swerve.getState().Pose;
     Optional<Alliance> alliance = DriverStation.getAlliance();
 
+    if (alliance.isEmpty()) {
+      alliance = Optional.of(Alliance.Blue); // Default to Blue if no alliance
+    }
+
+    Alliance currentAlliance = alliance.get();
+    boolean isRed = currentAlliance == Alliance.Red;
+
+    boolean shouldFlip = currentPose.getX() > FieldConstants.REEF_CENTER_X;
+
     if (alliance.isPresent()) {
       List<Pose2d> leftReefPoses =
-          alliance.get() == Alliance.Red
+          isRed
               ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
               : FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES;
       List<Pose2d> rightReefPoses =
-          alliance.get() == Alliance.Red
+          isRed
               ? FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES
               : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
       List<Pose2d> coralStationPoses =
-          alliance.get() == Alliance.Red
+          isRed
               ? FieldConstants.CoralStation.RED_CORAL_STATION_POSES
               : FieldConstants.CoralStation.BLUE_CORAL_STATION_POSES;
 
-      cachedClosestLeftReef = findClosestPose(currentPose, leftReefPoses);
-      cachedClosestRightReef = findClosestPose(currentPose, rightReefPoses);
+      if (shouldFlip) {
+        cachedClosestLeftReef = findClosestPose(currentPose, rightReefPoses);
+        cachedClosestRightReef = findClosestPose(currentPose, leftReefPoses);
+      } else {
+        cachedClosestLeftReef = findClosestPose(currentPose, leftReefPoses);
+        cachedClosestRightReef = findClosestPose(currentPose, rightReefPoses);
+      }
       cachedClosestCoralStation = findClosestPose(currentPose, coralStationPoses);
+    }
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+    if (++updateCounter >= CACHED_CLOSEST_POSE_UPDATE_RATE) {
+      updateCounter = 0;
+      updateCachedClosestPoses();
     }
   }
 }
