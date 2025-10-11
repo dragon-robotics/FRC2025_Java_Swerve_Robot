@@ -23,7 +23,8 @@ public interface CoralIO {
     @Getter @Setter private double intakeMotorTemperature;
 
     // Is the beam break tripped? //
-    @Getter @Setter private boolean beamBreakTripped;
+    @Getter @Setter private boolean beamBreakNearTripped;
+    @Getter @Setter private boolean beamBreakFarTripped;
 
     // Is the current limit tripped? //
     @Getter @Setter private boolean intakeCurrentLimitTripped;

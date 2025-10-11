@@ -51,9 +51,14 @@ public class CoralSubsystem extends SubsystemBase {
     this.hasCoral = hasCoral;
   }
 
-  public boolean isBeamBreakTripped() {
-    return coralIOInputs.isBeamBreakTripped();
+  public boolean isBeamBreakNearTripped() {
+    return coralIOInputs.isBeamBreakNearTripped();
   }
+
+  public boolean isBeamBreakFarTripped() {
+    return coralIOInputs.isBeamBreakFarTripped();
+  }
+
 
   /**
    * Set the state of the coral intake

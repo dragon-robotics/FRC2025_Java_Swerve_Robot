@@ -17,7 +17,8 @@ import edu.wpi.first.units.Units;
 
 public class CoralIOSparkMax implements CoralIO {
   private final SparkMax intakeMotor;
-  private final CANrange canRange;
+  private final CANrange canRangeNear; // The CANRange closer to the entry of the end-effector
+  private final CANrange canRangeFar; // The CANRange close to the exit of the end-effector
   private final CANrangeConfiguration canRangeConfigs;
 
   private int ntUpdateCounter = 0; // Counter to track loops for NT updates
@@ -28,7 +29,8 @@ public class CoralIOSparkMax implements CoralIO {
     intakeMotor = new SparkMax(MOTOR_ID, MotorType.kBrushless);
 
     // Instantiate the CANrange Flight-of-Time Sensor //
-    canRange = new CANrange(0);
+    canRangeNear = new CANrange(CANRANGE_NEAR_CHANNEL);
+    canRangeFar = new CANrange(CANRANGE_FAR_CHANNEL);
 
     // Configure the CANrange Flight-of-Time Sensor //
     canRangeConfigs = new CANrangeConfiguration();
@@ -37,7 +39,9 @@ public class CoralIOSparkMax implements CoralIO {
         Units.Meters.of(CORAL_DETECT_CANRANGE_HYSTERESIS).in(Units.Meters);
     canRangeConfigs.ProximityParams.ProximityThreshold =
         Units.Meters.of(CORAL_DETECT_CANRANGE_THRESHOLD).in(Units.Meters);
-    canRange.getConfigurator().apply(canRangeConfigs);
+
+    canRangeNear.getConfigurator().apply(canRangeConfigs);
+    canRangeFar.getConfigurator().apply(canRangeConfigs);
 
     // Intake Motor Configuration //
     SparkMaxConfig intakeMotorConfig = new SparkMaxConfig();
@@ -81,7 +85,8 @@ public class CoralIOSparkMax implements CoralIO {
     inputs.setIntakeMotorCurrent(intakeMotor.getOutputCurrent());
 
     // Check if the beam break is tripped //
-    inputs.setBeamBreakTripped(canRange.getIsDetected().getValue());
+    inputs.setBeamBreakNearTripped(canRangeNear.getIsDetected().getValue());
+    inputs.setBeamBreakFarTripped(canRangeFar.getIsDetected().getValue());
 
     // Check if the current limit is tripped //
     inputs.setIntakeCurrentLimitTripped(
@@ -92,7 +97,8 @@ public class CoralIOSparkMax implements CoralIO {
     DogLog.log("Coral/IntakeMotor/Current", inputs.getIntakeMotorCurrent());
     DogLog.log("Coral/IntakeMotor/Temperature", inputs.getIntakeMotorTemperature());
 
-    DogLog.log("Coral/CANRange/Tripped", inputs.isBeamBreakTripped());
+    DogLog.log("Coral/CANRange/Near/Tripped", inputs.isBeamBreakNearTripped());
+    DogLog.log("Coral/CANRange/Far/Tripped", inputs.isBeamBreakFarTripped());
     DogLog.log("Coral/IntakeMotor/CurrentLimitTripped", inputs.isIntakeCurrentLimitTripped());
   }
 }
