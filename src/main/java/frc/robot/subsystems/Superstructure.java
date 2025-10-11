@@ -503,6 +503,41 @@ public class Superstructure extends SubsystemBase {
 
   // Coral Subsystem Commands //
 
+  public Command intakeCoralDetectCmd() {
+    Command engageCoralIntake =
+        new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.INTAKE), coral);
+
+    Command runUntilCoralIsDetected = new WaitUntilCommand(coral::isBeamBreakTripped);
+
+    return engageCoralIntake
+        .andThen(runUntilCoralIsDetected);
+  }
+
+  public Command intakeCoralCompleteCmd() {
+    Command slowIntake =
+        new InstantCommand(() -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_INTAKE), coral);
+
+    Command runUntilCoralIsNotDetected = new WaitUntilCommand(() -> !coral.isBeamBreakTripped());
+
+    Command slowReverseIntake =
+        new InstantCommand(
+            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOW_REVERSE), coral);
+
+    Command runUntilCoralIsDetectedAgain = new WaitUntilCommand(() -> coral.isBeamBreakTripped());
+
+    Command slowIntakeAgain =
+        new InstantCommand(
+            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOWER_INTAKE), coral);        
+
+    // Run until the beambreak is not detected at all and reverse //
+    return slowIntake
+        .andThen(runUntilCoralIsNotDetected)
+        .andThen(slowReverseIntake)
+        .andThen(runUntilCoralIsDetectedAgain)
+        .andThen(slowIntakeAgain)
+        .andThen(new WaitCommand(0.02));
+  }
+
   public Command intakeCoralCmd() {
 
     Command engageCoralIntake =

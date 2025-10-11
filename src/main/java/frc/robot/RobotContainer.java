@@ -86,6 +86,8 @@ public class RobotContainer {
 
   // Coral Commands //
   private Command slowReverseCoralIntakeCommand;
+  private Command intakeCoralDetectCommand;
+  private Command intakeCoralCompleteCommand;
   private Command intakeCoralCommand;
   private Command intakeFromLeftCoralStationCommand;
   private Command intakeFromRightCoralStationCommand;
@@ -259,6 +261,8 @@ public class RobotContainer {
 
     // Instantiate Coral Commands //
     slowReverseCoralIntakeCommand = superstructureSubsystem.reverseCoralIntakeCmd();
+    intakeCoralDetectCommand = superstructureSubsystem.intakeCoralDetectCmd();
+    intakeCoralCompleteCommand = superstructureSubsystem.intakeCoralCompleteCmd();
     intakeCoralCommand = superstructureSubsystem.intakeCoralCmd();
     holdCoralCommand = superstructureSubsystem.holdCoralCmd();
     scoreCoralCommand = superstructureSubsystem.scoreCoralCmd();
@@ -292,6 +296,8 @@ public class RobotContainer {
 
     // Register Coral Commands //
     NamedCommands.registerCommand("ReverseIntakeCoral", slowReverseCoralIntakeCommand);
+    NamedCommands.registerCommand("IntakeCoralDetect", intakeCoralDetectCommand);
+    NamedCommands.registerCommand("IntakeCoralComplete", intakeCoralCompleteCommand);
     NamedCommands.registerCommand("IntakeCoral", intakeCoralCommand);
     NamedCommands.registerCommand("IntakeFromLeftCoralStation", intakeFromLeftCoralStationCommand);
     NamedCommands.registerCommand(
