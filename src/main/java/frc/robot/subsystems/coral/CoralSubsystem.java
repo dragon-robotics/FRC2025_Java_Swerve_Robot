@@ -66,29 +66,29 @@ public class CoralSubsystem extends SubsystemBase {
 
     switch (coralState) {
       case INTAKE:
-        coralIO.setIntakeMotorPercentage(INTAKE_SPEED);
+        coralIO.setIntakeMotorVoltage(INTAKE_VOLTAGE);
         break;
       case SLOW_INTAKE:
-        coralIO.setIntakeMotorPercentage(SLOW_INTAKE_SPEED);
+        coralIO.setIntakeMotorVoltage(SLOW_INTAKE_VOLTAGE);
         break;
       case SLOWER_INTAKE:
-        coralIO.setIntakeMotorPercentage(0.08);
+        coralIO.setIntakeMotorVoltage(SLOWER_INTAKE_VOLTAGE);
         break;
       case HOLD:
-        coralIO.setIntakeMotorPercentage(0);
+        coralIO.setIntakeMotorVoltage(HOLD_VOLTAGE);
         break;
       case SCORE:
-        coralIO.setIntakeMotorPercentage(OUTTAKE_SPEED);
+        coralIO.setIntakeMotorVoltage(OUTTAKE_VOLTAGE);
         break;
       case REVERSE:
-        coralIO.setIntakeMotorPercentage(REVERSE_SPEED);
+        coralIO.setIntakeMotorVoltage(REVERSE_VOLTAGE);
         break;
       case SLOW_REVERSE:
-        coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
+        coralIO.setIntakeMotorVoltage(SLOW_REVERSE_VOLTAGE);
         break;
       case IDLE:
       default:
-        coralIO.setIntakeMotorPercentage(0);
+        coralIO.setIntakeMotorVoltage(HOLD_VOLTAGE);
         break;
     }
   }
