@@ -1012,8 +1012,8 @@ public final class Constants {
     public static final int ALIGN_LEFT_CORAL_STATION_BTN = CustomButtonBoxConstants.BTN_5;
     public static final int ALIGN_RIGHT_CORAL_STATION_BTN = CustomButtonBoxConstants.BTN_6;
 
-    public static final int ALIGN_LEFT_REEF_BRANCH_BTN = CustomButtonBoxConstants.BTN_11;
-    public static final int ALIGN_RIGHT_REEF_BRANCH_BTN = CustomButtonBoxConstants.BTN_12;
+    public static final int SET_ELEVATOR_STATE = CustomButtonBoxConstants.BTN_11;
+    // public static final int ALIGN_RIGHT_REEF_BRANCH_BTN = CustomButtonBoxConstants.BTN_12;
 
     public static final int ALGAE_HOME_BTN = CustomButtonBoxConstants.BTN_10;
     public static final int INTAKE_ALGAE_BTN = CustomButtonBoxConstants.BTN_7;

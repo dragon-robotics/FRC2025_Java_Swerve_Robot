@@ -57,19 +57,6 @@ public class Superstructure extends SubsystemBase {
   private final RobotContainer container;
   private final Telemetry logger;
 
-  public enum ReefAlignmentStates {
-    ALIGN_REEF_LEFT_L1, // Default state
-    ALIGN_REEF_LEFT_L2,
-    ALIGN_REEF_LEFT_L3,
-    ALIGN_REEF_LEFT_L4,
-    ALIGN_REEF_RIGHT_L1,
-    ALIGN_REEF_RIGHT_L2,
-    ALIGN_REEF_RIGHT_L3,
-    ALIGN_REEF_RIGHT_L4,
-  }
-
-  private ReefAlignmentStates reefAlignmentState;
-
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive;
   private final SwerveRequest.SwerveDriveBrake brake;
@@ -178,9 +165,6 @@ public class Superstructure extends SubsystemBase {
         new SwerveRequest.ApplyRobotSpeeds()
             .withDesaturateWheelSpeeds(true)
             .withDriveRequestType(DriveRequestType.Velocity);
-
-    // Instantiate current and wanted super states as stopped //
-    reefAlignmentState = ReefAlignmentStates.ALIGN_REEF_LEFT_L1;
 
     // Instantiate current heading as empty //
     currentHeading = Optional.empty(); // Keeps track of current heading
@@ -312,10 +296,25 @@ public class Superstructure extends SubsystemBase {
     return new DeferredCommand(
             () -> {
               Pose2d target = left ? cachedClosestLeftReef : cachedClosestRightReef;
-              Transform2d offset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
+
+              double offsetDist = -0.25;
+              Command setElevatorCmd = this.elevatorHomeCmd();
+              if (elevState == ElevatorSubsystem.ElevatorState.L2) {
+                setElevatorCmd = this.elevatorL2Cmd();
+              } else if (elevState == ElevatorSubsystem.ElevatorState.L3) {
+                setElevatorCmd = this.elevatorL3Cmd();
+              } else if (elevState == ElevatorSubsystem.ElevatorState.L4) {
+                offsetDist = -0.4;
+                setElevatorCmd = this.elevatorL4Cmd();
+              }
+
+              Transform2d offset = new Transform2d(offsetDist, 0.0, Rotation2d.kZero);
 
               return new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
-                  .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, target));
+                  .andThen(
+                      Commands.deadline(
+                          new DriveToPosePID(swerve, applyRobotSpeeds, target),
+                          setElevatorCmd));
             },
             Set.of(swerve))
         .andThen(
