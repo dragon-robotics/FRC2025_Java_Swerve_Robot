@@ -635,29 +635,27 @@ public class Superstructure extends SubsystemBase {
 
     boolean shouldFlip = currentPose.getX() > FieldConstants.REEF_CENTER_X;
 
-    if (alliance.isPresent()) {
-      List<Pose2d> leftReefPoses =
-          isRed
-              ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
-              : FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES;
-      List<Pose2d> rightReefPoses =
-          isRed
-              ? FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES
-              : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
-      List<Pose2d> coralStationPoses =
-          isRed
-              ? FieldConstants.CoralStation.RED_CORAL_STATION_POSES
-              : FieldConstants.CoralStation.BLUE_CORAL_STATION_POSES;
+    List<Pose2d> leftReefPoses =
+        isRed
+            ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
+            : FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES;
+    List<Pose2d> rightReefPoses =
+        isRed
+            ? FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES
+            : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
+    List<Pose2d> coralStationPoses =
+        isRed
+            ? FieldConstants.CoralStation.RED_CORAL_STATION_POSES
+            : FieldConstants.CoralStation.BLUE_CORAL_STATION_POSES;
 
-      if (shouldFlip) {
-        cachedClosestLeftReef = findClosestPose(currentPose, rightReefPoses);
-        cachedClosestRightReef = findClosestPose(currentPose, leftReefPoses);
-      } else {
-        cachedClosestLeftReef = findClosestPose(currentPose, leftReefPoses);
-        cachedClosestRightReef = findClosestPose(currentPose, rightReefPoses);
-      }
-      cachedClosestCoralStation = findClosestPose(currentPose, coralStationPoses);
+    if (shouldFlip) {
+      cachedClosestLeftReef = findClosestPose(currentPose, rightReefPoses);
+      cachedClosestRightReef = findClosestPose(currentPose, leftReefPoses);
+    } else {
+      cachedClosestLeftReef = findClosestPose(currentPose, leftReefPoses);
+      cachedClosestRightReef = findClosestPose(currentPose, rightReefPoses);
     }
+    cachedClosestCoralStation = findClosestPose(currentPose, coralStationPoses);
   }
 
   @Override
