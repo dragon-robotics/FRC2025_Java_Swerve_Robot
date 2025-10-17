@@ -10,6 +10,8 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -661,5 +663,7 @@ public class Superstructure extends SubsystemBase {
       updateCounter = 0;
       updateCachedClosestPoses();
     }
+
+    DogLog.log("Elevator/ElevatorState", elevState);
   }
 }
