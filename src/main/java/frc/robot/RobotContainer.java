@@ -246,16 +246,19 @@ public class RobotContainer {
             () -> -driverController.getRightX(),
             () -> driverController.getHID().getPOV() == 0);
     // driveToClosestLeftReefPoseCommand = superstructureSubsystem.driveToClosestReefPoseCmd(true);
-    driveToClosestLeftReefPoseCommand = superstructureSubsystem.driveToClosestReefPoseWithElevatorCmd(true);
-    // driveToClosestRightReefPoseCommand = superstructureSubsystem.driveToClosestReefPoseCmd(false);
-    driveToClosestRightReefPoseCommand = superstructureSubsystem.driveToClosestReefPoseWithElevatorCmd(false);
+    driveToClosestLeftReefPoseCommand =
+        superstructureSubsystem.driveToClosestReefPoseWithElevatorCmd(true);
+    // driveToClosestRightReefPoseCommand =
+    // superstructureSubsystem.driveToClosestReefPoseCmd(false);
+    driveToClosestRightReefPoseCommand =
+        superstructureSubsystem.driveToClosestReefPoseWithElevatorCmd(false);
     driveToClosestCoralStationPoseCommand =
         superstructureSubsystem.driveToClosestCoralStationPoseCmd();
     swerveBrakeCommand = superstructureSubsystem.swerveBrakeCmd();
     seedFieldCentricCommand = superstructureSubsystem.seedFieldCentricCmd();
 
     // Instantiate Elevator Commands //
-    elevatorHomeCommand = superstructureSubsystem.elevatorHomeCmd();
+    elevatorHomeCommand = superstructureSubsystem.testElevatorHomeCmd();
     elevatorL1Command = superstructureSubsystem.elevatorL1Cmd();
     elevatorL2Command = superstructureSubsystem.elevatorL2Cmd();
     elevatorL3Command = superstructureSubsystem.elevatorL3Cmd();
@@ -465,23 +468,17 @@ public class RobotContainer {
 
     operatorButtonBoxController
         .button(OperatorControlNameConstants.SET_ELEVATOR_STATE)
-        .and(
-            operatorButtonBoxController.button(OperatorControlNameConstants.ELEVATOR_L2_BTN)
-        )
+        .and(operatorButtonBoxController.button(OperatorControlNameConstants.ELEVATOR_L2_BTN))
         .onTrue(setElevatorStateL2Command);
 
     operatorButtonBoxController
         .button(OperatorControlNameConstants.SET_ELEVATOR_STATE)
-        .and(
-            operatorButtonBoxController.button(OperatorControlNameConstants.ELEVATOR_L3_BTN)
-        )
+        .and(operatorButtonBoxController.button(OperatorControlNameConstants.ELEVATOR_L3_BTN))
         .onTrue(setElevatorStateL3Command);
 
     operatorButtonBoxController
         .button(OperatorControlNameConstants.SET_ELEVATOR_STATE)
-        .and(
-            operatorButtonBoxController.button(OperatorControlNameConstants.ELEVATOR_L4_BTN)
-        )
+        .and(operatorButtonBoxController.button(OperatorControlNameConstants.ELEVATOR_L4_BTN))
         .onTrue(setElevatorStateL4Command);
 
     // Algae Triggers //

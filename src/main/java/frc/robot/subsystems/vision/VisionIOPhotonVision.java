@@ -62,7 +62,7 @@ public class VisionIOPhotonVision implements VisionIO {
   }
 
   public void setFallbackPoseEstimationStrategy(boolean useTrig) {
-    if(useTrig) {
+    if (useTrig) {
       poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE);
     } else {
       poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);

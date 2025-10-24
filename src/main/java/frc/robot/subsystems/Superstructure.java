@@ -10,7 +10,6 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -103,7 +102,8 @@ public class Superstructure extends SubsystemBase {
   private Pose2d cachedClosestCoralStation = new Pose2d();
 
   private int updateCounter = 0;
-  private static final int CACHED_CLOSEST_POSE_UPDATE_RATE = 5; // Update every 5th call to periodic()
+  private static final int CACHED_CLOSEST_POSE_UPDATE_RATE =
+      5; // Update every 5th call to periodic()
 
   /** Creates a new Superstructure. */
   public Superstructure(
@@ -359,10 +359,8 @@ public class Superstructure extends SubsystemBase {
               return new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
                   .andThen(
                       Commands.parallel(
-                          elevCmd.withTimeout(0.2),
-                          new DriveToPosePID(swerve, applyRobotSpeeds, target)
-                      )
-                  );
+                          elevCmd,
+                          new DriveToPosePID(swerve, applyRobotSpeeds, target)));
             },
             Set.of(swerve))
         .andThen(
@@ -436,10 +434,11 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command setElevatorStateCmd(ElevatorSubsystem.ElevatorState state) {
-    return new InstantCommand(() -> {
-      elevState = state;
-      DogLog.log("Elevator/ElevatorState", elevState);
-    });
+    return new InstantCommand(
+        () -> {
+          elevState = state;
+          DogLog.log("Elevator/ElevatorState", elevState);
+        });
   }
 
   public Command testElevatorHomeCmd() {
@@ -463,16 +462,17 @@ public class Superstructure extends SubsystemBase {
     Command reZeroElevatorEncoder =
         new InstantCommand(() -> elevator.seedElevatorMotorEncoderPosition(0), elevator);
 
-    // When the elevator goes home, it checks for a current spike to to see if the elevator is at the limit. If not, set the elevator to idle //
-    Command elevatorHomeState =
-        new ConditionalCommand(
-            reZeroElevatorEncoder.andThen(setElevatorToIdle),
-            setElevatorToIdle,
-            elevator::isCurrentLimitTripped);
-
-    return setElevatorHome
-        .andThen(waitUntilElevatorIsAtHome)
-        .andThen(elevatorHomeState);  // If the elevator is at the home position, check if there is a current spike //
+    if (elevator.isCurrentLimitTripped()) {
+      return setElevatorHome
+      .andThen(waitUntilElevatorIsAtHome)
+      .andThen(reZeroElevatorEncoder)
+      .andThen(setElevatorToIdle);
+    } else {
+      return setElevatorHome
+      .andThen(waitUntilElevatorIsAtHome)
+      .andThen(setElevatorToIdle); // If the elevator is at the home position, check if there is a
+      // current spike //
+    }
   }
 
   public Command elevatorHomeCmd() {
@@ -576,8 +576,7 @@ public class Superstructure extends SubsystemBase {
 
     Command runUntilCoralIsDetected = new WaitUntilCommand(coral::isBeamBreakTripped);
 
-    return engageCoralIntake
-        .andThen(runUntilCoralIsDetected);
+    return engageCoralIntake.andThen(runUntilCoralIsDetected);
   }
 
   public Command intakeCoralCompleteCmd() {
@@ -594,7 +593,7 @@ public class Superstructure extends SubsystemBase {
 
     Command slowIntakeAgain =
         new InstantCommand(
-            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOWER_INTAKE), coral);        
+            () -> coral.setCoralState(CoralSubsystem.CoralState.SLOWER_INTAKE), coral);
 
     // Run until the beambreak is not detected at all and reverse //
     return slowIntake
