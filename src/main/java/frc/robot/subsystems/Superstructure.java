@@ -358,9 +358,11 @@ public class Superstructure extends SubsystemBase {
 
               return new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
                   .andThen(
-                      Commands.parallel(
-                          elevCmd,
-                          new DriveToPosePID(swerve, applyRobotSpeeds, target)));
+                      Commands.deadline(
+                          new DriveToPosePID(swerve, applyRobotSpeeds, target),
+                          elevCmd
+                      )
+                  );
             },
             Set.of(swerve))
         .andThen(
