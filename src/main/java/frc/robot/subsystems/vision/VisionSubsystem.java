@@ -136,7 +136,7 @@ public class VisionSubsystem extends SubsystemBase {
       String cameraIndexString = "Vision/Camera" + cameraIndex;
 
       if (validationResult instanceof AcceptedPose accepted) {
-        handleAcceptedPose(accepted, cameraIndexString, acceptedPoses);
+        handleAcceptedPose(accepted, cameraIndexString, cameraIndex, acceptedPoses);
       } else if (validationResult instanceof RejectedPose rejected) {
         handleRejectedPose(rejected, cameraIndexString, rejectedPoses);
       }
@@ -146,7 +146,10 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   private void handleAcceptedPose(
-      AcceptedPose accepted, String cameraIndexString, LinkedList<Pose3d> acceptedPoses) {
+      AcceptedPose accepted,
+      String cameraIndexString,
+      int cameraIndex,
+      LinkedList<Pose3d> acceptedPoses) {
     acceptedPoses.add(accepted.poseObservation().pose());
 
     // Check if odometry is initialized
@@ -156,6 +159,13 @@ public class VisionSubsystem extends SubsystemBase {
         swerve.resetPose(accepted.poseObservation().pose().toPose2d());
         odometryInitialized = true;
         DogLog.log("Vision/OdometryInitialized", true);
+
+        // Change backup pose estimation strategy to trig solve after initialization if using
+        // Photonvision //
+        if (io[cameraIndex] instanceof VisionIOPhotonVision) {
+          ((VisionIOPhotonVision) io[0]).setFallbackPoseEstimationStrategy(true);
+          ((VisionIOPhotonVision) io[0]).resetHeadingData();
+        }
       }
     }
 

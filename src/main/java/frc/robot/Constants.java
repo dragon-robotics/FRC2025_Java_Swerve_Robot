@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -173,7 +172,10 @@ public final class Constants {
 
     public static final double FIELD_LENGTH = APTAG_FIELD_LAYOUT.getFieldLength();
     public static final double FIELD_WIDTH = APTAG_FIELD_LAYOUT.getFieldWidth();
-    public static final double REEF_CENTER_X = (APTAG_FIELD_LAYOUT.getTagPose(21).get().getX() + APTAG_FIELD_LAYOUT.getTagPose(18).get().getX()) / 2;
+    public static final double REEF_CENTER_X =
+        (APTAG_FIELD_LAYOUT.getTagPose(21).get().getX()
+                + APTAG_FIELD_LAYOUT.getTagPose(18).get().getX())
+            / 2;
 
     public static class CoralStation {
       public static final Pose2d CORAL_STATION_LEFT_1_BLUE =
@@ -1012,8 +1014,9 @@ public final class Constants {
     public static final int ALIGN_LEFT_CORAL_STATION_BTN = CustomButtonBoxConstants.BTN_5;
     public static final int ALIGN_RIGHT_CORAL_STATION_BTN = CustomButtonBoxConstants.BTN_6;
 
-    public static final int ALIGN_LEFT_REEF_BRANCH_BTN = CustomButtonBoxConstants.BTN_11;
-    public static final int ALIGN_RIGHT_REEF_BRANCH_BTN = CustomButtonBoxConstants.BTN_12;
+    public static final int SET_ELEVATOR_STATE = CustomButtonBoxConstants.BTN_11;
+    // public static final int ALIGN_LEFT_REEF_BRANCH_BTN = CustomButtonBoxConstants.BTN_11;
+    // public static final int ALIGN_RIGHT_REEF_BRANCH_BTN = CustomButtonBoxConstants.BTN_12;
 
     public static final int ALGAE_HOME_BTN = CustomButtonBoxConstants.BTN_10;
     public static final int INTAKE_ALGAE_BTN = CustomButtonBoxConstants.BTN_7;

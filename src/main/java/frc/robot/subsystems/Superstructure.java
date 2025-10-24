@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -101,7 +102,8 @@ public class Superstructure extends SubsystemBase {
   private Pose2d cachedClosestCoralStation = new Pose2d();
 
   private int updateCounter = 0;
-  private static final int CACHED_CLOSEST_POSE_UPDATE_RATE = 5; // Update every 5th call to periodic()
+  private static final int CACHED_CLOSEST_POSE_UPDATE_RATE =
+      5; // Update every 5th call to periodic()
 
   /** Creates a new Superstructure. */
   public Superstructure(
@@ -298,17 +300,6 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command driveToClosestReefPoseCmd(boolean left) {
-    // // No DeferredCommand needed - just read cached value
-    // return Commands.runOnce(() -> {
-    //   Pose2d target = left ? cachedClosestLeftReef : cachedClosestRightReef;
-    //   Transform2d offset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
-
-    //   new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
-    //       .andThen(new DriveToPosePID(swerve, applyRobotSpeeds, target));
-    // }).andThen(
-    //     () -> currentHeading = Optional.of(swerve.getState().Pose.getRotation())
-    // );
-    // Lambda is now trivial - just reads cached value
     return new DeferredCommand(
             () -> {
               Pose2d target = left ? cachedClosestLeftReef : cachedClosestRightReef;
@@ -333,6 +324,46 @@ public class Superstructure extends SubsystemBase {
 
     return new DeferredCommand(
             () -> new DriveToPosePID(swerve, applyRobotSpeeds, cachedClosestCoralStation),
+            Set.of(swerve))
+        .andThen(
+            Commands.deadline(
+                new RunCommand(
+                        () -> controller.setControllerState(ControllerState.STRONG_RUMBLE),
+                        controller)
+                    .withTimeout(0.5)),
+            new InstantCommand(
+                () -> currentHeading = Optional.of(swerve.getState().Pose.getRotation())))
+        .handleInterrupt(() -> currentHeading = Optional.of(swerve.getState().Pose.getRotation()));
+  }
+
+  public Command driveToClosestReefPoseWithElevatorCmd(boolean left) {
+    return new DeferredCommand(
+            () -> {
+              Pose2d target = left ? cachedClosestLeftReef : cachedClosestRightReef;
+
+              double offsetDist = -0.25;
+              Command elevCmd = this.testElevatorHomeCmd();
+              if (elevState == ElevatorSubsystem.ElevatorState.L2) {
+                offsetDist = -0.3;
+                elevCmd = this.elevatorL2Cmd();
+              } else if (elevState == ElevatorSubsystem.ElevatorState.L3) {
+                offsetDist = -0.4;
+                elevCmd = this.elevatorL3Cmd();
+              } else if (elevState == ElevatorSubsystem.ElevatorState.L4) {
+                offsetDist = -0.5;
+                elevCmd = this.elevatorL4Cmd();
+              }
+
+              Transform2d offset = new Transform2d(offsetDist, 0.0, Rotation2d.kZero);
+
+              return new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
+                  .andThen(
+                      Commands.deadline(
+                          new DriveToPosePID(swerve, applyRobotSpeeds, target),
+                          elevCmd
+                      )
+                  );
+            },
             Set.of(swerve))
         .andThen(
             Commands.deadline(
@@ -405,7 +436,45 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command setElevatorStateCmd(ElevatorSubsystem.ElevatorState state) {
-    return new InstantCommand(() -> elevState = state);
+    return new InstantCommand(
+        () -> {
+          elevState = state;
+          DogLog.log("Elevator/ElevatorState", elevState);
+        });
+  }
+
+  public Command testElevatorHomeCmd() {
+
+    Command setElevatorHome =
+        new InstantCommand(
+            () -> {
+              elevHeightTranslationFactor = 1.0;
+              elevHeightStrafeFactor = 1.0;
+              elevHeightRotationFactor = 1.0;
+              elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
+            },
+            elevator);
+
+    Command waitUntilElevatorIsAtHome = new WaitUntilCommand(elevator::isAtElevatorState);
+
+    Command setElevatorToIdle =
+        new InstantCommand(
+            () -> elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE), elevator);
+
+    Command reZeroElevatorEncoder =
+        new InstantCommand(() -> elevator.seedElevatorMotorEncoderPosition(0), elevator);
+
+    if (elevator.isCurrentLimitTripped()) {
+      return setElevatorHome
+      .andThen(waitUntilElevatorIsAtHome)
+      .andThen(reZeroElevatorEncoder)
+      .andThen(setElevatorToIdle);
+    } else {
+      return setElevatorHome
+      .andThen(waitUntilElevatorIsAtHome)
+      .andThen(setElevatorToIdle); // If the elevator is at the home position, check if there is a
+      // current spike //
+    }
   }
 
   public Command elevatorHomeCmd() {
@@ -513,8 +582,7 @@ public class Superstructure extends SubsystemBase {
         () -> coral.isBeamBreakNearTripped() || coral.isBeamBreakFarTripped()
     );
 
-    return engageCoralIntake
-        .andThen(runUntilCoralIsDetected);
+    return engageCoralIntake.andThen(runUntilCoralIsDetected);
   }
 
   public Command intakeCoralCompleteCmd() {
@@ -665,5 +733,7 @@ public class Superstructure extends SubsystemBase {
       updateCounter = 0;
       updateCachedClosestPoses();
     }
+
+    DogLog.log("Elevator/ElevatorState", elevState);
   }
 }

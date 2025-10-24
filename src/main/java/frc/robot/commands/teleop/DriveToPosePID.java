@@ -22,8 +22,8 @@ public class DriveToPosePID extends Command {
 
   // PID controllers for field-relative X, Y, and Theta
   // Tune these gains carefully!
-  private final PIDController xController = new PIDController(7, 0, 0); // P_x
-  private final PIDController yController = new PIDController(7, 0, 0); // P_y
+  private final PIDController xController = new PIDController(5, 0, 0); // P_x
+  private final PIDController yController = new PIDController(5, 0, 0); // P_y
   private final ProfiledPIDController rotController =
       new ProfiledPIDController(
           5,

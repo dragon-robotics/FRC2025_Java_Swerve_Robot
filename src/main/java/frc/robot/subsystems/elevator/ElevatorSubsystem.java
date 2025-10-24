@@ -47,18 +47,7 @@ public class ElevatorSubsystem extends SubsystemBase {
       case L2 -> MathUtil.isNear(elevatorIO.getElevatorSetpoint(), L2, 0.2);
       case L3 -> MathUtil.isNear(elevatorIO.getElevatorSetpoint(), L3, 0.2);
       case L4 -> MathUtil.isNear(elevatorIO.getElevatorSetpoint(), L4, 0.2);
-      case HOME -> {
-        // Get the current encoder position.
-        double encoderPosition = elevatorIOInputs.getElevatorLeadMotorPosition();
-
-        // Check if the encoder is at the bottom
-        boolean encoderAtBottom = MathUtil.isNear(HOME, encoderPosition, 0.01);
-
-        // Check if the current limit is tripped
-        boolean currentSpiked = elevatorIOInputs.isElevatorCurrentLimitTripped();
-
-        yield encoderAtBottom && currentSpiked;
-      }
+      case HOME -> MathUtil.isNear(elevatorIO.getElevatorSetpoint(), HOME, 0.1);
       default -> false;
     };
   }

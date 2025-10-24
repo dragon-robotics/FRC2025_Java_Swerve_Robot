@@ -32,6 +32,7 @@ import frc.robot.subsystems.coral.CoralIOSparkMax;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSparkMax;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorState;
 import frc.robot.subsystems.led.LedIORevBlinkin;
 import frc.robot.subsystems.led.LedSubsystem;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -83,6 +84,9 @@ public class RobotContainer {
   private Command elevatorManualDownCommand;
   private Command elevatorStopCommand;
   private Command elevatorSeedCommand;
+  private Command setElevatorStateL2Command;
+  private Command setElevatorStateL3Command;
+  private Command setElevatorStateL4Command;
 
   // Coral Commands //
   private Command slowReverseCoralIntakeCommand;
@@ -241,15 +245,20 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX(),
             () -> driverController.getHID().getPOV() == 0);
-    driveToClosestLeftReefPoseCommand = superstructureSubsystem.driveToClosestReefPoseCmd(true);
-    driveToClosestRightReefPoseCommand = superstructureSubsystem.driveToClosestReefPoseCmd(false);
+    // driveToClosestLeftReefPoseCommand = superstructureSubsystem.driveToClosestReefPoseCmd(true);
+    driveToClosestLeftReefPoseCommand =
+        superstructureSubsystem.driveToClosestReefPoseWithElevatorCmd(true);
+    // driveToClosestRightReefPoseCommand =
+    // superstructureSubsystem.driveToClosestReefPoseCmd(false);
+    driveToClosestRightReefPoseCommand =
+        superstructureSubsystem.driveToClosestReefPoseWithElevatorCmd(false);
     driveToClosestCoralStationPoseCommand =
         superstructureSubsystem.driveToClosestCoralStationPoseCmd();
     swerveBrakeCommand = superstructureSubsystem.swerveBrakeCmd();
     seedFieldCentricCommand = superstructureSubsystem.seedFieldCentricCmd();
 
     // Instantiate Elevator Commands //
-    elevatorHomeCommand = superstructureSubsystem.elevatorHomeCmd();
+    elevatorHomeCommand = superstructureSubsystem.testElevatorHomeCmd();
     elevatorL1Command = superstructureSubsystem.elevatorL1Cmd();
     elevatorL2Command = superstructureSubsystem.elevatorL2Cmd();
     elevatorL3Command = superstructureSubsystem.elevatorL3Cmd();
@@ -258,6 +267,9 @@ public class RobotContainer {
     elevatorManualDownCommand = superstructureSubsystem.elevatorManualDownCmd();
     elevatorStopCommand = superstructureSubsystem.elevatorStopCmd();
     elevatorSeedCommand = superstructureSubsystem.elevatorZeroCmd();
+    setElevatorStateL2Command = superstructureSubsystem.setElevatorStateCmd(ElevatorState.L2);
+    setElevatorStateL3Command = superstructureSubsystem.setElevatorStateCmd(ElevatorState.L3);
+    setElevatorStateL4Command = superstructureSubsystem.setElevatorStateCmd(ElevatorState.L4);
 
     // Instantiate Coral Commands //
     slowReverseCoralIntakeCommand = superstructureSubsystem.reverseCoralIntakeCmd();
@@ -313,7 +325,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("DeAlgae", deAlgaeCommand);
 
     // Init Auto Chooser //
-    autoChooser = AutoBuilder.buildAutoChooser("S6-R02-R03-R04-SeqElev-Auto");
+    autoChooser = AutoBuilder.buildAutoChooser("S6-3Piece-R02-R03-R04-R05-Auto");
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     // Configure the trigger bindings
@@ -370,6 +382,11 @@ public class RobotContainer {
 
     // Left stick button = Elevator Home
     driverController.leftStick().whileTrue(slowReverseCoralIntakeCommand);
+
+    // Set elevator state for auto-align + elevator sequence
+    driverController.b().onTrue(setElevatorStateL2Command);
+    driverController.x().onTrue(setElevatorStateL3Command);
+    driverController.y().onTrue(setElevatorStateL4Command);
 
     // // A = L1, toggle = Home / L1
     // driverController.a().toggleOnTrue(
@@ -448,6 +465,21 @@ public class RobotContainer {
     operatorButtonBoxController
         .button(OperatorControlNameConstants.ELEVATOR_L4_BTN)
         .onTrue(elevatorL4Command);
+
+    operatorButtonBoxController
+        .button(OperatorControlNameConstants.SET_ELEVATOR_STATE)
+        .and(operatorButtonBoxController.button(OperatorControlNameConstants.ELEVATOR_L2_BTN))
+        .onTrue(setElevatorStateL2Command);
+
+    operatorButtonBoxController
+        .button(OperatorControlNameConstants.SET_ELEVATOR_STATE)
+        .and(operatorButtonBoxController.button(OperatorControlNameConstants.ELEVATOR_L3_BTN))
+        .onTrue(setElevatorStateL3Command);
+
+    operatorButtonBoxController
+        .button(OperatorControlNameConstants.SET_ELEVATOR_STATE)
+        .and(operatorButtonBoxController.button(OperatorControlNameConstants.ELEVATOR_L4_BTN))
+        .onTrue(setElevatorStateL4Command);
 
     // Algae Triggers //
     operatorButtonBoxController
