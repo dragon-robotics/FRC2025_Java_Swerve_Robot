@@ -15,13 +15,19 @@
                 }
               },
               {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
                 "type": "deadline",
                 "data": {
                   "commands": [
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.0
+                        "waitTime": 0.3
                       }
                     },
                     {
@@ -41,15 +47,174 @@
           "data": {
             "commands": [
               {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IntakeCoral"
+                      }
+                    },
+                    {
+                      "type": "deadline",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.1
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "HoldCoral"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
                 "type": "path",
                 "data": {
-                  "pathName": "R02-S6-Path"
+                  "pathName": "R02-LC3-Fast-Path"
                 }
               },
               {
                 "type": "named",
                 "data": {
                   "name": "ElevatorHome"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LC3-R03-ParElev-Path"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "deadline",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.3
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "ScoreCoral"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IntakeCoral"
+                      }
+                    },
+                    {
+                      "type": "deadline",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.1
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "HoldCoral"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R03-LC3-Fast-Path"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorHome"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LC3-R04-ParElev-Path"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "deadline",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.3
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "ScoreCoral"
+                      }
+                    }
+                  ]
                 }
               }
             ]
