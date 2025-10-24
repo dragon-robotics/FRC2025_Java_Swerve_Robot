@@ -59,7 +59,6 @@ public class CoralSubsystem extends SubsystemBase {
     return coralIOInputs.isBeamBreakFarTripped();
   }
 
-
   /**
    * Set the state of the coral intake
    *
