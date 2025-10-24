@@ -359,10 +359,7 @@ public class Superstructure extends SubsystemBase {
               return new DriveToPosePID(swerve, applyRobotSpeeds, target.transformBy(offset))
                   .andThen(
                       Commands.deadline(
-                          new DriveToPosePID(swerve, applyRobotSpeeds, target),
-                          elevCmd
-                      )
-                  );
+                          new DriveToPosePID(swerve, applyRobotSpeeds, target), elevCmd));
             },
             Set.of(swerve))
         .andThen(
@@ -466,13 +463,14 @@ public class Superstructure extends SubsystemBase {
 
     if (elevator.isCurrentLimitTripped()) {
       return setElevatorHome
-      .andThen(waitUntilElevatorIsAtHome)
-      .andThen(reZeroElevatorEncoder)
-      .andThen(setElevatorToIdle);
+          .andThen(waitUntilElevatorIsAtHome)
+          .andThen(reZeroElevatorEncoder)
+          .andThen(setElevatorToIdle);
     } else {
       return setElevatorHome
-      .andThen(waitUntilElevatorIsAtHome)
-      .andThen(setElevatorToIdle); // If the elevator is at the home position, check if there is a
+          .andThen(waitUntilElevatorIsAtHome)
+          .andThen(
+              setElevatorToIdle); // If the elevator is at the home position, check if there is a
       // current spike //
     }
   }
