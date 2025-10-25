@@ -12,6 +12,7 @@ import java.util.List;
 
 import com.ctre.phoenix6.Utils;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -35,19 +36,6 @@ public class VisionSubsystem extends SubsystemBase {
   private final VisionIOInputs[] m_inputs;
   private final Alert[] m_disconnectedAlerts;
 
-  // Per-Camera Logging
-  private List<StructArrayPublisher<Pose3d>> m_tagPosesPerCamArrayPublisherList;
-  private List<StructArrayPublisher<Pose3d>> m_robotPosesPerCamArrayPublisherList;
-  private List<StructArrayPublisher<Pose3d>> m_robotPosesAcceptedPerCamArrayPublisherList;
-  private List<StructArrayPublisher<Pose3d>> m_robotPosesRejectedPerCamArrayPublisherList;
-
-  // Summary (All Camera) Logging
-
-  private StructArrayPublisher<Pose3d> m_tagPosesArrayPublisher;
-  private StructArrayPublisher<Pose3d> m_robotPosesArrayPublisher;
-  private StructArrayPublisher<Pose3d> m_robotPosesAcceptedArrayPublisher;
-  private StructArrayPublisher<Pose3d> m_robotPosesRejectedArrayPublisher;
-
   // Check for odometry initialization and use about  //
   private int m_stablePoseCounter = 5;
   private boolean m_odometryInitialized = false;
@@ -65,42 +53,12 @@ public class VisionSubsystem extends SubsystemBase {
     m_inputs = new VisionIOInputs[m_io.length];
     m_disconnectedAlerts = new Alert[m_io.length];
 
-    // Initialize the per-camera loggers
-    m_tagPosesPerCamArrayPublisherList = new LinkedList<>();
-    m_robotPosesPerCamArrayPublisherList = new LinkedList<>();
-    m_robotPosesAcceptedPerCamArrayPublisherList = new LinkedList<>();
-    m_robotPosesRejectedPerCamArrayPublisherList = new LinkedList<>();
-
     for (int i = 0; i < m_inputs.length; i++) {
       m_inputs[i] = new VisionIOInputs();
       m_disconnectedAlerts[i] =
           new Alert(
               "Vision camera " + io[i].getCameraName() + " is disconnected.", AlertType.kWarning);
-      
-      // Initialize the per-camera loggers
-      m_tagPosesPerCamArrayPublisherList.add(
-          NetworkTableInstance.getDefault().getStructArrayTopic(
-              "Vision/Camera-" + io[i].getCameraName() + "/TagPoses", Pose3d.struct).publish());
-      m_robotPosesPerCamArrayPublisherList.add(
-          NetworkTableInstance.getDefault().getStructArrayTopic(
-              "Vision/Camera-" + io[i].getCameraName() + "/RobotPoses", Pose3d.struct).publish());
-      m_robotPosesAcceptedPerCamArrayPublisherList.add(
-          NetworkTableInstance.getDefault().getStructArrayTopic(
-              "Vision/Camera-" + io[i].getCameraName() + "/RobotPosesAccepted", Pose3d.struct).publish());
-      m_robotPosesRejectedPerCamArrayPublisherList.add(
-          NetworkTableInstance.getDefault().getStructArrayTopic(
-              "Vision/Camera-" + io[i].getCameraName() + "/RobotPosesRejected", Pose3d.struct).publish());
     }
-
-    // Initialize the summary loggers
-    m_tagPosesArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
-        "Vision/Summary/TagPoses", Pose3d.struct).publish();
-    m_robotPosesArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
-        "Vision/Summary/RobotPoses", Pose3d.struct).publish();
-    m_robotPosesAcceptedArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
-        "Vision/Summary/RobotPosesAccepted", Pose3d.struct).publish();
-    m_robotPosesRejectedArrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic(
-        "Vision/Summary/RobotPosesRejected", Pose3d.struct).publish();
   }
 
   @FunctionalInterface
@@ -226,16 +184,6 @@ public class VisionSubsystem extends SubsystemBase {
             Utils.fpgaToCurrentTime(observation.timestamp()),
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
       }
-
-      // Log camera datadata
-      m_tagPosesPerCamArrayPublisherList.get(cameraIndex).set(
-        tagPoses.toArray(new Pose3d[tagPoses.size()]));
-      m_robotPosesPerCamArrayPublisherList.get(cameraIndex).set(
-        robotPoses.toArray(new Pose3d[robotPoses.size()]));
-      m_robotPosesAcceptedPerCamArrayPublisherList.get(cameraIndex).set(
-        robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
-      m_robotPosesRejectedPerCamArrayPublisherList.get(cameraIndex).set(
-        robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
   
       allTagPoses.addAll(tagPoses);
       allRobotPoses.addAll(robotPoses);
@@ -244,13 +192,9 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     // Log summary data
-    m_tagPosesArrayPublisher.set(
-      allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
-    m_robotPosesArrayPublisher.set(
-      allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
-    m_robotPosesAcceptedArrayPublisher.set(
-      allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
-    m_robotPosesRejectedArrayPublisher.set(
-      allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+    DogLog.log("Vision/Summary/TagPoses", allTagPoses.toArray(Pose3d[]::new));
+    DogLog.log("Vision/Summary/RobotPoses", allRobotPoses.toArray(Pose3d[]::new));
+    DogLog.log("Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(Pose3d[]::new));
+    DogLog.log("Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(Pose3d[]::new));
   }
 }
