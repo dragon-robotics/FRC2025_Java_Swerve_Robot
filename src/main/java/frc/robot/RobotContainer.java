@@ -286,8 +286,6 @@ public class RobotContainer {
     NamedCommands.registerCommand("IntakeFromLeftCoralStation", m_intakeFromLeftCoralStationCommand);
     NamedCommands.registerCommand("IntakeFromRightCoralStation", m_intakeFromRightCoralStationCommand);
     NamedCommands.registerCommand("HoldCoral", m_holdCoralCommand);
-    NamedCommands.registerCommand("AlignToLeftReefBranch", m_alignToLeftReefBranchCommand);
-    NamedCommands.registerCommand("AlignToRightReefBranch", m_alignToRightReefBranchCommand);
     NamedCommands.registerCommand("ScoreCoral", m_scoreCoralCommand);
 
     // Register Algae Commands //
