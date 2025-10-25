@@ -286,29 +286,39 @@ public class Superstructure extends SubsystemBase {
             Set.of(m_swerve))
         .andThen(
             Commands.deadline(
-                new RunCommand(
-                        () -> m_controller.setControllerState(ControllerState.STRONG_RUMBLE),
-                        m_controller)
-                    .withTimeout(0.5)),
-            new InstantCommand(
-                () -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation())))
-        .handleInterrupt(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
+                Commands.sequence(
+                  new RunCommand(() -> m_controller.setControllerState(ControllerState.STRONG_RUMBLE), m_controller).withTimeout(0.5),
+                  new RunCommand(() -> m_controller.setControllerState(ControllerState.NO_RUMBLE), m_controller).withTimeout(0.02)
+                ),
+                new InstantCommand(
+                    () -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()))
+            )
+        )
+        .handleInterrupt(() -> {
+          currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
+          m_controller.setControllerState(ControllerState.NO_RUMBLE);
+        });
   }
   
   public Command DriveToClosestCoralStationPoseCommand() {
 
     return new DeferredCommand(
-            () -> new DriveToPosePID(m_swerve, applyRobotSpeeds, cachedClosestCoralStation),
-            Set.of(m_swerve))
+        () -> new DriveToPosePID(m_swerve, applyRobotSpeeds, cachedClosestCoralStation),
+        Set.of(m_swerve))
         .andThen(
             Commands.deadline(
-                new RunCommand(
-                        () -> m_controller.setControllerState(ControllerState.STRONG_RUMBLE),
-                        m_controller)
-                    .withTimeout(0.5)),
-            new InstantCommand(
-                () -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation())))
-        .handleInterrupt(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
+                Commands.sequence(
+                  new RunCommand(() -> m_controller.setControllerState(ControllerState.STRONG_RUMBLE), m_controller).withTimeout(0.5),
+                  new RunCommand(() -> m_controller.setControllerState(ControllerState.NO_RUMBLE), m_controller).withTimeout(0.02)
+                ),
+                new InstantCommand(
+                    () -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()))
+            )
+        )
+        .handleInterrupt(() -> {
+          currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
+          m_controller.setControllerState(ControllerState.NO_RUMBLE);
+        });
   }
 
   // Helper method to find closest pose from a list
