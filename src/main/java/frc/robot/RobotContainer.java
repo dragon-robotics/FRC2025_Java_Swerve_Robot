@@ -250,8 +250,6 @@ public class RobotContainer {
     // Instantiate Coral Commands //
     m_slowReverseCoralIntakeCommand = m_superstructureSubsystem.ReverseCoralIntake();
     m_intakeCoralCommand = m_superstructureSubsystem.IntakeCoral();
-    m_intakeFromLeftCoralStationCommand = m_superstructureSubsystem.SetCoralStation(true);
-    m_intakeFromRightCoralStationCommand = m_superstructureSubsystem.SetCoralStation(false);
     m_holdCoralCommand = m_superstructureSubsystem.HoldCoral();
     m_scoreCoralCommand = m_superstructureSubsystem.ScoreCoral();
 

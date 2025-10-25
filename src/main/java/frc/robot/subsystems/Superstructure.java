@@ -6,8 +6,6 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static frc.robot.Constants.ElevatorSubsystemConstants.L2;
-import static frc.robot.Constants.FieldConstants.RED_REEF_STATION_TAG_IDS;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import java.util.ArrayList;
@@ -20,13 +18,10 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.FollowPathCommand;
-import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -51,13 +46,10 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.FieldConstants.ReefLevel;
 import frc.robot.commands.Teleop.DriveToPosePID;
-// import frc.robot.commands.Teleop.AutoAlignToReefTag;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorState;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.RobotContainer;
 import frc.robot.swerve_constant.TunerConstants;
@@ -73,19 +65,6 @@ public class Superstructure extends SubsystemBase {
   private final RobotContainer m_container;
   private final Telemetry logger;
 
-  public enum ReefAlignmentStates {
-    ALIGN_REEF_LEFT_L1, // Default state
-    ALIGN_REEF_LEFT_L2,
-    ALIGN_REEF_LEFT_L3,
-    ALIGN_REEF_LEFT_L4,
-    ALIGN_REEF_RIGHT_L1,
-    ALIGN_REEF_RIGHT_L2,
-    ALIGN_REEF_RIGHT_L3,
-    ALIGN_REEF_RIGHT_L4,
-  }
-
-  private ReefAlignmentStates m_reefAlignmentState;
-
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive;
   private final SwerveRequest.SwerveDriveBrake brake;
@@ -97,12 +76,6 @@ public class Superstructure extends SubsystemBase {
   private final SwerveRequest.ApplyFieldSpeeds applyFieldSpeeds;
   private final SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds;
 
-  /* Holonomic Drive Controller for pathfollowing */
-  private HolonomicDriveController holonomicDriveController;
-  private PIDController xController;
-  private PIDController yController;
-  private ProfiledPIDController thetaController;
-
   private final double maxSpeed;
   private final double maxAngularRate;
   private PIDController visionRangePID;
@@ -111,9 +84,6 @@ public class Superstructure extends SubsystemBase {
   private double rotationLastTriggered; // Keeps track of the last time the rotation was triggered
   private Optional<Rotation2d> currentHeading; // Keeps track of current heading
 
-  private boolean useLeftCamera;                          // Keeps track of the camera to use
-  private boolean intakeCoralLeft;                        // Keeps track of the coral intake side
-  private ElevatorSubsystem.ElevatorState elevatorState;  // Keeps track of the current elevator state
   private double elevatorHeightTranslationFactor;         // Keeps track of the elevator translation speed factor
   private double elevatorHeightStrafeFactor;              // Keeps track of the elevator strafe speed factor
   private double elevatorHeightRotationFactor;            // Keeps track of the elevator rotation speed factor
@@ -185,16 +155,6 @@ public class Superstructure extends SubsystemBase {
       = new SwerveRequest.ApplyRobotSpeeds()
         .withDesaturateWheelSpeeds(true)
         .withDriveRequestType(DriveRequestType.Velocity);
-    
-    // Instantiate the holonomic drive controller for path following //
-    xController = new PIDController(10, 0, 0);
-    yController = new PIDController(10, 0, 0);
-    thetaController = new ProfiledPIDController(7, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI / 2));
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-    holonomicDriveController = new HolonomicDriveController(xController, yController, thetaController);
-
-    // Instantiate current and wanted super states as stopped //
-    m_reefAlignmentState = ReefAlignmentStates.ALIGN_REEF_LEFT_L1;
 
     // Instantiate current heading as empty //
     currentHeading = Optional.empty(); // Keeps track of current heading
@@ -202,19 +162,10 @@ public class Superstructure extends SubsystemBase {
     // Instantiate the rotation last triggered as 0 //
     rotationLastTriggered = 0.0;
 
-    // Instantiate the elevator wanted state as home //
-    elevatorState = ElevatorSubsystem.ElevatorState.HOME;
-
-    // Default we use the right camera //
-    useLeftCamera = true;
-
     // Initialize the elevator height speed factor //
     elevatorHeightTranslationFactor = 1.0;
     elevatorHeightStrafeFactor = 1.0;
     elevatorHeightRotationFactor = 1.0;
-
-    // We intake coral from the left side by default //
-    intakeCoralLeft = true;
 
     // Instantiate the logger for telemetry //
     logger = new Telemetry(maxSpeed);
@@ -383,13 +334,6 @@ public class Superstructure extends SubsystemBase {
           null,
           new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
       );
-
-      // // Use pathfindThenFollowPath with different constraints
-      // return AutoBuilder.pathfindToPose(
-      //           waypoints.get(0),
-      //           pathFindingConstraints,
-      //           0.5)
-      //       .andThen(AutoBuilder.followPath(path));
 
       return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
 
@@ -773,13 +717,6 @@ public class Superstructure extends SubsystemBase {
   }
 
   // Coral Subsystem Commands //
-  public Command SetCoralStation(boolean left) {
-    Command setCoralStation = new InstantCommand(() -> {
-      intakeCoralLeft = left;
-    });
-
-    return setCoralStation;
-  }
 
   public Command IntakeCoral(){
 
