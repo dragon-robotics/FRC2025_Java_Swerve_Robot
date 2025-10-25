@@ -962,68 +962,6 @@ public class Superstructure extends SubsystemBase {
     return setAlgaeArmHold;
   }
 
-  /** Robot state configurations - operator (2nd driver) sets up what the score button does */
-  public void setReefAlignment(ReefAlignmentStates wantedReefAlignmentState) {
-    switch(wantedReefAlignmentState){
-      case ALIGN_REEF_LEFT_L1:
-        elevatorState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
-        useLeftCamera = true;                                     // Use the left camera
-        break;
-      case ALIGN_REEF_LEFT_L2:
-        elevatorState = ElevatorSubsystem.ElevatorState.L2; // Set the elevator to L2
-        useLeftCamera = true;                                     // Use the left camera
-        break;
-      case ALIGN_REEF_LEFT_L3:
-        elevatorState = ElevatorSubsystem.ElevatorState.L3; // Set the elevator to L1
-        useLeftCamera = true;                                     // Use the left camera
-        break;
-      case ALIGN_REEF_LEFT_L4:
-        elevatorState = ElevatorSubsystem.ElevatorState.L4; // Set the elevator to L1
-        useLeftCamera = true;                                     // Use the left camera
-        break;
-      case ALIGN_REEF_RIGHT_L1:
-        elevatorState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
-        useLeftCamera = false;                                    // Use the right camera
-        break;
-      case ALIGN_REEF_RIGHT_L2:
-        elevatorState = ElevatorSubsystem.ElevatorState.L2; // Set the elevator to L1
-        useLeftCamera = false;                                    // Use the right camera
-        break;
-      case ALIGN_REEF_RIGHT_L3:
-        elevatorState = ElevatorSubsystem.ElevatorState.L3; // Set the elevator to L3
-        useLeftCamera = false;                                    // Use the right camera
-        break;
-      case ALIGN_REEF_RIGHT_L4:
-        elevatorState = ElevatorSubsystem.ElevatorState.L4; // Set the elevator to L4
-        useLeftCamera = false;                                    // Use the right camera
-        break;
-      default:
-        elevatorState = ElevatorSubsystem.ElevatorState.L1; // Set the elevator to L1
-        useLeftCamera = true;                                     // Use the left camera
-        break;
-    }
-  }
-
-  public Command setReefAlignmentCommand(ReefAlignmentStates wantedReefAlignmentState) {
-    return new InstantCommand(() -> setReefAlignment(wantedReefAlignmentState));
-  }
-
-  public void setReefAlignment(boolean left){
-    useLeftCamera = left;
-  }
-
-  public Command SetReefAlignment(boolean left){
-    return new InstantCommand(() -> setReefAlignment(left)); 
-  }
-
-  public void setReefHeight(ElevatorState wantedElevatorState){
-    elevatorState = wantedElevatorState;
-  }
-
-  public Command SetReefHeight(ElevatorState wantedElevatorState){
-    return new InstantCommand(() -> setReefHeight(wantedElevatorState));
-  }
-
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
