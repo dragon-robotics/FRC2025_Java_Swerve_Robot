@@ -441,16 +441,6 @@ public class RobotContainer {
         .button(OperatorControlNameConstants.ELEVATOR_L4_BTN)
         .onTrue(m_elevatorL4Command);
 
-    // Coral Triggers //
-
-    m_operatorButtonBoxController
-        .button(OperatorControlNameConstants.ALIGN_LEFT_REEF_BRANCH_BTN)
-        .onTrue(m_alignToLeftReefBranchCommand);
-
-    m_operatorButtonBoxController
-        .button(OperatorControlNameConstants.ALIGN_RIGHT_REEF_BRANCH_BTN)
-        .onTrue(m_alignToRightReefBranchCommand);
-
     // Algae Triggers //
     m_operatorButtonBoxController
         .button(OperatorControlNameConstants.ALGAE_HOME_BTN)
