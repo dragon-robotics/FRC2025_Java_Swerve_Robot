@@ -30,6 +30,14 @@ public class VisionIOPhotonVision implements VisionIO {
 
   protected final Supplier<SwerveDriveState> m_swerveDriveStateSupplier;
 
+  // In constructor or as static finals
+  private static final double YAW_THRESHOLD =
+      VisionConstants.CAMERA_FOV_HORIZONTAL_DEGREES / 2.0 * 0.8;
+  private static final double PITCH_THRESHOLD =
+      VisionConstants.CAMERA_FOV_VERTICAL_DEGREES / 2.0 * 0.8;
+  private static final double YAW_HALF_THRESH = YAW_THRESHOLD * 0.5;
+  private static final double PITCH_HALF_THRESH = PITCH_THRESHOLD * 0.5;  
+
   /**
    * Creates a new VisionIOPV.
    *
@@ -50,6 +58,18 @@ public class VisionIOPhotonVision implements VisionIO {
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
             m_robotToCamera);
     m_poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE);
+
+    // Reset heading data before pose initialization //
+    m_poseEstimator.resetHeadingData(
+        Timer.getFPGATimestamp(), swerveDriveStateSupplier.get().Pose.getRotation());    
+  }
+
+  public void setFallbackPoseEstimationStrategy(boolean useTrig) {
+    if (useTrig) {
+      m_poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE);
+    } else {
+      m_poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    }
   }
 
   @Override
@@ -86,71 +106,38 @@ public class VisionIOPhotonVision implements VisionIO {
 
       visionEst.ifPresent(
           estimator -> {
-            // Get robot pose
-            Pose3d robotPose = estimator.estimatedPose;
+            List<PhotonTrackedTarget> targets = result.getTargets();
+            int targetCount = targets.size();
 
-            // Calculate tag distance
-            double totalAvgTagDistance = 0.0;
-            for (var target : result.targets) {
-              totalAvgTagDistance += target.bestCameraToTarget.getTranslation().getNorm();
+            // Single-pass computation
+            double totalDistance = 0;
+            double totalAmbiguity = 0;
+            double maxEdgeFactor = 1.0;
+
+            for (PhotonTrackedTarget target : targets) {
+              totalDistance += target.bestCameraToTarget.getTranslation().getNorm();
+              totalAmbiguity += target.getPoseAmbiguity();
+              tagIds.add((short) target.getFiducialId());
+
+              // Edge factor calculation
+              double targetYaw = Math.abs(target.getYaw());
+              double targetPitch = Math.abs(target.getPitch());
+              double yawScore = Math.max(0, targetYaw - YAW_HALF_THRESH) / YAW_HALF_THRESH;
+              double pitchScore = Math.max(0, targetPitch - PITCH_HALF_THRESH) / PITCH_HALF_THRESH;
+              maxEdgeFactor = Math.max(maxEdgeFactor, 1.0 + Math.max(yawScore, pitchScore));
             }
 
-            // Calculate average tag distance if multiple tags are used
-            if (result.getTargets().size() > 0) {
-              totalAvgTagDistance /= result.getTargets().size();
-            }
-
-            // Add tag IDs
-            List<Short> tagIdsUsed = result.getTargets().stream()
-                .map(target -> (short) target.getFiducialId())
-                .collect(Collectors.toList());
-            tagIds.addAll(tagIdsUsed);
-
-            // Calculate average ambiguity across all visible tags
-            double ambiguity =
-              result.getTargets().stream()
-                .mapToDouble(PhotonTrackedTarget::getPoseAmbiguity)
-                .average()
-                .orElse(0.0);
-
-            // Calculate latency
-            double latencySeconds = result.metadata.getLatencyMillis() / 1000;
-
-            // Calculate Edge Factor //
-            double maxEdgeScore = 1.0; // Default: assume centered
-            if (result.hasTargets()) {
-                // Define thresholds based on your camera's FOV (e.g., half the FOV)
-                double yawThreshold = VisionConstants.CAMERA_FOV_HORIZONTAL_DEGREES / 2.0 * 0.8; // e.g., 80% of half-FOV
-                double pitchThreshold = VisionConstants.CAMERA_FOV_VERTICAL_DEGREES / 2.0 * 0.8;
-
-                for (var target : result.targets) {
-                    double targetYaw = Math.abs(target.getYaw());
-                    double targetPitch = Math.abs(target.getPitch());
-
-                    // Calculate a score (higher means closer to edge)
-                    // Simple example: Max normalized distance from center
-                    double yawScore = Math.max(0, targetYaw - yawThreshold * 0.5) / (yawThreshold * 0.5); // Score from 0 up based on exceeding 50% threshold
-                    double pitchScore = Math.max(0, targetPitch - pitchThreshold * 0.5) / (pitchThreshold * 0.5);
-                    double currentTargetEdgeScore = 1.0 + Math.max(yawScore, pitchScore); // Factor starts at 1, increases if near edge
-
-                    maxEdgeScore = Math.max(maxEdgeScore, currentTargetEdgeScore); // Use the worst score among visible tags
-                }
-            }
-            double edgeFactor = maxEdgeScore;
-
-            // Add pose observation calculated from the PhotonPoseEstimator
             poseObservations.add(
                 new PoseObservation(
-                    estimator.timestampSeconds, // Timestamp
-                    robotPose, // 3D pose estimate
-                    ambiguity, // Ambiguity
-                    result.getTargets().size(), // Tag count
-                    totalAvgTagDistance, // Average tag distance
-                    latencySeconds, // Latency
-                    edgeFactor, // Edge factor
-                    PoseObservationType.PHOTONVISION)); // Observation type
-          }
-      );
+                    estimator.timestampSeconds,
+                    estimator.estimatedPose,
+                    totalAmbiguity / targetCount,
+                    targetCount,
+                    totalDistance / targetCount,
+                    result.metadata.getLatencyMillis() / 1000.0,
+                    maxEdgeFactor,
+                    PoseObservationType.PHOTONVISION));
+          });
     }
 
     // Save pose observations to inputs object
