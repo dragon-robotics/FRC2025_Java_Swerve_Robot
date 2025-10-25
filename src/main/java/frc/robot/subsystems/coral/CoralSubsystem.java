@@ -70,7 +70,7 @@ public class CoralSubsystem extends SubsystemBase {
 
   /**
    * Set the state of the coral intake
-   * 
+   *
    * @param wantedCoralState
    */
   public void setCoralState(CoralState wantedCoralState) {
@@ -79,49 +79,29 @@ public class CoralSubsystem extends SubsystemBase {
 
     switch (m_coralState) {
       case INTAKE:
-        m_coralIO.setIntakeMotorPercentage(INTAKE_SPEED);
+        m_coralIO.setIntakeMotorVoltage(INTAKE_VOLTAGE);
         break;
       case SLOW_INTAKE:
-        m_coralIO.setIntakeMotorPercentage(SLOW_INTAKE_SPEED);
+        m_coralIO.setIntakeMotorVoltage(SLOW_INTAKE_VOLTAGE);
         break;
       case SLOWER_INTAKE:
-        m_coralIO.setIntakeMotorPercentage(0.08);
+        m_coralIO.setIntakeMotorVoltage(SLOWER_INTAKE_VOLTAGE);
         break;
       case HOLD:
-        // switch (m_holdState) {
-        //   case REVERSE:
-        //     // Reverse the intake until beam break detected
-        //     m_coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
-        //     if (m_coralIOInputs.beamBreakTripped) {
-        //       // Coral hit the beam break, switch to forward for 0.1 seconds
-        //       m_holdState = HoldState.FORWARD;
-        //       m_forwardEndTime = Timer.getFPGATimestamp() + 0.1;
-        //     }
-        //     break;
-
-        //   case FORWARD:
-        //     // Run intake forward for a short time
-        //     m_coralIO.setIntakeMotorPercentage(-SLOW_REVERSE_SPEED);
-        //     if (Timer.getFPGATimestamp() >= m_forwardEndTime) {
-        //       // 0.1 seconds elapsed, switch back to reverse
-        //       m_holdState = HoldState.REVERSE;
-        //     }
-        //     break;
-        // }
-        m_coralIO.setIntakeMotorPercentage(0);
+        m_coralIO.setIntakeMotorVoltage(HOLD_VOLTAGE);
         break;
       case SCORE:
-        m_coralIO.setIntakeMotorPercentage(OUTTAKE_SPEED);
+        m_coralIO.setIntakeMotorVoltage(OUTTAKE_VOLTAGE);
         break;
       case REVERSE:
-        m_coralIO.setIntakeMotorPercentage(REVERSE_SPEED);
+        m_coralIO.setIntakeMotorVoltage(REVERSE_VOLTAGE);
         break;
       case SLOW_REVERSE:
-        m_coralIO.setIntakeMotorPercentage(SLOW_REVERSE_SPEED);
+        m_coralIO.setIntakeMotorVoltage(SLOW_REVERSE_VOLTAGE);
         break;
       case IDLE:
       default:
-        m_coralIO.setIntakeMotorPercentage(0);
+        m_coralIO.setIntakeMotorVoltage(HOLD_VOLTAGE);
         break;
     }
   }

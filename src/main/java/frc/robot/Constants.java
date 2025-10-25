@@ -763,12 +763,23 @@ public final class Constants {
     public static final double CORAL_DETECT_CANRANGE_THRESHOLD = 0.18;
     public static final double CORAL_DETECT_CANRANGE_HYSTERESIS = 0.015;
 
-    /* Desired intake speed for intake and outtake */
+    /* Desired speed for intake and outtake */
+    public static final double HOLD_SPEED = 0;
     public static final double INTAKE_SPEED = 0.7;
     public static final double SLOW_INTAKE_SPEED = 0.15;
+    public static final double SLOWER_INTAKE_SPEED = 0.08;
     public static final double OUTTAKE_SPEED = 0.5;
     public static final double REVERSE_SPEED = -0.5;
     public static final double SLOW_REVERSE_SPEED = -0.1;
+
+    /* Desired voltage for intake and outtake */
+    public static final double HOLD_VOLTAGE = 0;
+    public static final double INTAKE_VOLTAGE = 7.0;
+    public static final double SLOW_INTAKE_VOLTAGE = 1.5;
+    public static final double SLOWER_INTAKE_VOLTAGE = 0.8;
+    public static final double OUTTAKE_VOLTAGE = 5.0;
+    public static final double REVERSE_VOLTAGE = -5.0;
+    public static final double SLOW_REVERSE_VOLTAGE = -1.0;
   }
 
   public static class BoomstickSubsystemConstants {
