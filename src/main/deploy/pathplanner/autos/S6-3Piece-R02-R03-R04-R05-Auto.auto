@@ -223,7 +223,7 @@
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": "MatchAutos",
   "choreoAuto": false
 }
