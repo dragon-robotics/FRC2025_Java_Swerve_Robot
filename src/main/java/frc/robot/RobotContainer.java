@@ -245,13 +245,13 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX(),
             () -> driverController.getHID().getPOV() == 0);
-    // driveToClosestLeftReefPoseCommand = superstructureSubsystem.driveToClosestReefPoseCmd(true);
-    driveToClosestLeftReefPoseCommand =
-        superstructureSubsystem.driveToClosestReefPoseWithElevatorCmd(true);
-    // driveToClosestRightReefPoseCommand =
-    // superstructureSubsystem.driveToClosestReefPoseCmd(false);
+    driveToClosestLeftReefPoseCommand = superstructureSubsystem.driveToClosestReefPoseCmd(true);
+    // driveToClosestLeftReefPoseCommand =
+    //     superstructureSubsystem.driveToClosestReefPoseWithElevatorCmd(true);
     driveToClosestRightReefPoseCommand =
-        superstructureSubsystem.driveToClosestReefPoseWithElevatorCmd(false);
+        superstructureSubsystem.driveToClosestReefPoseCmd(false);
+    // driveToClosestRightReefPoseCommand =
+    //     superstructureSubsystem.driveToClosestReefPoseWithElevatorCmd(false);
     driveToClosestCoralStationPoseCommand =
         superstructureSubsystem.driveToClosestCoralStationPoseCmd();
     swerveBrakeCommand = superstructureSubsystem.swerveBrakeCmd();
