@@ -561,13 +561,6 @@ public class Superstructure extends SubsystemBase {
 
   public Command IntakeCoral(){
 
-    // Command setRobotHeading = new InstantCommand(() -> {
-    //   // Set the robot heading to the coral station angle for intake //
-    //   currentHeading = intakeCoralLeft ? 
-    //     Optional.of(GeneralConstants.LEFT_CORAL_STATION_INTAKE_ANGLE) : // If left, set to left side angle
-    //     Optional.of(GeneralConstants.RIGHT_CORAL_STATION_INTAKE_ANGLE); // If right, set to right side angle
-    // });
-
     Command engageCoralIntake = new InstantCommand(
       () -> m_coral.setCoralState(CoralSubsystem.CoralState.INTAKE),
       m_coral
@@ -600,7 +593,6 @@ public class Superstructure extends SubsystemBase {
     .andThen(slowIntake)
     .andThen(runUntilCoralIsNotDetected)
     .andThen(slowReverseIntake)
-    // .andThen(new WaitCommand(0.1));
     .andThen(runUntilCoralIsDetectedAgain)
     .andThen(slowIntakeAgain)
     .andThen(new WaitCommand(0.02));
