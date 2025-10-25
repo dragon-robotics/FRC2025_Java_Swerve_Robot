@@ -99,7 +99,7 @@ public class Robot extends TimedRobot {
     // Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.
 
     // Warmup PathPlanner to avoid Java pauses
-    PathfindingCommand.warmupCommand().schedule();
+    // PathfindingCommand.warmupCommand().schedule();
     FollowPathCommand.warmupCommand().schedule();
 
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
