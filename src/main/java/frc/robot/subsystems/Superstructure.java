@@ -837,39 +837,6 @@ public class Superstructure extends SubsystemBase {
     return slowReverseIntake;
   }
 
-  // public Command AimAndRangeReefApriltag() {
-    
-  //   Command autoAlignToReefTag = new AutoAlignToReefTag(
-  //     useLeftCamera,
-  //     visionAimPID,
-  //     visionRangePID,
-  //     driveMaintainHeading,
-  //     m_vision,
-  //     m_swerve);
-
-  //   Command setCurrentHeading = new InstantCommand(() -> {
-  //     currentHeading = Optional.of(m_swerve.getState().Pose.getRotation());
-  //   });
-
-  //   return autoAlignToReefTag
-  //         .andThen(setCurrentHeading);
-  // }
-
-  // public Command AlignToScoreCoral(){
-
-  //   Command autoDriveToReefStation = AimAndRangeReefApriltag();
-
-  //   Command setElevatorLevel = new InstantCommand(() -> {
-  //     m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.L1);
-  //   }, m_elevator);
-
-  //   Command waitUntilElevatorIsAtLevel = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
-
-  //   return autoDriveToReefStation
-  //         .andThen(setElevatorLevel)
-  //         .andThen(waitUntilElevatorIsAtLevel);
-  // }
-
   public Command ScoreCoral() {
     Command scoreCoral = new RunCommand(
       () -> m_coral.setCoralState(CoralSubsystem.CoralState.SCORE),
