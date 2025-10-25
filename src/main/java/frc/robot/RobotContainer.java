@@ -30,6 +30,9 @@ import frc.robot.util.OperatorDashboard;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import dev.doglog.DogLog;
+import dev.doglog.DogLogOptions;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -107,6 +110,10 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    // Add DogLog //
+    DogLog.setOptions(new DogLogOptions());
+    DogLog.setPdh(new PowerDistribution());
 
     m_operatorDashboard = new OperatorDashboard();
 
@@ -230,8 +237,6 @@ public class RobotContainer {
         () -> -m_driverController.getLeftX(),
         () -> -m_driverController.getRightX(),
         () -> m_driverController.getHID().getPOV() == 0);
-    // m_aimAndAlignToReefApriltagCommand = m_superstructureSubsystem.AimAndRangeReefApriltag();
-    // m_driveToClosestReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand();
     m_driveToClosestLeftReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand(true);
     m_driveToClosestRightReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand(false);;
     m_driveToClosestCoralStationPoseCommand = m_superstructureSubsystem.DriveToClosestCoralStationPoseCommand();
@@ -256,8 +261,6 @@ public class RobotContainer {
     m_intakeFromLeftCoralStationCommand = m_superstructureSubsystem.SetCoralStation(true);
     m_intakeFromRightCoralStationCommand = m_superstructureSubsystem.SetCoralStation(false);
     m_holdCoralCommand = m_superstructureSubsystem.HoldCoral();
-    m_alignToLeftReefBranchCommand = m_superstructureSubsystem.SetReefAlignment(true);
-    m_alignToRightReefBranchCommand = m_superstructureSubsystem.SetReefAlignment(false);
     m_scoreCoralCommand = m_superstructureSubsystem.ScoreCoral();
 
     // Instantiate Algae Commands //
