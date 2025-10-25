@@ -25,7 +25,6 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.swerve_constant.TunerConstants;
-import frc.robot.util.OperatorDashboard;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -94,8 +93,6 @@ public class RobotContainer {
   private Command m_intakeFromLeftCoralStationCommand;
   private Command m_intakeFromRightCoralStationCommand;
   private Command m_holdCoralCommand;
-  private Command m_alignToLeftReefBranchCommand;
-  private Command m_alignToRightReefBranchCommand;
   private Command m_scoreCoralCommand;
 
   // Algae Commands //
@@ -105,17 +102,12 @@ public class RobotContainer {
   private Command m_scoreAlgaeCommand;
   private Command m_deAlgaeCommand;
 
-  // Operator Dashboard //
-  private OperatorDashboard m_operatorDashboard;
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
     // Add DogLog //
     DogLog.setOptions(new DogLogOptions());
     DogLog.setPdh(new PowerDistribution());
-
-    m_operatorDashboard = new OperatorDashboard();
 
     // Instantiate the joysticks //
     m_driverController = new CommandXboxController(OperatorConstants.DRIVER_PORT);
