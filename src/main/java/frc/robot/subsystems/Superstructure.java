@@ -695,7 +695,7 @@ public class Superstructure extends SubsystemBase {
     Alliance currentAlliance = alliance.get();
     boolean isRed = currentAlliance == Alliance.Red;
 
-    boolean shouldFlip = currentPose.getX() > FieldConstants.REEF_CENTER_X;
+    // boolean shouldFlip = currentPose.getX() > FieldConstants.REEF_CENTER_X;
 
     List<Pose2d> leftReefPoses =
         isRed
@@ -710,13 +710,8 @@ public class Superstructure extends SubsystemBase {
             ? FieldConstants.CoralStation.RED_CORAL_STATION_POSES
             : FieldConstants.CoralStation.BLUE_CORAL_STATION_POSES;
 
-    if (shouldFlip) {
-      cachedClosestLeftReef = findClosestPose(currentPose, rightReefPoses);
-      cachedClosestRightReef = findClosestPose(currentPose, leftReefPoses);
-    } else {
-      cachedClosestLeftReef = findClosestPose(currentPose, leftReefPoses);
-      cachedClosestRightReef = findClosestPose(currentPose, rightReefPoses);
-    }
+    cachedClosestLeftReef = findClosestPose(currentPose, leftReefPoses);
+    cachedClosestRightReef = findClosestPose(currentPose, rightReefPoses);
     cachedClosestCoralStation = findClosestPose(currentPose, coralStationPoses);
   }
 
