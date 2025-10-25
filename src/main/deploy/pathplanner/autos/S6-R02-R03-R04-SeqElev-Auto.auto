@@ -303,12 +303,6 @@
               }
             ]
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "R04-LC3-Path"
-          }
         }
       ]
     }
