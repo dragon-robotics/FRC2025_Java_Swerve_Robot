@@ -340,127 +340,90 @@ public final class Constants {
 
     public static class Reef {
 
-      public static final Pose2d REEF_A_BLUE =
-          new Pose2d(
-              3.1886031999999997,
-              4.1902126,
-              Rotation2d.fromDegrees(0))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_B_BLUE =
-          new Pose2d(
-              3.1886031999999997,
-              3.8615874000000003,
-              Rotation2d.fromDegrees(0))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_C_BLUE =
-          new Pose2d(
-              3.6966769142381293,
-              2.9815779129493296,
-              Rotation2d.fromDegrees(60))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_D_BLUE =
-          new Pose2d(
-              3.9812746857618713,
-              2.81726531294933,
-              Rotation2d.fromDegrees(60))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_E_BLUE =
-          new Pose2d(
-              4.9974221142381285,
-              2.81726531294933,
-              Rotation2d.fromDegrees(120))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_F_BLUE =
-          new Pose2d(
-              5.282019885761871,
-              2.9815779129493296,
-              Rotation2d.fromDegrees(120))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_G_BLUE =
-          new Pose2d(
-              5.7900936000000005,
-              3.8615874,
-              Rotation2d.fromDegrees(360 - 180))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_H_BLUE =
-          new Pose2d(
-              5.7900936000000005,
-              4.1902126,
-              Rotation2d.fromDegrees(360 - 180))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_I_BLUE =
-          new Pose2d(
-              5.282019885761871,
-              5.070222087050671,
-              Rotation2d.fromDegrees(360 - 120))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_J_BLUE =
-          new Pose2d(
-              4.9974221142381285,
-              5.234534687050671,
-              Rotation2d.fromDegrees(360 - 120))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_K_BLUE =
-          new Pose2d(
-              3.9812746857618713,
-              5.234534687050671,
-              Rotation2d.fromDegrees(360 - 60))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-      public static final Pose2d REEF_L_BLUE =
-          new Pose2d(
-              3.6966769142381293,
-              5.070222087050671,
-              Rotation2d.fromDegrees(360 - 60))
-          .transformBy(
-              new Transform2d(
-                  -0.02,
-                  0.0,
-                  Rotation2d.kZero)); // Adjust for bumper width
-
+        public static final Pose2d REEF_A_BLUE =
+        new Pose2d(3.1886031999999997, 4.1902126, Rotation2d.fromDegrees(0))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_B_BLUE =
+        new Pose2d(3.1886031999999997, 3.8615874000000003, Rotation2d.fromDegrees(0))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_C_BLUE =
+        new Pose2d(3.6966769142381293, 2.9815779129493296, Rotation2d.fromDegrees(60))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_D_BLUE =
+        new Pose2d(3.9812746857618713, 2.81726531294933, Rotation2d.fromDegrees(60))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_E_BLUE =
+        new Pose2d(4.9974221142381285, 2.81726531294933, Rotation2d.fromDegrees(120))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_F_BLUE =
+        new Pose2d(5.282019885761871, 2.9815779129493296, Rotation2d.fromDegrees(120))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_G_BLUE =
+        new Pose2d(5.7900936000000005, 3.8615874, Rotation2d.fromDegrees(360 - 180))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_H_BLUE =
+        new Pose2d(5.7900936000000005, 4.1902126, Rotation2d.fromDegrees(360 - 180))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_I_BLUE =
+        new Pose2d(5.282019885761871, 5.070222087050671, Rotation2d.fromDegrees(360 - 120))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_J_BLUE =
+        new Pose2d(4.9974221142381285, 5.234534687050671, Rotation2d.fromDegrees(360 - 120))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_K_BLUE =
+        new Pose2d(3.9812746857618713, 5.234534687050671, Rotation2d.fromDegrees(360 - 60))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
+    public static final Pose2d REEF_L_BLUE =
+        new Pose2d(3.6966769142381293, 5.070222087050671, Rotation2d.fromDegrees(360 - 60))
+            .transformBy(
+                new Transform2d(
+                    Units.inchesToMeters(1.75),
+                    0.0,
+                    Rotation2d.kZero)); // Adjust for bumper width
 
       public static final Pose2d REEF_A_RED = new Pose2d(
           FIELD_LENGTH - REEF_A_BLUE.getX(),
