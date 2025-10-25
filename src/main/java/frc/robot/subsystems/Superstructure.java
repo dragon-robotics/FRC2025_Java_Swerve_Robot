@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,24 +17,18 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.Waypoint;
-
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -48,6 +41,8 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.Teleop.DriveToPosePID;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
+import frc.robot.subsystems.controller.ControllerSubsystem;
+import frc.robot.subsystems.controller.ControllerSubsystem.ControllerState;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -62,6 +57,7 @@ public class Superstructure extends SubsystemBase {
   private final ElevatorSubsystem m_elevator;
   private final AlgaeSubsystem m_algae;
   private final VisionSubsystem m_vision;
+  private final ControllerSubsystem m_controller;
   private final RobotContainer m_container;
   private final Telemetry logger;
 
@@ -88,6 +84,15 @@ public class Superstructure extends SubsystemBase {
   private double elevatorHeightStrafeFactor;              // Keeps track of the elevator strafe speed factor
   private double elevatorHeightRotationFactor;            // Keeps track of the elevator rotation speed factor
 
+  // Cache the closest reef pose, updated periodically
+  private Pose2d cachedClosestLeftReef = new Pose2d();
+  private Pose2d cachedClosestRightReef = new Pose2d();
+  private Pose2d cachedClosestCoralStation = new Pose2d();
+
+  private int updateCounter = 0;
+  private static final int CACHED_CLOSEST_POSE_UPDATE_RATE =
+      3; // Update every 3rd call to periodic()
+
   /** Creates a new Superstructure. */
   public Superstructure(
       CommandSwerveDrivetrain swerve,
@@ -95,12 +100,14 @@ public class Superstructure extends SubsystemBase {
       ElevatorSubsystem elevator,
       AlgaeSubsystem algae,
       VisionSubsystem vision,
+      ControllerSubsystem controller,
       RobotContainer container) {
     m_swerve = swerve;
     m_coral = coral;
     m_elevator = elevator;
     m_algae = algae;
     m_vision = vision;
+    m_controller = controller;
     m_container = container;
 
     // Instatiate swerve max speed and angular rate //
@@ -268,217 +275,40 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command DriveToClosestReefPoseCommand(boolean left) {
-    // Define Path-Finding PathConstraints (adjust values as needed)
-    PathConstraints pathFindingConstraints = new PathConstraints(
-        2.5,                  // Max velocity (m/s)
-        3.5,            // Max acceleration (m/s^2)
-        Units.degreesToRadians(540), // Max angular velocity (rad/s)
-        Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
-    );
+    return new DeferredCommand(
+            () -> {
+              Pose2d target = left ? cachedClosestLeftReef : cachedClosestRightReef;
+              Transform2d offset = new Transform2d(-0.25, 0.0, Rotation2d.kZero);
 
-    // Define Path-Following PathConstraints (adjust values as needed)
-    PathConstraints pathFollowingConstraints = new PathConstraints(
-        1.5,                  // Max velocity (m/s)
-        3.5,              // Max acceleration (m/s^2)
-        Units.degreesToRadians(540), // Max angular velocity (rad/s)
-        Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
-    );
-
-    return new DeferredCommand(() -> {
-      // Grab the robot's current alliance
-      Optional<Alliance> alliance = DriverStation.getAlliance();
-
-      // Grab the robot's current pose
-      Pose2d currentPose = m_swerve.getState().Pose;
-
-      // Initialize the target poses based on the alliance and whether we are left or right //
-      List<Pose2d> targetPoses = 
-          alliance.isPresent() && alliance.get() == Alliance.Red ?
-              (left ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES : FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES) :
-              (left ? FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES);
-
-      // Calculate the pose closest to the current pose
-      Pose2d closestPose = null;
-      double minDistanceSq = Double.MAX_VALUE; // Use squared distance to avoid sqrt
-  
-      // Iterate through the list of target poses
-      for (Pose2d targetPose : targetPoses) {
-          Transform2d translationDelta = targetPose.minus(currentPose);
-
-          // Calculate the squared distance between the translations
-          double distanceSq = translationDelta.getTranslation().getNorm();
-
-          // If this pose is closer than the current minimum, update
-          if (distanceSq < minDistanceSq) {
-              minDistanceSq = distanceSq;
-              closestPose = targetPose;
-          }
-      }
-
-      // Create waypoint list
-      List<Pose2d> waypoints = new ArrayList<>();
-      
-      // Add intermediate waypoint (1 meter back from target)
-      Transform2d backwardOffset = new Transform2d(-0.75, 0.0, Rotation2d.kZero);
-      waypoints.add(closestPose.transformBy(backwardOffset));
-      
-      // Add final destination
-      waypoints.add(closestPose);
-
-      List<Waypoint> waypointList = PathPlannerPath.waypointsFromPoses(waypoints);
-      
-      // Create PathPlannerPath from waypoints
-      PathPlannerPath path = new PathPlannerPath(
-          waypointList,
-          pathFollowingConstraints,
-          null,
-          new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
-      );
-
-      return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
-
-    }, Set.of(m_swerve))
-    .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
-  }
-
-  public Command ToggleReefBranchCommand() {
-  
-    return new DeferredCommand(() -> {
-      // Grab the robot's current alliance
-      Optional<Alliance> alliance = DriverStation.getAlliance();
-  
-      // Grab the robot's current pose
-      Pose2d currentPose = m_swerve.getState().Pose;
-
-      // Get the heading of the current pose
-      Rotation2d currentHeading = currentPose.getRotation();
-  
-      // Get reef poses based on alliance
-      List<Pose2d> targetPoses =
-          alliance.isPresent() && alliance.get() == Alliance.Red ?
-              FieldConstants.Reef.RED_REEF_STATION_POSES :
-              FieldConstants.Reef.BLUE_REEF_STATION_POSES;
-
-      // Filter the only target poses that have the same heading as the current pose
-      List<Pose2d> filteredPoses = new ArrayList<>();
-      for (Pose2d targetPose : targetPoses) {
-        // Check if the heading of the target pose is close to the current heading
-        Rotation2d angleDifference = targetPose.getRotation().minus(currentHeading);
-        double angleDifferenceDegrees = angleDifference.getDegrees();
-        if (Math.abs(angleDifferenceDegrees) < 5) {
-          filteredPoses.add(targetPose);
-        }
-      }
-
-      // Get the pose with the furthest distance from the current pose
-      if (filteredPoses.isEmpty()) {
-        // If no poses match the current heading, return an empty command
-        return new RunCommand(() -> {});
-      }
-
-      // Calculate the pose closest to the current pose
-      Pose2d furthestPose = null;
-      double maxDistanceSq = 0.0; // Use squared distance to avoid sqrt
-  
-      // Iterate through the list of target poses
-      for (Pose2d pose : filteredPoses) {
-        Transform2d translationDelta = pose.minus(currentPose);
-
-        // Calculate the squared distance between the translations
-        double distanceSq = translationDelta.getTranslation().getNorm();
-
-        // If this pose is closer than the current minimum, update
-        if (distanceSq > maxDistanceSq) {
-          maxDistanceSq = distanceSq;
-          furthestPose = pose;
-        }
-      }
-
-      return new DriveToPosePID(m_swerve, applyRobotSpeeds, furthestPose);
-  
-      // return AutoBuilder.pathfindToPose(furthestPose, constraints);
-    }, Set.of(m_swerve))
-    .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
+              return new DriveToPosePID(m_swerve, applyRobotSpeeds, target.transformBy(offset))
+                  .andThen(new DriveToPosePID(m_swerve, applyRobotSpeeds, target));
+            },
+            Set.of(m_swerve))
+        .andThen(
+            Commands.deadline(
+                new RunCommand(
+                        () -> m_controller.setControllerState(ControllerState.STRONG_RUMBLE),
+                        m_controller)
+                    .withTimeout(0.5)),
+            new InstantCommand(
+                () -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation())))
+        .handleInterrupt(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
   }
   
   public Command DriveToClosestCoralStationPoseCommand() {
-    // Define Path-Finding PathConstraints (adjust values as needed)
-    PathConstraints pathFindingConstraints = new PathConstraints(
-        2.5,                  // Max velocity (m/s)
-        3.5,            // Max acceleration (m/s^2)
-        Units.degreesToRadians(540), // Max angular velocity (rad/s)
-        Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
-    );
 
-    // Define Path-Following PathConstraints (adjust values as needed)
-    PathConstraints pathFollowingConstraints = new PathConstraints(
-        1.5,                  // Max velocity (m/s)
-        3.5,            // Max acceleration (m/s^2)
-        Units.degreesToRadians(540), // Max angular velocity (rad/s)
-        Units.degreesToRadians(720)  // Max angular acceleration (rad/s^2)
-    );
-
-    return new DeferredCommand(() -> {
-      // Grab the robot's current alliance
-      Optional<Alliance> alliance = DriverStation.getAlliance();
-
-      // Grab the robot's current pose
-      Pose2d currentPose = m_swerve.getState().Pose;
-
-      List<Pose2d> targetPoses =
-          alliance.isPresent() && alliance.get() == Alliance.Red ?
-              FieldConstants.CoralStation.RED_CORAL_STATION_POSES :
-              FieldConstants.CoralStation.BLUE_CORAL_STATION_POSES;
-
-      // Calculate the pose closest to the current pose
-      Pose2d closestPose = null;
-      double minDistanceSq = Double.MAX_VALUE; // Use squared distance to avoid sqrt
-  
-      // Iterate through the list of target poses
-      for (Pose2d targetPose : targetPoses) {
-          Transform2d translationDelta = targetPose.minus(currentPose);
-
-          // Calculate the squared distance between the translations
-          double distanceSq = translationDelta.getTranslation().getNorm();
-
-          // If this pose is closer than the current minimum, update
-          if (distanceSq < minDistanceSq) {
-              minDistanceSq = distanceSq;
-              closestPose = targetPose;
-          }
-      }
-
-      // Create waypoint list
-      List<Pose2d> waypoints = new ArrayList<>();
-      
-      // Add intermediate waypoint (1 meter back from target)
-      Transform2d backwardOffset = new Transform2d(0.5, 0.0, Rotation2d.kZero);
-      waypoints.add(closestPose.transformBy(backwardOffset));
-      
-      // Add final destination
-      waypoints.add(closestPose);
-
-      List<Waypoint> waypointList = PathPlannerPath.waypointsFromPoses(waypoints);
-      
-      // Create PathPlannerPath from waypoints
-      PathPlannerPath path = new PathPlannerPath(
-          waypointList,
-          pathFollowingConstraints,
-          null,
-          new GoalEndState(0.0, closestPose.getRotation()) // Stop at end
-      );
-
-      // // Use pathfindThenFollowPath with different constraints
-      // return AutoBuilder.pathfindToPose(
-      //           waypoints.get(0),
-      //           pathFindingConstraints,
-      //           0.5)
-      //       .andThen(AutoBuilder.followPath(path));
-
-      return AutoBuilder.pathfindToPose(closestPose, pathFindingConstraints, 0);
-
-    }, Set.of(m_swerve))
-    .andThen(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
+    return new DeferredCommand(
+            () -> new DriveToPosePID(m_swerve, applyRobotSpeeds, cachedClosestCoralStation),
+            Set.of(m_swerve))
+        .andThen(
+            Commands.deadline(
+                new RunCommand(
+                        () -> m_controller.setControllerState(ControllerState.STRONG_RUMBLE),
+                        m_controller)
+                    .withTimeout(0.5)),
+            new InstantCommand(
+                () -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation())))
+        .handleInterrupt(() -> currentHeading = Optional.of(m_swerve.getState().Pose.getRotation()));
   }
 
   // Helper method to find closest pose from a list
@@ -632,27 +462,38 @@ public class Superstructure extends SubsystemBase {
 
   public Command ElevatorHome() {
         
-    Command setElevatorHome = new InstantCommand(() -> {
-      // Set the robot back to full speed //
-      elevatorHeightTranslationFactor = 1.0;
-      elevatorHeightStrafeFactor = 1.0;
-      elevatorHeightRotationFactor = 1.0;
-      m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
-    }, m_elevator);
+    Command setElevatorHome =
+        new InstantCommand(
+            () -> {
+              elevatorHeightTranslationFactor = 1.0;
+              elevatorHeightStrafeFactor = 1.0;
+              elevatorHeightRotationFactor = 1.0;
+              m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.HOME);
+            },
+            m_elevator);
 
-    Command waitUntilElevatorIsAtBottom = new WaitUntilCommand(() -> m_elevator.isAtElevatorState());
+    Command waitUntilElevatorIsAtHome = new WaitUntilCommand(m_elevator::isAtElevatorState);
 
-    Command reZeroElevatorEncoder = new InstantCommand(() -> {
-      m_elevator.seedElevatorMotorEncoderPosition(0);
-    }, m_elevator);
+    Command setElevatorToIdle =
+        new InstantCommand(
+            () -> m_elevator.setElevatorState(ElevatorSubsystem.ElevatorState.IDLE), m_elevator);
 
-    return setElevatorHome
-          .andThen(waitUntilElevatorIsAtBottom)
-          .andThen(reZeroElevatorEncoder);
+    Command reZeroElevatorEncoder =
+        new InstantCommand(() -> m_elevator.seedElevatorMotorEncoderPosition(0), m_elevator);
 
-    // If the elevator is at the home position, check if there is a current spike //
-    // If there is a current spike, reset the elevator encoder, then set to idle //
-    // else set the motor to idle
+    if (m_elevator.isCurrentLimitTripped()) {
+      // If the elevator is at the home position, check if there is a current spike //
+      // If there is a current spike, rezero the encoder and set the elevator to idle //
+      return setElevatorHome
+          .andThen(waitUntilElevatorIsAtHome)
+          .andThen(reZeroElevatorEncoder)
+          .andThen(setElevatorToIdle);
+    } else {
+      return setElevatorHome
+          .andThen(waitUntilElevatorIsAtHome)
+          .andThen(
+              setElevatorToIdle);
+    }
   }
 
   public Command ElevatorL1() {
@@ -866,10 +707,43 @@ public class Superstructure extends SubsystemBase {
     return setAlgaeArmHold;
   }
 
+  private void updateCachedClosestPoses() {
+    Pose2d currentPose = m_swerve.getState().Pose;
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+
+    if (alliance.isEmpty()) {
+      alliance = Optional.of(Alliance.Blue); // Default to Blue if no alliance
+    }
+
+    Alliance currentAlliance = alliance.get();
+    boolean isRed = currentAlliance == Alliance.Red;
+
+    // boolean shouldFlip = currentPose.getX() > FieldConstants.REEF_CENTER_X;
+
+    List<Pose2d> leftReefPoses =
+        isRed
+            ? FieldConstants.Reef.RED_REEF_STATION_LEFT_POSES
+            : FieldConstants.Reef.BLUE_REEF_STATION_LEFT_POSES;
+    List<Pose2d> rightReefPoses =
+        isRed
+            ? FieldConstants.Reef.RED_REEF_STATION_RIGHT_POSES
+            : FieldConstants.Reef.BLUE_REEF_STATION_RIGHT_POSES;
+    List<Pose2d> coralStationPoses =
+        isRed
+            ? FieldConstants.CoralStation.RED_CORAL_STATION_POSES
+            : FieldConstants.CoralStation.BLUE_CORAL_STATION_POSES;
+
+    cachedClosestLeftReef = findClosestPose(currentPose, leftReefPoses);
+    cachedClosestRightReef = findClosestPose(currentPose, rightReefPoses);
+    cachedClosestCoralStation = findClosestPose(currentPose, coralStationPoses);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
-    // Update the robot pose using Photonvision's Pose Estimates //
+    if (++updateCounter >= CACHED_CLOSEST_POSE_UPDATE_RATE) {
+      updateCounter = 0;
+      updateCachedClosestPoses();
+    }
   }
 }

@@ -15,6 +15,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.algae.AlgaeIOSparkMax;
 import frc.robot.subsystems.algae.AlgaeSubsystem;
+import frc.robot.subsystems.controller.ControllerIOXbox;
+import frc.robot.subsystems.controller.ControllerSubsystem;
 import frc.robot.subsystems.coral.CoralIOSparkMax;
 import frc.robot.subsystems.coral.CoralSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSparkMax;
@@ -55,6 +57,7 @@ public class RobotContainer {
   public final AlgaeSubsystem m_algaeSubsystem;
   public final VisionSubsystem m_visionSubsystem;
   public final LedSubsystem m_ledSubsystem;
+  public final ControllerSubsystem m_controllerSubsystem;
   public final Superstructure m_superstructureSubsystem;
 
   // Define Driver and Operator controllers //
@@ -67,12 +70,9 @@ public class RobotContainer {
 
   // Swerve Commands //
   private Command m_defaultDriveCommand;
-  // private Command m_aimAndAlignToReefApriltagCommand;
-//   private Command m_driveToClosestReefPoseCommand;
   private Command m_driveToClosestLeftReefPoseCommand;
   private Command m_driveToClosestRightReefPoseCommand;
   private Command m_driveToClosestCoralStationPoseCommand;
-  private Command m_toggleReefBranchCommand;
   private Command m_swerveBrakeCommand;
   private Command m_seedFieldCentricCommand;
 
@@ -139,6 +139,7 @@ public class RobotContainer {
                 VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
                 () -> m_swerveDriveSubsystem.getState()));
         m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+        m_controllerSubsystem = new ControllerSubsystem(new ControllerIOXbox(m_driverController));
         break;
       case SIM:
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -175,6 +176,7 @@ public class RobotContainer {
             //     () -> m_swerveDriveSubsystem.getState())
         );
         m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+        m_controllerSubsystem = new ControllerSubsystem(new ControllerIOXbox(m_driverController));
         break;
       case TEST:
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -191,7 +193,8 @@ public class RobotContainer {
 								APTAG_CAMERA_NAMES[1],
 								VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
 								() -> m_swerveDriveSubsystem.getState()));
-        m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());                                
+        m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+        m_controllerSubsystem = new ControllerSubsystem(new ControllerIOXbox(m_driverController));
         break;
       default: // Default should be in comp mode //
         m_coralSubsystem = new CoralSubsystem(new CoralIOSparkMax());
@@ -209,6 +212,7 @@ public class RobotContainer {
 								VisionConstants.APTAG_ALIGN_RIGHT_CAM_POS,
 								() -> m_swerveDriveSubsystem.getState()));
         m_ledSubsystem = new LedSubsystem(new LedIORevBlinkin());
+        m_controllerSubsystem = new ControllerSubsystem(new ControllerIOXbox(m_driverController));
         break;
     }
 
@@ -219,6 +223,7 @@ public class RobotContainer {
         m_elevatorSubsystem,
         m_algaeSubsystem,
         m_visionSubsystem,
+        m_controllerSubsystem,
         this);
 
     // Instantiate all commands used //
@@ -232,7 +237,6 @@ public class RobotContainer {
     m_driveToClosestLeftReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand(true);
     m_driveToClosestRightReefPoseCommand = m_superstructureSubsystem.DriveToClosestReefPoseCommand(false);;
     m_driveToClosestCoralStationPoseCommand = m_superstructureSubsystem.DriveToClosestCoralStationPoseCommand();
-    m_toggleReefBranchCommand = m_superstructureSubsystem.ToggleReefBranchCommand();
     m_swerveBrakeCommand = m_superstructureSubsystem.SwerveBrake();
     m_seedFieldCentricCommand = m_superstructureSubsystem.SeedFieldCentric();
 
